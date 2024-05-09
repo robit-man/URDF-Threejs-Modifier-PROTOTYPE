@@ -1,0 +1,68 @@
+{
+  "name": "urdf-js",
+  "version": "0.0.14",
+  "description": "URDF Loader for THREE.js and webcomponent viewer",
+  "main": "umd/URDFLoader.js",
+  "scripts": {
+    "start": "concurrently --kill-others \"rollup -c -w\" \"static-server\"",
+    "build": "rollup -c && cd example && webpack",
+    "test": "rollup -c && jest",
+    "lint": "eslint src/*.js ./test/*.js",
+    "coverage": "nyc report --reporter=html & opn coverage/index.html"
+  },
+  "files": [
+    "src/*",
+    "umd/*",
+    "example/index.js",
+    "example/dragAndDrop.js",
+    "example/styles.css"
+  ],
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https:///rapyuta-robotics/urdf-js.git"
+  },
+  "bugs": {
+    "url": "https://github.com//rapyuta-robotics/urdf-js/issues"
+  },
+  "homepage": "https://github.com//rapyuta-robotics/urdf-js#readme",
+  "keywords": [
+    "javascript",
+    "threejs",
+    "graphics",
+    "ros",
+    "robotics",
+    "urdf",
+    "urdf-models",
+    "webcomponents"
+  ],
+  "peerDependencies": {
+    "three": ">=0.105.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.6.4",
+    "@babel/plugin-transform-runtime": "^7.6.2",
+    "@babel/preset-env": "^7.6.3",
+    "@webcomponents/webcomponentsjs": "^2.0.0",
+    "concurrently": "^4.0.1",
+    "eslint": "^5.14.1",
+    "jest": "^24.1.0",
+    "jest-cli": "^24.1.0",
+    "nyc": "^13.3.0",
+    "opn-cli": "^3.1.0",
+    "puppeteer": "^1.19.0",
+    "puppeteer-to-istanbul": "^1.2.2",
+    "rollup": "^1.16.7",
+    "rollup-plugin-babel": "^4.3.3",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "script-loader": "^0.7.0",
+    "static-server": "^3.0.0",
+    "three": "^0.109.0",
+    "threejs-model-loader": "0.0.1",
+    "wc-loader": "^1.1.12",
+    "webpack": "^3.5.3"
+  },
+  "dependencies": {
+    "three-mesh-bvh": "^0.1.4"
+  }
+}
