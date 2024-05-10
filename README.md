@@ -1,8 +1,11 @@
-# urdf-js
+[![Group 2](https://github.com/robit-man/dropbear-neck-assembly/assets/36677806/bd13c6f5-7a3f-4262-9891-4259f17abbe0)](https://t.me/fractionalrobots)
+
+
+# urdf-js mod - Work In Progress
 
 Fork of [gkjohnson/urdf-loaders](https://github.com/gkjohnson/urdf-loaders) with only the JS component.
 
-![Example](./docs/javascript-example.gif)
+![image](https://github.com/robit-man/dropbear-leg-system/assets/36677806/9eb9f6e5-c8af-486e-b5ee-0c7827e61416)
 
 # Dev
 
