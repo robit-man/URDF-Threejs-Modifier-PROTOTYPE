@@ -18,8 +18,16 @@ As projects progress, changes are made to robots that will affect RL policies, o
 - URDF Export after modification
 - URDF Mesh Manipulation in multiple modalities
 - Multi-modal Communication Protocol for interaction with low-level hardware
-- Handling of sensor data (imu, encoders) and appropriate labling and update of model
-- Mre refined description of the above components, integrations libraries to support the above goals
+- Handling of sensor data (imu, encoders) and appropriate application to joints and links
+- Refined description of the above components, integrations libraries to support mentioned goals
+
+### Community Notes -------->
+``
+
+
+
+``
+### Community Notes -------->
 
 # Dev
 
