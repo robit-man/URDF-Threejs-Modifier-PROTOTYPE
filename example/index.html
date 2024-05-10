@@ -64,6 +64,9 @@
             color: white;
         }
 
+        input::placeholder{
+            color:#fffa;
+        }
         #joint-controls {
             display: flex;
             flex-flow: column;
@@ -103,9 +106,9 @@
 
     <div id="menu">
         <ul id="urdf-options" style="display:none;">
-            <li urdf="../urdf/dropbear/urdf/dropbear.urdf" color="#E91E63">DROPBEAR</li>
-            <li urdf="../urdf/TriATHLETE/urdf/TriATHLETE_flipped.URDF" color="#009688">TriATHLETE</li>
-            <li urdf="../urdf/TriATHLETE_Climbing/urdf/TriATHLETE_flipped.URDF" color="#FFB300">TriATHLETE Climbing</li>
+            <li urdf="../urdf/dropbear/urdf/dropbear.urdf" color="#3e4952">DROPBEAR</li>
+            <li urdf="../urdf/TriATHLETE/urdf/TriATHLETE_flipped.URDF" color="#3e4952">TriATHLETE</li>
+            <li urdf="../urdf/TriATHLETE_Climbing/urdf/TriATHLETE_flipped.URDF" color="#3e4952">TriATHLETE Climbing</li>
         </ul>
 
 
@@ -277,7 +280,7 @@
                 joint.limit = { lower: lowerLimit, upper: upperLimit };
                 joint.position.set(positionXYZ[0], positionXYZ[1], positionXYZ[2]);
 
-
+                console.log(joint.origPosition);
                 // Refresh scene to apply changes
                 refreshScene();
 
@@ -313,7 +316,7 @@
                 document.getElementById('joint-origin-xyz').value = joint.origPosition.toArray().join(' ');
                 //document.getElementById('joint-origin-rpy').value = (new THREE.Euler().setFromQuaternion(joint.origQuaternion, 'XYZ')).toArray().map(r => (r * 180 / Math.PI).toFixed(2));
                 document.getElementById('joint-position-xyz').value = joint.position.toArray().join(' ');
-                document.getElementById('joint-axis-xyz').value = joint.axis.toArray().join(' ');
+                //document.getElementById('joint-axis-xyz').value = joint.axis.toArray().join(' ');
                 document.getElementById('joint-lower-limit').value = (joint.limit.lower * 180 / Math.PI).toFixed(2);
                 document.getElementById('joint-upper-limit').value = (joint.limit.upper * 180 / Math.PI).toFixed(2);
             } else {
@@ -335,14 +338,25 @@
             }
         }
 
-        document.getElementById('joint-selector').addEventListener('change', loadJointDetails);
 
         document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
-                populateJointNames();
-                document.getElementById('joint-selector').addEventListener('change', loadJointDetails);
-            }, 2000); // Ensure URDF data is loaded and delay to setup the event listener
-        });
+        // Assuming URDFViewer is already initialized and populated with the robot model
+        setTimeout(() => {
+            populateJointNames();
+            document.getElementById('joint-selector').addEventListener('change', loadJointDetails);
+            
+            // Add listener to the viewer for joint click events
+            if (viewer) {
+                viewer.addEventListener('joint-click', function(e) {
+                    const jointName = e.detail; // Assuming the event detail contains the joint name
+                    const jointSelector = document.getElementById('joint-selector');
+                    jointSelector.value = jointName;
+                    loadJointDetails(); // Load the details of the clicked joint into the input fields
+                });
+            }
+        }, 2000); // Ensure URDF data is loaded and delay to setup the event listener
+    });
+
 
     </script>
 

@@ -43,13 +43,27 @@ viewer.addEventListener('angle-change', e => {
 });
 
 viewer.addEventListener('joint-mouseover', e => {
-    const j = document.querySelector(`li[joint-name="${e.detail}"]`);
-    if (j) j.setAttribute('robot-hovered', true);
+    const jointName = e.detail; // The joint name is expected to be in the event detail
+    const jointSelector = document.getElementById('joint-selector');
+    
+    // Check if the joint exists in the dropdown and set it as selected
+    if (jointSelector && jointName && viewer.robot.joints[jointName]) {
+        jointSelector.value = jointName;
+        loadJointDetails(); // Load joint details into the UI
+    }
+
+    const j = document.querySelector(`li[joint-name="${jointName}"]`);
+    if (j) {
+        j.setAttribute('robot-hovered', true);
+    }
 });
 
 viewer.addEventListener('joint-mouseout', e => {
-    const j = document.querySelector(`li[joint-name="${e.detail}"]`);
-    if (j) j.removeAttribute('robot-hovered');
+    const jointName = e.detail;
+    const j = document.querySelector(`li[joint-name="${jointName}"]`);
+    if (j) {
+        j.removeAttribute('robot-hovered');
+    }
 });
 
 let originalNoAutoRecenter;

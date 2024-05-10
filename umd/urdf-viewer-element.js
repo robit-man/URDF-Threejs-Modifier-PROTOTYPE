@@ -2558,7 +2558,7 @@
     }, {
       key: "ambientColor",
       get: function get() {
-        return this.getAttribute('ambient-color') || '#455A64';
+        return this.getAttribute('ambient-color') || '#263238';
       },
       set: function set(val) {
         val ? this.setAttribute('ambient-color', val) : this.removeAttribute('ambient-color');
