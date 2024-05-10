@@ -3,9 +3,14 @@
 
 # urdf-js mod - Work In Progress
 
-Fork of [gkjohnson/urdf-loaders](https://github.com/gkjohnson/urdf-loaders) with only the JS component.
+Fork of [gkjohnson/urdf-loaders](https://github.com/gkjohnson/urdf-loaders) with only the JS component, and (soon) incorporating deeper sim2real control of systems connected over serial / websockets.
 
-![image](https://github.com/robit-man/dropbear-leg-system/assets/36677806/9eb9f6e5-c8af-486e-b5ee-0c7827e61416)
+![image](https://github.com/robit-man/URDF-Threejs-Modifier/assets/36677806/160b0642-a9f4-468f-b18e-d2b11acb39f1)
+
+# Project Overview
+
+"tba"
+
 
 # Dev
 
