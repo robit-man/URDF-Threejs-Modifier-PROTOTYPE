@@ -27,6 +27,76 @@
 
     <link href="https://fonts.googleapis.com/css?family=Roboto:100,300" rel="stylesheet" />
     <link href="../example/styles.css" rel="stylesheet" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap');
+
+        .inputrow {
+            width: 100%;
+            display: flex;
+            flex-flow: row;
+            justify-content: space-between;
+        }
+
+        * {
+            font-family: "Rajdhani", sans-serif;
+        }
+
+        li {
+            border-radius: 0.25rem;
+        }
+
+        input[type="text"] {
+            color: white;
+            border: none;
+            font-weight: 300;
+            background: rgba(255, 255, 255, 0.25);
+            padding: 1px 2px;
+        }
+
+        select {
+            border-radius: 0.25rem;
+
+            font-family: "Rajdhani", sans-serif;
+        }
+
+        input {
+            border-radius: 0.25rem;
+            color: white;
+        }
+
+        #joint-controls {
+            display: flex;
+            flex-flow: column;
+            gap: 4px;
+        }
+
+        #controls {
+            backdrop-filter: blur(10px)brightness(0.5);
+            padding: 1rem;
+            border-radius: 1rem;
+            overflow-y: auto;
+            max-height: calc(100vh - 4rem);
+            margin-top:unset!important;
+
+        }
+
+        button {
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+            border: unset;
+            padding: 1px 2px;
+            border-radius: 0.25rem;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: rgba(255, 255, 255, 0.5);
+            color: white;
+            border: unset;
+            padding: 1px 2px;
+            border-radius: 0.25rem;
+        }
+    </style>
 </head>
 
 <body tabindex="0">
@@ -38,37 +108,47 @@
             <li urdf="../urdf/TriATHLETE_Climbing/urdf/TriATHLETE_flipped.URDF" color="#FFB300">TriATHLETE Climbing</li>
         </ul>
 
-        <div id="joint-controls" style="display: flex;flex-flow:column;">
-            <h3>Joint Control Panel</h3>
-            <label for="joint-selector">Select Joint:</label>
-            <select id="joint-selector">
-            </select>
-
-            <label for="joint-position-xyz">Position (XYZ):</label>
-            <input type="text" id="joint-position-xyz" placeholder="x y z">
-
-
-            <label for="joint-origin-xyz">Origin (XYZ):</label>
-            <input type="text" id="joint-origin-xyz" placeholder="x y z">
-
-            <label for="joint-origin-rpy">Rotation (RPY):</label>
-            <input type="text" id="joint-origin-rpy" placeholder="roll pitch yaw">
-
-            <label for="joint-axis-xyz">Axis (XYZ):</label>
-            <input type="text" id="joint-axis-xyz" placeholder="x y z">
-
-            <label for="joint-lower-limit">Lower Limit:</label>
-            <input type="number" id="joint-lower-limit" step="0.01">
-
-            <label for="joint-upper-limit">Upper Limit:</label>
-            <input type="number" id="joint-upper-limit" step="0.01">
-
-            <button onclick="updateJointProperties()">Update Joint</button>
-        </div>
-
 
         <div id="controls" class="hidden">
-            <div id="toggle-controls"></div>
+
+
+            <div id="joint-controls">
+                <label for="joint-selector">Select Joint:</label>
+                <select id="joint-selector">
+                </select>
+                <div class="inputrow">
+                    <label for="joint-position-xyz">Position (XYZ):</label>
+                    <input type="text" id="joint-position-xyz" placeholder="x y z">
+                </div>
+                <div class="inputrow">
+                    <label for="joint-origin-xyz">Origin (XYZ):</label>
+                    <input type="text" id="joint-origin-xyz" placeholder="x y z">
+                </div>
+                <div class="inputrow">
+                    <label for="joint-origin-rpy">Rotation (RPY):</label>
+                    <input type="text" id="joint-origin-rpy" placeholder="roll pitch yaw">
+                </div>
+                <div class="inputrow">
+
+                    <label for="joint-axis-xyz">Axis (XYZ):</label>
+                    <input type="text" id="joint-axis-xyz" placeholder="x y z">
+                </div>
+                <div class="inputrow">
+
+                    <label for="joint-lower-limit">Lower Limit:</label>
+                    <input type="number" id="joint-lower-limit" step="0.01">
+                </div>
+                <div class="inputrow">
+
+
+                    <label for="joint-upper-limit">Upper Limit:</label>
+                    <input type="number" id="joint-upper-limit" step="0.01">
+                </div>
+
+                <button onclick="updateJointProperties()">Update Joint</button>
+            </div>
+
+
             <div>Drag and drop a set of URDF files! <br /> (Chrome Only)</div>
             <div id="ignore-joint-limits" class="toggle">Ignore Joint Limits</div>
             <div id="do-animate" class="toggle checked">Animate Joints</div>
@@ -84,6 +164,8 @@
                 </select>
             </label>
             <ul></ul>
+            <div id="toggle-controls"></div>
+
         </div>
     </div>
     <urdf-viewer up="+Y" display-shadow tabindex="0"></urdf-viewer>
@@ -167,77 +249,102 @@
 
         });
     </script>
-    
-  <script>
-    // Function to update the joint properties based on user input
-    // Assuming 'viewer' has a method to get the current robot model and 'robot' is an instance of URDFRobot
-    function updateJointProperties() {
-    const jointName = document.getElementById('joint-selector').value;
-    const originXYZ = document.getElementById('joint-origin-xyz').value.split(' ').map(Number);
-    const originRPY = document.getElementById('joint-origin-rpy').value.split(' ').map(v => parseFloat(v) * Math.PI / 180);
-    const positionXYZ = document.getElementById('joint-position-xyz').value.split(' ').map(Number); // Assuming you have a UI input for this
-    const axisXYZ = document.getElementById('joint-axis-xyz').value.split(' ').map(Number);
-    const lowerLimit = parseFloat(document.getElementById('joint-lower-limit').value) * Math.PI / 180;
-    const upperLimit = parseFloat(document.getElementById('joint-upper-limit').value) * Math.PI / 180;
 
-    if (viewer && viewer.robot && viewer.robot.joints[jointName]) {
-        const joint = viewer.robot.joints[jointName];
+    <script>
+        // Function to update the joint properties based on user input
+        // Assuming 'viewer' has a method to get the current robot model and 'robot' is an instance of URDFRobot
+        function updateJointProperties() {
+            const jointName = document.getElementById('joint-selector').value;
+            const originXYZ = document.getElementById('joint-origin-xyz').value.split(' ').map(Number);
+            const originRPY = document.getElementById('joint-origin-rpy').value.split(' ').map(v => parseFloat(v) * Math.PI / 180);
+            const positionXYZ = document.getElementById('joint-position-xyz').value.split(' ').map(Number); // Assuming you have a UI input for this
+            const axisXYZ = document.getElementById('joint-axis-xyz').value.split(' ').map(Number);
+            const lowerLimit = parseFloat(document.getElementById('joint-lower-limit').value) * Math.PI / 180;
+            const upperLimit = parseFloat(document.getElementById('joint-upper-limit').value) * Math.PI / 180;
 
-        // Convert RPY to a Quaternion
-        const quaternion = new THREE.Quaternion();
-        const euler = new THREE.Euler(...originRPY, 'XYZ');
-        quaternion.setFromEuler(euler);
+            if (viewer && viewer.robot && viewer.robot.joints[jointName]) {
+                const joint = viewer.robot.joints[jointName];
 
-        // Update joint properties
-        joint.origPosition.set(originXYZ[0], originXYZ[1], originXYZ[2]); // Assuming the joint class has origPosition
-        joint.origQuaternion = quaternion; // Assuming the joint class has origQuaternion
-        joint.axis = new THREE.Vector3(...axisXYZ);
-        joint.limit = { lower: lowerLimit, upper: upperLimit };
-        joint.position.set(positionXYZ[0], positionXYZ[1], positionXYZ[2]);
+                // Convert RPY to a Quaternion
+                const quaternion = new THREE.Quaternion();
+                const euler = new THREE.Euler(...originRPY, 'XYZ');
+                quaternion.setFromEuler(euler);
 
-        
-        // Refresh scene to apply changes
-        render();
-        refreshScene();
+                // Update joint properties
+                joint.origPosition.set(originXYZ[0], originXYZ[1], originXYZ[2]); // Assuming the joint class has origPosition
+                joint.origQuaternion = quaternion; // Assuming the joint class has origQuaternion
+                joint.axis = new THREE.Vector3(...axisXYZ);
+                joint.limit = { lower: lowerLimit, upper: upperLimit };
+                joint.position.set(positionXYZ[0], positionXYZ[1], positionXYZ[2]);
 
-    } else {
-        console.error("Joint not found or viewer not initialized properly.");
-    }
-}
 
-function refreshScene() {
-    if (viewer && typeof viewer.updateScene === 'function') {
-        viewer.updateScene(); // Assuming your viewer has an 'updateScene' method
-    } else {
-        // Fallback: manually trigger the necessary updates and re-render
-        viewer.scene.updateMatrixWorld(true);
-        if (viewer.controls) {
-            viewer.controls.update(); // Update controls after modifying the scene
+                // Refresh scene to apply changes
+                refreshScene();
+
+
+            } else {
+                console.error("Joint not found or viewer not initialized properly.");
+            }
         }
-        if (typeof render === 'function') {
-            render(); // Call your rendering function if it's defined
-        }
-    }
-}
 
-function populateJointNames() {
-    const jointSelector = document.getElementById('joint-selector');
-    if (viewer && viewer.robot) {
-        jointSelector.innerHTML = ''; // Clear existing options
-        Object.keys(viewer.robot.joints).forEach(jointName => {
-            const option = document.createElement('option');
-            option.value = jointName;
-            option.textContent = jointName;
-            jointSelector.appendChild(option);
+        function refreshScene() {
+            if (viewer && typeof viewer.updateScene === 'function') {
+                viewer.updateScene(); // Assuming your viewer has an 'updateScene' method
+            } else {
+                // Fallback: manually trigger the necessary updates and re-render
+                viewer.scene.updateMatrixWorld(true);
+                if (viewer.controls) {
+                    viewer.controls.update(); // Update controls after modifying the scene
+                }
+                if (typeof render === 'function') {
+                    render(); // Call your rendering function if it's defined
+                }
+            }
+        }
+
+        function loadJointDetails() {
+            const jointSelector = document.getElementById('joint-selector');
+            const jointName = jointSelector.value;
+
+            if (viewer && viewer.robot && viewer.robot.joints[jointName]) {
+                const joint = viewer.robot.joints[jointName];
+
+                // Assuming that joint.origin, joint.origQuaternion, and joint.position are available
+                document.getElementById('joint-origin-xyz').value = joint.origPosition.toArray().join(' ');
+                //document.getElementById('joint-origin-rpy').value = (new THREE.Euler().setFromQuaternion(joint.origQuaternion, 'XYZ')).toArray().map(r => (r * 180 / Math.PI).toFixed(2));
+                document.getElementById('joint-position-xyz').value = joint.position.toArray().join(' ');
+                document.getElementById('joint-axis-xyz').value = joint.axis.toArray().join(' ');
+                document.getElementById('joint-lower-limit').value = (joint.limit.lower * 180 / Math.PI).toFixed(2);
+                document.getElementById('joint-upper-limit').value = (joint.limit.upper * 180 / Math.PI).toFixed(2);
+            } else {
+                console.error("Joint not found or viewer not initialized properly.");
+            }
+        }
+
+        function populateJointNames() {
+            const jointSelector = document.getElementById('joint-selector');
+            if (viewer && viewer.robot) {
+                jointSelector.innerHTML = ''; // Clear existing options
+                Object.keys(viewer.robot.joints).forEach(jointName => {
+                    const option = document.createElement('option');
+                    option.value = jointName;
+                    option.textContent = jointName;
+                    jointSelector.appendChild(option);
+                });
+                loadJointDetails(); // Load details of the first joint
+            }
+        }
+
+        document.getElementById('joint-selector').addEventListener('change', loadJointDetails);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                populateJointNames();
+                document.getElementById('joint-selector').addEventListener('change', loadJointDetails);
+            }, 2000); // Ensure URDF data is loaded and delay to setup the event listener
         });
-    }
-}
 
-document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(populateJointNames, 2000); // Ensure URDF data is loaded
-});
-
-</script>
+    </script>
 
 </body>
 
