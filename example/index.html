@@ -177,67 +177,51 @@
     if (viewer && viewer.robot && viewer.robot.joints[jointName]) {
         const joint = viewer.robot.joints[jointName];
 
-        // Assuming set methods or similar handling exists:
-        if (joint.setOrigin) {
-            joint.setOrigin(originXYZ, originRPY);
-        }
-        if (joint.setAxis) {
-            joint.setAxis(new THREE.Vector3(...axisXYZ));
-        }
-        if (joint.setLimit) {
-            joint.setLimit(lowerLimit, upperLimit);
-        }
+        // Set new joint properties
+        joint.origin = { xyz: originXYZ, rpy: originRPY };
+        joint.axis = new THREE.Vector3(...axisXYZ);
+        joint.limit = { lower: lowerLimit, upper: upperLimit };
 
         console.log(joint);
-
-        // Explicitly refresh the scene to reflect changes
+        // Refresh scene to apply changes
         refreshScene();
     } else {
         console.error("Joint not found or viewer not initialized properly.");
     }
 }
 
-
-    function refreshScene() {
-        // Implement the logic to refresh your scene here
-        if (viewer && typeof viewer.updateScene === 'function') {
-            viewer.updateScene(); // Assuming your viewer has an 'updateScene' method
-        } else {
-            // Fallback: manually trigger the necessary updates and re-render
-            viewer.scene.updateMatrixWorld(true);
-            if (typeof render === 'function') {
-                render(); // Call your rendering function if it's defined
-            }
+function refreshScene() {
+    if (viewer && typeof viewer.updateScene === 'function') {
+        viewer.updateScene(); // Assuming your viewer has an 'updateScene' method
+    } else {
+        // Fallback: manually trigger the necessary updates and re-render
+        viewer.scene.updateMatrixWorld(true);
+        if (viewer.controls) {
+            viewer.controls.update(); // Update controls after modifying the scene
+        }
+        if (typeof render === 'function') {
+            render(); // Call your rendering function if it's defined
         }
     }
+}
 
-    function populateJointNames() {
-        console.log('populateJointNames called'); // Check if function is called
-        const jointSelector = document.getElementById('joint-selector');
-        if (viewer && viewer.robot) {
-            console.log('Viewer and robot are available'); // Check if viewer and robot are properly initialized
-            jointSelector.innerHTML = ''; // Clear existing options
-            const jointNames = Object.keys(viewer.robot.joints);
-            console.log('Joints available:', jointNames); // Log available joints
-
-            if (jointNames.length === 0) {
-                console.log('No joints found in the robot data');
-            }
-
-            jointNames.forEach(jointName => {
-                const option = document.createElement('option');
-                option.value = jointName;
-                option.textContent = jointName;
-                jointSelector.appendChild(option);
-            });
-        } else {
-            console.log('Viewer or robot is not initialized', viewer, viewer.robot);
-        }
+function populateJointNames() {
+    const jointSelector = document.getElementById('joint-selector');
+    if (viewer && viewer.robot) {
+        jointSelector.innerHTML = ''; // Clear existing options
+        Object.keys(viewer.robot.joints).forEach(jointName => {
+            const option = document.createElement('option');
+            option.value = jointName;
+            option.textContent = jointName;
+            jointSelector.appendChild(option);
+        });
     }
-    // You might need a custom event or a callback from the URDF viewer indicating it is fully loaded
-    document.addEventListener('DOMContentLoaded', () => {
-        setTimeout(populateJointNames, 2000); // Delay execution to ensure URDF data is loaded
-    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(populateJointNames, 2000); // Ensure URDF data is loaded
+});
+
 </script>
 
 </body>
