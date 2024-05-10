@@ -1853,3 +1853,45 @@
 
 }));
 //# sourceMappingURL=URDFClasses.js.map
+
+// Add or modify URDFJoint to handle updates more dynamically
+URDFJoint.prototype.updateProperties = function(params) {
+  if (params.origin) {
+      this.origin.set(...params.origin.xyz);
+      const euler = new THREE.Euler(...params.origin.rpy, 'XYZ');
+      this.origQuaternion.setFromEuler(euler);
+  }
+  if (params.axis) {
+      this.axis.set(...params.axis);
+  }
+  if (params.limit) {
+      this.limit.lower = params.limit.lower;
+      this.limit.upper = params.limit.upper;
+  }
+
+  // After updating properties, you might need to recalculate the joint's position in the world
+  this.updateTransform();
+}
+
+URDFJoint.prototype.updateTransform = function() {
+  // Apply new position and rotation
+  this.position.set(...this.origin.toArray());
+  this.quaternion.copy(this.origQuaternion);
+
+  // Ensure updates affect the visual representation
+  this.updateMatrix();
+  this.updateMatrixWorld(true);
+
+  // If part of a larger kinematic chain, inform parent or children to update as well
+  if (this.parent) {
+      this.parent.updateMatrixWorld(true);
+  }
+}
+
+// Call this method after changing joint parameters
+function refreshScene() {
+  if (viewer && viewer.robot) {
+      Object.values(viewer.robot.joints).forEach(joint => joint.updateTransform());
+      viewer.updateScene();  // Assuming this triggers a re-render
+  }
+}

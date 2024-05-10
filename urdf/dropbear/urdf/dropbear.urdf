@@ -23,7 +23,7 @@
     <joint name="torso_to_hips_joint" type="fixed">
         <parent link="torso"/>
         <child link="hips"/>
-        <origin xyz="-5 -26 2.25" rpy="0 0 0"/>
+        <origin xyz="-10 -26 2.25" rpy="0 0 0"/>
     </joint>
 
     <!-- Left Leg Chain -->

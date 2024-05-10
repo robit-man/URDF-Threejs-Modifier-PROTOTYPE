@@ -44,6 +44,10 @@
             <select id="joint-selector">
             </select>
 
+            <label for="joint-position-xyz">Position (XYZ):</label>
+            <input type="text" id="joint-position-xyz" placeholder="x y z">
+
+
             <label for="joint-origin-xyz">Origin (XYZ):</label>
             <input type="text" id="joint-origin-xyz" placeholder="x y z">
 
@@ -163,6 +167,7 @@
 
         });
     </script>
+    
   <script>
     // Function to update the joint properties based on user input
     // Assuming 'viewer' has a method to get the current robot model and 'robot' is an instance of URDFRobot
@@ -170,6 +175,7 @@
     const jointName = document.getElementById('joint-selector').value;
     const originXYZ = document.getElementById('joint-origin-xyz').value.split(' ').map(Number);
     const originRPY = document.getElementById('joint-origin-rpy').value.split(' ').map(v => parseFloat(v) * Math.PI / 180);
+    const positionXYZ = document.getElementById('joint-position-xyz').value.split(' ').map(Number); // Assuming you have a UI input for this
     const axisXYZ = document.getElementById('joint-axis-xyz').value.split(' ').map(Number);
     const lowerLimit = parseFloat(document.getElementById('joint-lower-limit').value) * Math.PI / 180;
     const upperLimit = parseFloat(document.getElementById('joint-upper-limit').value) * Math.PI / 180;
@@ -177,14 +183,23 @@
     if (viewer && viewer.robot && viewer.robot.joints[jointName]) {
         const joint = viewer.robot.joints[jointName];
 
-        // Set new joint properties
-        joint.origin = { xyz: originXYZ, rpy: originRPY };
+        // Convert RPY to a Quaternion
+        const quaternion = new THREE.Quaternion();
+        const euler = new THREE.Euler(...originRPY, 'XYZ');
+        quaternion.setFromEuler(euler);
+
+        // Update joint properties
+        joint.origPosition.set(originXYZ[0], originXYZ[1], originXYZ[2]); // Assuming the joint class has origPosition
+        joint.origQuaternion = quaternion; // Assuming the joint class has origQuaternion
         joint.axis = new THREE.Vector3(...axisXYZ);
         joint.limit = { lower: lowerLimit, upper: upperLimit };
+        joint.position.set(positionXYZ[0], positionXYZ[1], positionXYZ[2]);
 
-        console.log(joint);
+        
         // Refresh scene to apply changes
+        render();
         refreshScene();
+
     } else {
         console.error("Joint not found or viewer not initialized properly.");
     }

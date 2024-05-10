@@ -2393,9 +2393,62 @@
 
     return URDFLoader;
   }();
-  ; // Assuming URDFLoader, URDFRobot, and URDFJoint are already defined elsewhere in your script
+  ; // Add or modify URDFJoint to handle updates more dynamically
+
+  URDFJoint.prototype.updateProperties = function (params) {
+    if (params.origin) {
+      var _this$origin;
+
+      (_this$origin = this.origin).set.apply(_this$origin, _toConsumableArray(params.origin.xyz));
+
+      var euler = _construct(THREE.Euler, _toConsumableArray(params.origin.rpy).concat(['XYZ']));
+
+      this.origQuaternion.setFromEuler(euler);
+    }
+
+    if (params.axis) {
+      var _this$axis;
+
+      (_this$axis = this.axis).set.apply(_this$axis, _toConsumableArray(params.axis));
+    }
+
+    if (params.limit) {
+      this.limit.lower = params.limit.lower;
+      this.limit.upper = params.limit.upper;
+    } // After updating properties, you might need to recalculate the joint's position in the world
+
+
+    this.updateTransform();
+  };
+
+  URDFJoint.prototype.updateTransform = function () {
+    var _this$position;
+
+    // Apply new position and rotation
+    (_this$position = this.position).set.apply(_this$position, _toConsumableArray(this.origin.toArray()));
+
+    this.quaternion.copy(this.origQuaternion); // Ensure updates affect the visual representation
+
+    this.updateMatrix();
+    this.updateMatrixWorld(true); // If part of a larger kinematic chain, inform parent or children to update as well
+
+    if (this.parent) {
+      this.parent.updateMatrixWorld(true);
+    }
+  }; // Call this method after changing joint parameters
+
+
+  function refreshScene() {
+    if (viewer && viewer.robot) {
+      Object.values(viewer.robot.joints).forEach(function (joint) {
+        return joint.updateTransform();
+      });
+      viewer.updateScene(); // Assuming this triggers a re-render
+    }
+  } // Assuming URDFLoader, URDFRobot, and URDFJoint are already defined elsewhere in your script
 
   /* Add update joint functionality to URDFRobot */
+
 
   URDFRobot.prototype.updateJoint = function (jointName, params) {
     var joint = this.joints[jointName];
