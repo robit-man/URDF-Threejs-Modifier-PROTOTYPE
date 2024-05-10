@@ -1,137 +1,245 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-        <meta charset="utf-8"/>
 
-        <title>URDF Viewer Example</title>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta charset="utf-8" />
 
-        <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-bundle.js"></script>
-        <script src="../node_modules/three/build/three.js"></script>
-        <script src="../node_modules/three/examples/js/controls/OrbitControls.js"></script>
-        <script src="../node_modules/three/examples/js/loaders/GLTFLoader.js"></script>
-        <script src="../node_modules/three/examples/js/loaders/OBJLoader.js"></script>
-        <script src="../node_modules/three/examples/js/loaders/STLLoader.js"></script>
-        <script src="../node_modules/three/examples/js/loaders/ColladaLoader.js"></script>
-        <script src="../node_modules/threejs-model-loader/ModelLoader.js"></script>
-        <script src="../umd/URDFLoader.js"></script>
-        <script src="../umd/urdf-viewer-element.js"></script>
-        <script src="../umd/urdf-manipulator-element.js"></script>
-        <script>
-            /* globals URDFViewer */
-            customElements.define('urdf-viewer', URDFManipulator)
-        </script>
+    <title>URDF Viewer Example</title>
 
-        <link href="https://fonts.googleapis.com/css?family=Roboto:100,300" rel="stylesheet"/>
-        <link href="../example/styles.css" rel="stylesheet" />
-    </head>
-    <body tabindex="0">
+    <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-bundle.js"></script>
+    <script src="../node_modules/three/build/three.js"></script>
+    <script src="../node_modules/three/examples/js/controls/OrbitControls.js"></script>
+    <script src="../node_modules/three/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="../node_modules/three/examples/js/loaders/OBJLoader.js"></script>
+    <script src="../node_modules/three/examples/js/loaders/STLLoader.js"></script>
+    <script src="../node_modules/three/examples/js/loaders/ColladaLoader.js"></script>
+    <script src="../node_modules/threejs-model-loader/ModelLoader.js"></script>
+    <script src="../umd/URDFLoader.js"></script>
 
-        <div id="menu">
-            <ul id="urdf-options" style="display:none;">
-                <li urdf="../urdf/dropbear/urdf/dropbear.urdf" color="#E91E63">DROPBEAR</li>
-                <li urdf="../urdf/TriATHLETE/urdf/TriATHLETE_flipped.URDF" color="#009688">TriATHLETE</li>
-                <li urdf="../urdf/TriATHLETE_Climbing/urdf/TriATHLETE_flipped.URDF" color="#FFB300">TriATHLETE Climbing</li>
-            </ul>
 
-            <div id="controls" class="hidden">
-                <div id="toggle-controls"></div>
-                <div>Drag and drop a set of URDF files! <br/> (Chrome Only)</div>
-                <div id="ignore-joint-limits" class="toggle">Ignore Joint Limits</div>
-                <div id="do-animate" class="toggle checked">Animate Joints</div>
-                <label>
-                    Up Axis
-                    <select id="up-select">
-                        <option value="+X">+X</option>
-                        <option value="-X">-X</option>
-                        <option value="+Y">+Y</option>
-                        <option value="-Y">-Y</option>
-                        <option value="+Z">+Z</option>
-                        <option value="-Z" selected>-Z</option>
-                    </select>
-                </label>
-                <ul></ul>
-            </div>
+    <script src="../umd/urdf-viewer-element.js"></script>
+    <script src="../umd/urdf-manipulator-element.js"></script>
+    <script>
+        /* globals URDFViewer */
+        customElements.define('urdf-viewer', URDFManipulator)
+    </script>
+
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300" rel="stylesheet" />
+    <link href="../example/styles.css" rel="stylesheet" />
+</head>
+
+<body tabindex="0">
+
+    <div id="menu">
+        <ul id="urdf-options" style="display:none;">
+            <li urdf="../urdf/dropbear/urdf/dropbear.urdf" color="#E91E63">DROPBEAR</li>
+            <li urdf="../urdf/TriATHLETE/urdf/TriATHLETE_flipped.URDF" color="#009688">TriATHLETE</li>
+            <li urdf="../urdf/TriATHLETE_Climbing/urdf/TriATHLETE_flipped.URDF" color="#FFB300">TriATHLETE Climbing</li>
+        </ul>
+
+        <div id="joint-controls" style="display: flex;flex-flow:column;">
+            <h3>Joint Control Panel</h3>
+            <label for="joint-selector">Select Joint:</label>
+            <select id="joint-selector">
+            </select>
+
+            <label for="joint-origin-xyz">Origin (XYZ):</label>
+            <input type="text" id="joint-origin-xyz" placeholder="x y z">
+
+            <label for="joint-origin-rpy">Rotation (RPY):</label>
+            <input type="text" id="joint-origin-rpy" placeholder="roll pitch yaw">
+
+            <label for="joint-axis-xyz">Axis (XYZ):</label>
+            <input type="text" id="joint-axis-xyz" placeholder="x y z">
+
+            <label for="joint-lower-limit">Lower Limit:</label>
+            <input type="number" id="joint-lower-limit" step="0.01">
+
+            <label for="joint-upper-limit">Upper Limit:</label>
+            <input type="number" id="joint-upper-limit" step="0.01">
+
+            <button onclick="updateJointProperties()">Update Joint</button>
         </div>
-        <urdf-viewer up="-Z" display-shadow tabindex="0"></urdf-viewer>
 
-        <script src="../example/index.js"></script>
-        <script src="../example/dragAndDrop.js"></script>
-        <script>
-            /* eslint-disable */
-            /* globals viewer */
-            var DEG2RAD = Math.PI / 180;
-            window.animToggle = document.getElementById('do-animate');
 
-            const lerp = (from, to, ratio) => from + (to - from) * ratio;
+        <div id="controls" class="hidden">
+            <div id="toggle-controls"></div>
+            <div>Drag and drop a set of URDF files! <br /> (Chrome Only)</div>
+            <div id="ignore-joint-limits" class="toggle">Ignore Joint Limits</div>
+            <div id="do-animate" class="toggle checked">Animate Joints</div>
+            <label>
+                Up Axis
+                <select id="up-select">
+                    <option value="+X">+X</option>
+                    <option value="-X">-X</option>
+                    <option value="+Y" selected>+Y</option>
+                    <option value="-Y">-Y</option>
+                    <option value="+Z">+Z</option>
+                    <option value="-Z">-Z</option>
+                </select>
+            </label>
+            <ul></ul>
+        </div>
+    </div>
+    <urdf-viewer up="+Y" display-shadow tabindex="0"></urdf-viewer>
 
-            const updateAngles = () => {
+    <script src="../example/index.js"></script>
+    <script src="../example/dragAndDrop.js"></script>
 
-                if (!viewer.setAngle) return;
+    <script>
+        /* eslint-disable */
+        /* globals viewer */
+        var DEG2RAD = Math.PI / 180;
+        window.animToggle = document.getElementById('do-animate');
 
-                // reset everything to 0 first
-                const resetangles = viewer.angles;
-                for (const name in resetangles) resetangles[name] = 0;
-                viewer.setAngles(resetangles);
+        const lerp = (from, to, ratio) => from + (to - from) * ratio;
 
-                // animate the legs
-                const time = Date.now() / 3e2;
-                for (let i = 1; i <= 6; i++) {
+        const updateAngles = () => {
 
-                    const offset = i * Math.PI / 3;
-                    const ratio = Math.max(0, Math.sin(time + offset));
+            if (!viewer.setAngle) return;
 
-                    viewer.setAngle(`HP${ i }`, lerp(30, 0, ratio) * DEG2RAD);
-                    viewer.setAngle(`KP${ i }`, lerp(90, 150, ratio) * DEG2RAD);
-                    viewer.setAngle(`AP${ i }`, lerp(-30, -60, ratio) * DEG2RAD);
+            // reset everything to 0 first
+            const resetangles = viewer.angles;
+            for (const name in resetangles) resetangles[name] = 0;
+            viewer.setAngles(resetangles);
 
-                    viewer.setAngle(`TC${ i }A`, lerp(0, 0.065, ratio));
-                    viewer.setAngle(`TC${ i }B`, lerp(0, 0.065, ratio));
+            // animate the legs
+            const time = Date.now() / 3e2;
+            for (let i = 1; i <= 6; i++) {
 
-                    viewer.setAngle(`W${ i }`, window.performance.now() * 0.001);
+                const offset = i * Math.PI / 3;
+                const ratio = Math.max(0, Math.sin(time + offset));
 
-                }
+                viewer.setAngle(`HP${i}`, lerp(30, 0, ratio) * DEG2RAD);
+                viewer.setAngle(`KP${i}`, lerp(90, 150, ratio) * DEG2RAD);
+                viewer.setAngle(`AP${i}`, lerp(-30, -60, ratio) * DEG2RAD);
 
-            };
+                viewer.setAngle(`TC${i}A`, lerp(0, 0.065, ratio));
+                viewer.setAngle(`TC${i}B`, lerp(0, 0.065, ratio));
 
-            const updateLoop = () => {
+                viewer.setAngle(`W${i}`, window.performance.now() * 0.001);
 
-                if (animToggle.classList.contains('checked')) {
-                    updateAngles();
-                }
+            }
 
-                requestAnimationFrame(updateLoop);
+        };
 
-            };
+        const updateLoop = () => {
 
-            document.querySelectorAll('#urdf-options li[urdf]').forEach(el => {
+            if (animToggle.classList.contains('checked')) {
+                updateAngles();
+            }
 
-                el.addEventListener('click', e => {
+            requestAnimationFrame(updateLoop);
 
-                    const urdf = e.target.getAttribute('urdf');
-                    const color = e.target.getAttribute('color');
+        };
 
-                    viewer.up = '-Z';
-                    document.getElementById('up-select').value = viewer.up;
-                    viewer.urdf = urdf;
-                    animToggle.classList.add('checked');
-                    setColor(color);
+        document.querySelectorAll('#urdf-options li[urdf]').forEach(el => {
 
-                });
+            el.addEventListener('click', e => {
+
+                const urdf = e.target.getAttribute('urdf');
+                const color = e.target.getAttribute('color');
+
+                viewer.up = '+Y';
+                document.getElementById('up-select').value = viewer.up;
+                viewer.urdf = urdf;
+                animToggle.classList.add('checked');
+                setColor(color);
 
             });
 
-            document.addEventListener('WebComponentsReady', () => {
+        });
 
-                animToggle.addEventListener('click', () => animToggle.classList.toggle('checked'));
+        document.addEventListener('WebComponentsReady', () => {
 
-                // stop the animation if user tried to manipulate the model
-                viewer.addEventListener('manipulate-start', e => animToggle.classList.remove('checked'));
-                viewer.addEventListener('urdf-processed', e => updateAngles());
-                updateLoop();
-                viewer.camera.position.set(-5.5, 3.5, 5.5);
+            animToggle.addEventListener('click', () => animToggle.classList.toggle('checked'));
 
+            // stop the animation if user tried to manipulate the model
+            viewer.addEventListener('manipulate-start', e => animToggle.classList.remove('checked'));
+            viewer.addEventListener('urdf-processed', e => updateAngles());
+            updateLoop();
+            viewer.camera.position.set(-5.5, 3.5, 5.5);
+
+        });
+    </script>
+  <script>
+    // Function to update the joint properties based on user input
+    // Assuming 'viewer' has a method to get the current robot model and 'robot' is an instance of URDFRobot
+    function updateJointProperties() {
+    const jointName = document.getElementById('joint-selector').value;
+    const originXYZ = document.getElementById('joint-origin-xyz').value.split(' ').map(Number);
+    const originRPY = document.getElementById('joint-origin-rpy').value.split(' ').map(v => parseFloat(v) * Math.PI / 180);
+    const axisXYZ = document.getElementById('joint-axis-xyz').value.split(' ').map(Number);
+    const lowerLimit = parseFloat(document.getElementById('joint-lower-limit').value) * Math.PI / 180;
+    const upperLimit = parseFloat(document.getElementById('joint-upper-limit').value) * Math.PI / 180;
+
+    if (viewer && viewer.robot && viewer.robot.joints[jointName]) {
+        const joint = viewer.robot.joints[jointName];
+
+        // Assuming set methods or similar handling exists:
+        if (joint.setOrigin) {
+            joint.setOrigin(originXYZ, originRPY);
+        }
+        if (joint.setAxis) {
+            joint.setAxis(new THREE.Vector3(...axisXYZ));
+        }
+        if (joint.setLimit) {
+            joint.setLimit(lowerLimit, upperLimit);
+        }
+
+        console.log(`Updated properties for ${jointName}:`, joint);
+
+        // Explicitly refresh the scene to reflect changes
+        refreshScene();
+    } else {
+        console.error("Joint not found or viewer not initialized properly.");
+    }
+}
+
+
+    function refreshScene() {
+        // Implement the logic to refresh your scene here
+        if (viewer && typeof viewer.updateScene === 'function') {
+            viewer.updateScene(); // Assuming your viewer has an 'updateScene' method
+        } else {
+            // Fallback: manually trigger the necessary updates and re-render
+            viewer.scene.updateMatrixWorld(true);
+            if (typeof render === 'function') {
+                render(); // Call your rendering function if it's defined
+            }
+        }
+    }
+
+    function populateJointNames() {
+        console.log('populateJointNames called'); // Check if function is called
+        const jointSelector = document.getElementById('joint-selector');
+        if (viewer && viewer.robot) {
+            console.log('Viewer and robot are available'); // Check if viewer and robot are properly initialized
+            jointSelector.innerHTML = ''; // Clear existing options
+            const jointNames = Object.keys(viewer.robot.joints);
+            console.log('Joints available:', jointNames); // Log available joints
+
+            if (jointNames.length === 0) {
+                console.log('No joints found in the robot data');
+            }
+
+            jointNames.forEach(jointName => {
+                const option = document.createElement('option');
+                option.value = jointName;
+                option.textContent = jointName;
+                jointSelector.appendChild(option);
             });
-        </script>
-    </body>
+        } else {
+            console.log('Viewer or robot is not initialized', viewer, viewer.robot);
+        }
+    }
+    // You might need a custom event or a callback from the URDF viewer indicating it is fully loaded
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(populateJointNames, 2000); // Delay execution to ensure URDF data is loaded
+    });
+</script>
+
+</body>
+
 </html>

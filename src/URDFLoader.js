@@ -240,6 +240,8 @@ class URDFLoader {
 
         };
 
+        
+
         // Process the <robot> node
         function processRobot(robot) {
 
@@ -626,3 +628,48 @@ class URDFLoader {
     }
 
 };
+
+// Assuming URDFLoader, URDFRobot, and URDFJoint are already defined elsewhere in your script
+
+/* Add update joint functionality to URDFRobot */
+URDFRobot.prototype.updateJoint = function(jointName, params) {
+    const joint = this.joints[jointName];
+    if (joint) {
+        // Update joint parameters like origin, axis, limits, etc.
+        if (params.origin) {
+            joint.origin = params.origin;
+        }
+        if (params.axis) {
+            joint.axis.set(...params.axis);
+        }
+        if (params.limit) {
+            joint.limit.lower = params.limit.lower;
+            joint.limit.upper = params.limit.upper;
+        }
+        // Trigger a scene update or similar if needed
+        this.refreshScene(); // This method would need to be implemented based on your application's structure
+    }
+};
+
+/* Method to refresh the visual scene, to be defined based on how you're managing your THREE.js scene */
+URDFRobot.prototype.refreshScene = function() {
+    // Implementation depends on how the scene is managed, but you would typically mark the scene or object for update
+    // For example:
+    if (this.mesh) {
+        this.mesh.geometry.computeBoundingSphere();
+        this.mesh.geometry.computeVertexNormals();
+    }
+    // You might need to re-render the scene
+    render(); // This function would need to be defined in your global scope or passed in
+};
+// Extend URDFLoader to handle scene updates
+URDFLoader.prototype.applyUpdates = function() {
+    // This could be a method to apply pending updates or simply refresh parts of the model
+    if (window.model) {
+        window.model.refreshScene();
+    }
+};
+function render() {
+    renderer.render(scene, camera);
+    requestAnimationFrame(render);
+}
