@@ -280,7 +280,7 @@
                 joint.limit = { lower: lowerLimit, upper: upperLimit };
                 joint.position.set(positionXYZ[0], positionXYZ[1], positionXYZ[2]);
 
-                console.log(joint.origPosition);
+                console.log(joint);
                 // Refresh scene to apply changes
                 refreshScene();
 
@@ -338,6 +338,29 @@
             }
         }
 
+        viewer.addEventListener('joint-mouseover', e => {
+    const jointName = e.detail; // Assuming `e.detail` contains the name of the hovered joint
+    const jointSelector = document.getElementById('joint-selector');
+    const jointOption = document.querySelector(`#joint-selector option[value="${jointName}"]`);
+    const j = document.querySelector(`li[joint-name="${jointName}"]`);
+
+    if (j) {
+        j.setAttribute('robot-hovered', true);
+    }
+
+    // Check if the option exists in the select dropdown, if not, create and append it
+    if (!jointOption) {
+        let newOption = document.createElement("option");
+        newOption.value = jointName;
+        newOption.textContent = jointName;
+        jointSelector.appendChild(newOption);
+    }
+
+    // Set the select element's value to the hovered joint name
+    jointSelector.value = jointName;
+    loadJointDetails(); // Load details of the first joint
+
+});
 
         document.addEventListener('DOMContentLoaded', () => {
         // Assuming URDFViewer is already initialized and populated with the robot model

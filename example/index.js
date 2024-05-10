@@ -41,29 +41,31 @@ viewer.addEventListener('ignore-limits-change', () => {
 viewer.addEventListener('angle-change', e => {
     if (sliders[e.detail]) sliders[e.detail].update();
 });
-
 viewer.addEventListener('joint-mouseover', e => {
-    const jointName = e.detail; // The joint name is expected to be in the event detail
+    const jointName = e.detail; // Assuming `e.detail` contains the name of the hovered joint
     const jointSelector = document.getElementById('joint-selector');
-    
-    // Check if the joint exists in the dropdown and set it as selected
-    if (jointSelector && jointName && viewer.robot.joints[jointName]) {
-        jointSelector.value = jointName;
-        loadJointDetails(); // Load joint details into the UI
-    }
-
+    const jointOption = document.querySelector(`#joint-selector option[value="${jointName}"]`);
     const j = document.querySelector(`li[joint-name="${jointName}"]`);
+
     if (j) {
         j.setAttribute('robot-hovered', true);
     }
+
+    // Check if the option exists in the select dropdown, if not, create and append it
+    if (!jointOption) {
+        let newOption = document.createElement("option");
+        newOption.value = jointName;
+        newOption.textContent = jointName;
+        jointSelector.appendChild(newOption);
+    }
+
+    // Set the select element's value to the hovered joint name
+    jointSelector.value = jointName;
 });
 
 viewer.addEventListener('joint-mouseout', e => {
-    const jointName = e.detail;
-    const j = document.querySelector(`li[joint-name="${jointName}"]`);
-    if (j) {
-        j.removeAttribute('robot-hovered');
-    }
+    const j = document.querySelector(`li[joint-name="${e.detail}"]`);
+    if (j) j.removeAttribute('robot-hovered');
 });
 
 let originalNoAutoRecenter;
