@@ -9,8 +9,17 @@ Fork of [gkjohnson/urdf-loaders](https://github.com/gkjohnson/urdf-loaders) with
 
 # Project Overview
 
-"tba"
+We want to create a similar experience to [the project modelbot](https://github.com/AdoHaha/modelrobot), but include additional elements for easy integration into live robot control, by developing an api for interface over serial or websockets for low level control hardware, such that a user can view and bi-directionally manipulate the states of the real system, and digital twin.
 
+As projects progress, changes are made to robots that will affect RL policies, overall kinematics, and to be able to quickly modify and test will be valuable over a webapp.
+
+# To Be Developed:
+
+- URDF Export after modification
+- URDF Mesh Manipulation in multiple modalities
+- Multi-modal Communication Protocol for interaction with low-level hardware
+- Handling of sensor data (imu, encoders) and appropriate labling and update of model
+- Mre refined description of the above components, integrations libraries to support the above goals
 
 # Dev
 
