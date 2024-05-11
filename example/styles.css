@@ -171,11 +171,16 @@ input:focus {
 }
 
 #controls #toggle-controls {
+    margin-bottom: unset;
     margin-top: 0;
-    margin-bottom: 10px;
-    text-align: right;
-    transition: 0.1s opacity linear;
-    border-top: 1px solid white;
+    /* margin-bottom: 10px; */
+    text-align: center;
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 2rem;
+    text-transform: uppercase;
 }
 
 #controls #toggle-controls:hover {

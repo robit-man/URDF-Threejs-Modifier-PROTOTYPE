@@ -96,6 +96,30 @@
             padding: 0.5rem;
         }
 
+        #toggle-controls {
+            margin-bottom: unset!important;
+            margin-top: 0 !important;
+            /* margin-bottom: 10px; */
+            text-align: center;
+            display: flex;
+            flex-flow: column;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 2rem;
+            text-transform: uppercase;
+            border: unset !important;
+        }
+
+        #toggle-controls::before {
+            font-weight: bold !important;text-align: center;
+            opacity:0.75!important;
+        }
+        #toggle-controls:hover {
+            text-decoration: unset!important;
+            font-weight: bold !important;
+        }
+
+
         button {
             background: rgba(255, 255, 255, 0.25);
             color: white;
@@ -135,7 +159,7 @@
                 </div>
                 <div class="inputrow">
 
-                    <label for="joint-selector">Joints:</label>
+                    <label for="joint-selector">Joint:</label>
                     <select id="joint-selector">
                     </select>
                 </div>
