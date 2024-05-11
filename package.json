@@ -63,6 +63,7 @@
     "webpack": "^3.5.3"
   },
   "dependencies": {
-    "three-mesh-bvh": "^0.1.4"
+    "three-mesh-bvh": "^0.1.4",
+    "xacro-parser": "^0.3.9"
   }
 }

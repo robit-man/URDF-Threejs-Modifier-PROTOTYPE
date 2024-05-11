@@ -37,6 +37,14 @@
             justify-content: space-between;
         }
 
+        .buttonrow {
+            width: 100%;
+            display: flex;
+            flex-flow: row;
+            justify-content: center;
+            gap: 4px;
+        }
+
         * {
             font-family: "Rajdhani", sans-serif;
         }
@@ -97,7 +105,7 @@
         }
 
         #toggle-controls {
-            margin-bottom: unset!important;
+            margin-bottom: unset !important;
             margin-top: 0 !important;
             /* margin-bottom: 10px; */
             text-align: center;
@@ -111,11 +119,13 @@
         }
 
         #toggle-controls::before {
-            font-weight: bold !important;text-align: center;
-            opacity:0.75!important;
+            font-weight: bold !important;
+            text-align: center;
+            opacity: 0.75 !important;
         }
+
         #toggle-controls:hover {
-            text-decoration: unset!important;
+            text-decoration: unset !important;
             font-weight: bold !important;
         }
 
@@ -124,17 +134,32 @@
             background: rgba(255, 255, 255, 0.25);
             color: white;
             border: unset;
-            padding: 1px 2px;
+            padding: 2px 8px;
             border-radius: 0.25rem;
             cursor: pointer;
+            width: 100%;
         }
 
         button:hover {
             background: rgba(255, 255, 255, 0.5);
             color: white;
             border: unset;
-            padding: 1px 2px;
             border-radius: 0.25rem;
+        }
+
+        textarea:focus,
+        input:focus {
+            outline: none;
+        }
+
+        .urdf-editor {
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        textarea {
+            border: unset !important;
+            padding: 0.5rem;
         }
     </style>
 </head>
@@ -192,8 +217,20 @@
                     <label for="joint-upper-limit">Upper Limit:</label>
                     <input type="number" id="joint-upper-limit" step="0.01">
                 </div>
+                <div class="buttonrow">
+                    <button onclick="updateJointProperties()">Update Joint</button>
+                    <button id="edit-urdf-btn" onclick="updateURDF()">Update URDF</button>
 
-                <button onclick="updateJointProperties()">Update Joint</button>
+                </div>
+            </div>
+            <div class="urdf-editor">
+                <textarea id="urdf-editor" style="width: 100%; height: 200px;"></textarea>
+            </div>
+            <div class="buttonrow">
+                <button id="edit-urdf-btn" onclick="editURDF()">Edit URDF</button>
+                <button id="edit-urdf-btn" onclick="editURDF()">Apply URDF</button>
+                <button id="save-urdf-btn" onclick="saveURDF()">Save URDF</button>
+
             </div>
 
 
@@ -220,6 +257,120 @@
 
     <script src="../example/index.js"></script>
     <script src="../example/dragAndDrop.js"></script>
+    <script>
+        // Function to save the modified URDF content as a local file
+        function saveURDF(event) {
+            event.preventDefault(); // Prevent default form submission behavior
+            const updatedContent = document.getElementById('urdf-editor').value;
+            const blob = new Blob([updatedContent], {type: 'text/plain'});
+            const url = URL.createObjectURL(blob);
+    
+            // Create a link and trigger the download
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'updated-urdf.urdf'; // Specify the filename to download as
+            document.body.appendChild(a);
+            a.click();
+    
+            // Clean up
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    
+        function setupEventListeners() {
+            const editButton = document.getElementById('edit-urdf-btn');
+            const saveButton = document.getElementById('save-urdf-btn');
+    
+            // Adding event listeners safely
+            if (editButton) {
+                editButton.removeEventListener('click', editURDF);
+                editButton.addEventListener('click', editURDF);
+            }
+            if (saveButton) {
+                saveButton.removeEventListener('click', saveURDF);
+                saveButton.addEventListener('click', saveURDF);
+            }
+        }
+    
+        // Event listeners setup (if not already configured)
+        document.addEventListener('DOMContentLoaded', setupEventListeners);
+    </script>
+    
+    <script>
+        let urdfDoc;  // To hold the parsed URDF document
+    
+        // Function to fetch and edit the current URDF
+        function editURDF() {
+            const urdfContent = viewer.urdf;  // Get the current URDF path or content
+            fetch(urdfContent)
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('urdf-editor').value = data;
+                    // Parse the URDF for manipulation
+                    const parser = new DOMParser();
+                    urdfDoc = parser.parseFromString(data, "text/xml");
+                })
+                .catch(error => console.error('Error loading URDF:', error));
+        }
+    
+        // Function to update the URDF content based on joint changes
+        function updateJointProperties() {
+            const jointName = document.getElementById('joint-selector').value;
+            const originXYZ = document.getElementById('joint-origin-xyz').value;
+            const positionXYZ = document.getElementById('joint-position-xyz').value;  // Assuming you have a UI input for this
+    
+            // Find the joint in the URDF XML
+            const joints = urdfDoc.querySelectorAll(`joint[name="${jointName}"]`);
+            if(joints.length > 0) {
+                const joint = joints[0];
+    
+                // Update position and origin if available
+                let origin = joint.querySelector('origin');
+                if (!origin) {
+                    origin = urdfDoc.createElement('origin');
+                    joint.appendChild(origin);
+                }
+                origin.setAttribute('xyz', originXYZ);
+                origin.setAttribute('rpy', document.getElementById('joint-origin-rpy').value);  // Assuming RPY input also needs to be updated
+    
+                let position = joint.querySelector('position');  // If position is a custom element you manage
+                if (position) {
+                    position.setAttribute('xyz', positionXYZ);
+                }
+    
+                // Serialize and update the textarea
+                const serializer = new XMLSerializer();
+                const updatedURDF = serializer.serializeToString(urdfDoc);
+                document.getElementById('urdf-editor').value = updatedURDF;
+            } else {
+                console.error("Joint not found in URDF.");
+            }
+        }
+    
+        // Function to save the modified URDF content as a local file
+        function saveURDF(event) {
+            event.preventDefault();
+            const updatedContent = document.getElementById('urdf-editor').value;
+            const blob = new Blob([updatedContent], {type: 'text/plain'});
+            const url = URL.createObjectURL(blob);
+    
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'updated-urdf.urdf';
+            document.body.appendChild(a);
+            a.click();
+    
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('edit-urdf-btn').addEventListener('click', editURDF);
+            document.getElementById('save-urdf-btn').addEventListener('click', saveURDF);
+        });
+    </script>
+    
+
 
     <script>
         /* eslint-disable */
