@@ -309,12 +309,24 @@
             document.getElementById('urdf-editor').value = updatedURDF;
         }
 
-
-        // Function to apply the updated URDF XML to the viewer
         function applyURDF() {
             const updatedURDF = document.getElementById('urdf-editor').value;
-            viewer.setURDF(updatedURDF);
+            const viewerElement = document.querySelector('urdf-viewer');
+            if (viewerElement.updateURDFContent) {
+                viewerElement.updateURDFContent(updatedURDF);
+            } else {
+                console.error("Method updateURDFContent not found on viewerElement.");
+            }
         }
+
+        function updateURDFContent(newURDF) {
+            if (!newURDF || this.getAttribute('urdf') === newURDF) return;
+
+            // Set new URDF and force reload of the model
+            this.setAttribute('urdf', newURDF);
+            this._loadUrdf(this.package, newURDF);
+        }
+
 
         // Function to initialize event listeners once the document is ready
         document.addEventListener('DOMContentLoaded', () => {
@@ -404,27 +416,7 @@
             }
         }
 
-        // Function to save the modified URDF content as a local file
-        function saveURDF(event) {
-            event.preventDefault();
-            const updatedContent = document.getElementById('urdf-editor').value;
-            const blob = new Blob([updatedContent], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'updated-urdf.urdf';
-            document.body.appendChild(a);
-            a.click();
-
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('edit-urdf-btn').addEventListener('click', editURDF);
-            document.getElementById('save-urdf-btn').addEventListener('click', saveURDF);
-        });
+      
     </script>
 
 
