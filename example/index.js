@@ -41,6 +41,7 @@ viewer.addEventListener('ignore-limits-change', () => {
 viewer.addEventListener('angle-change', e => {
     if (sliders[e.detail]) sliders[e.detail].update();
 });
+
 viewer.addEventListener('joint-mouseover', e => {
     const jointName = e.detail; // Assuming `e.detail` contains the name of the hovered joint
     const jointSelector = document.getElementById('joint-selector');
@@ -61,11 +62,13 @@ viewer.addEventListener('joint-mouseover', e => {
 
     // Set the select element's value to the hovered joint name
     jointSelector.value = jointName;
+
 });
 
 viewer.addEventListener('joint-mouseout', e => {
     const j = document.querySelector(`li[joint-name="${e.detail}"]`);
     if (j) j.removeAttribute('robot-hovered');
+
 });
 
 let originalNoAutoRecenter;

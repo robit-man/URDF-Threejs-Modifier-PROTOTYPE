@@ -64,13 +64,15 @@
             color: white;
         }
 
-        input::placeholder{
-            color:#fffa;
+        input::placeholder {
+            color: #fffa;
         }
+
         #joint-controls {
             display: flex;
             flex-flow: column;
             gap: 4px;
+            margin-top: unset !important;
         }
 
         #controls {
@@ -79,8 +81,19 @@
             border-radius: 1rem;
             overflow-y: auto;
             max-height: calc(100vh - 4rem);
-            margin-top:unset!important;
+            margin-top: unset !important;
 
+        }
+
+        #joint-selection-save {
+            background: white;
+            text-align: center;
+            color: black;
+            width: 100%;
+            font-size: 1.2rem;
+            font-weight: bold;
+            pointer-events: none;
+            padding: 0.5rem;
         }
 
         button {
@@ -116,9 +129,17 @@
 
 
             <div id="joint-controls">
-                <label for="joint-selector">Select Joint:</label>
-                <select id="joint-selector">
-                </select>
+
+                <div class="inputrow">
+                    <input type="text" id="joint-selection-save" placeholder="x y z">
+                </div>
+                <div class="inputrow">
+
+                    <label for="joint-selector">Joints:</label>
+                    <select id="joint-selector">
+                    </select>
+                </div>
+
                 <div class="inputrow">
                     <label for="joint-position-xyz">Position (XYZ):</label>
                     <input type="text" id="joint-position-xyz" placeholder="x y z">
@@ -254,10 +275,11 @@
     </script>
 
     <script>
+
         // Function to update the joint properties based on user input
         // Assuming 'viewer' has a method to get the current robot model and 'robot' is an instance of URDFRobot
         function updateJointProperties() {
-            const jointName = document.getElementById('joint-selector').value;
+            const jointName = document.getElementById('joint-selection-save').value;
             const originXYZ = document.getElementById('joint-origin-xyz').value.split(' ').map(Number);
             const originRPY = document.getElementById('joint-origin-rpy').value.split(' ').map(v => parseFloat(v) * Math.PI / 180);
             const positionXYZ = document.getElementById('joint-position-xyz').value.split(' ').map(Number); // Assuming you have a UI input for this
@@ -303,6 +325,8 @@
                     render(); // Call your rendering function if it's defined
                 }
             }
+            console.log('refreshed');
+
         }
 
         function loadJointDetails() {
@@ -311,6 +335,9 @@
 
             if (viewer && viewer.robot && viewer.robot.joints[jointName]) {
                 const joint = viewer.robot.joints[jointName];
+                const jointNameSaved = jointName;
+
+                document.getElementById('joint-selection-save').value = jointNameSaved;
 
                 // Assuming that joint.origin, joint.origQuaternion, and joint.position are available
                 document.getElementById('joint-origin-xyz').value = joint.origPosition.toArray().join(' ');
@@ -322,6 +349,7 @@
             } else {
                 console.error("Joint not found or viewer not initialized properly.");
             }
+            console.log('loaded', jointName);
         }
 
         function populateJointNames() {
@@ -333,52 +361,57 @@
                     option.value = jointName;
                     option.textContent = jointName;
                     jointSelector.appendChild(option);
+
                 });
                 loadJointDetails(); // Load details of the first joint
             }
+            console.log('populated');
         }
-
-        viewer.addEventListener('joint-mouseover', e => {
-    const jointName = e.detail; // Assuming `e.detail` contains the name of the hovered joint
-    const jointSelector = document.getElementById('joint-selector');
-    const jointOption = document.querySelector(`#joint-selector option[value="${jointName}"]`);
-    const j = document.querySelector(`li[joint-name="${jointName}"]`);
-
-    if (j) {
-        j.setAttribute('robot-hovered', true);
-    }
-
-    // Check if the option exists in the select dropdown, if not, create and append it
-    if (!jointOption) {
-        let newOption = document.createElement("option");
-        newOption.value = jointName;
-        newOption.textContent = jointName;
-        jointSelector.appendChild(newOption);
-    }
-
-    // Set the select element's value to the hovered joint name
-    jointSelector.value = jointName;
-    loadJointDetails(); // Load details of the first joint
-
-});
+        /*
+                viewer.addEventListener('manipulate-start', e => {
+                    const jointName = e.detail; // Assuming `e.detail` contains the name of the hovered joint
+                    const jointSelector = document.getElementById('joint-selector');
+                    const jointOption = document.querySelector(`#joint-selector option[value="${jointName}"]`);
+                    //const j = document.querySelector(`li[joint-name="${jointName}"]`);
+        
+                    if (j) {
+                        j.setAttribute('robot-hovered', true);
+                    }
+        
+                    // Check if the option exists in the select dropdown, if not, create and append it
+                    if (!jointOption) {
+                        let newOption = document.createElement("option");
+                        newOption.value = jointName;
+                        newOption.textContent = jointName;
+                        jointSelector.appendChild(newOption);
+                    }
+        
+                    // Set the select element's value to the hovered joint name
+                    jointSelector.value = jointName;
+                    loadJointDetails(); // Load details of the first joint
+        
+                });*/
 
         document.addEventListener('DOMContentLoaded', () => {
-        // Assuming URDFViewer is already initialized and populated with the robot model
-        setTimeout(() => {
-            populateJointNames();
-            document.getElementById('joint-selector').addEventListener('change', loadJointDetails);
-            
-            // Add listener to the viewer for joint click events
-            if (viewer) {
-                viewer.addEventListener('joint-click', function(e) {
-                    const jointName = e.detail; // Assuming the event detail contains the joint name
-                    const jointSelector = document.getElementById('joint-selector');
-                    jointSelector.value = jointName;
-                    loadJointDetails(); // Load the details of the clicked joint into the input fields
+            // Assuming URDFViewer is already initialized and populated with the robot model
+            setTimeout(() => {
+                populateJointNames();
+                /* document.getElementById('joint-selector').addEventListener('manipulate-start', loadJointDetails);
+ */    // Add event listener for when the selected joint changes
+                document.getElementById('joint-selector').addEventListener('change', function () {
+                    loadJointDetails(); // Load the details of the selected joint into the input fields
                 });
-            }
-        }, 2000); // Ensure URDF data is loaded and delay to setup the event listener
-    });
+                // Add listener to the viewer for joint click events
+                if (viewer) {
+                    viewer.addEventListener('manipulate-start', function (e) {
+                        const jointName = e.detail; // Assuming the event detail contains the joint name
+                        const jointSelector = document.getElementById('joint-selector');
+                        jointSelector.value = jointName;
+                        loadJointDetails(); // Load the details of the clicked joint into the input fields
+                    });
+                }
+            }, 2000); // Ensure URDF data is loaded and delay to setup the event listener
+        });
 
 
     </script>
