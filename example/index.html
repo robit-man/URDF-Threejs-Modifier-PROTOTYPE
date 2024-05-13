@@ -129,7 +129,12 @@
             font-weight: bold !important;
         }
 
-        #link-img{height:24px;width:24px;filter:invert(1);}
+        #link-img {
+            height: 24px;
+            width: 24px;
+            filter: invert(1);
+        }
+
         button {
             background: rgba(255, 255, 255, 0.25);
             color: white;
@@ -156,8 +161,22 @@
             border-radius: 0.5rem;
             overflow: hidden;
         }
-.linkbutton{position:relative;margin-top:-2px;margin-bottom:-2px;height:0px;display:flex;flex-flow:row;justify-content: flex-end;}
-.linkbutton>img{margin-right:150px;margin-top:-15px;}
+
+        .linkbutton {
+            position: relative;
+            margin-top: -2px;
+            margin-bottom: -2px;
+            height: 0px;
+            display: flex;
+            flex-flow: row;
+            justify-content: flex-end;
+        }
+
+        .linkbutton>img {
+            margin-right: 150px;
+            margin-top: -15px;
+        }
+
         textarea {
             border: unset !important;
             padding: 0.5rem;
@@ -189,7 +208,7 @@
                     <select id="joint-selector">
                     </select>
                 </div>
-                
+
                 <div class="inputrow">
                     <label for="joint-position-xyz">Position (XYZ):</label>
                     <input type="text" id="joint-position-xyz" placeholder="x y z" oninput="syncInputs('position')">
@@ -197,9 +216,10 @@
 
                 <div class="linkbutton">
                     <input type="checkbox" id="link-toggle" style="display: none;" />
-                    <img src="../example/unlinked.svg" alt="Linked" id="link-img" onclick="toggleLink()" style="cursor: pointer;">
+                    <img src="../example/unlinked.svg" alt="Linked" id="link-img" onclick="toggleLink()"
+                        style="cursor: pointer;">
                 </div>
-                
+
                 <div class="inputrow">
                     <label for="joint-origin-xyz">Origin (XYZ):</label>
                     <input type="text" id="joint-origin-xyz" placeholder="x y z" oninput="syncInputs('origin')">
@@ -371,33 +391,33 @@
             URL.revokeObjectURL(url);
         }
         function toggleLink() {
-    const checkbox = document.getElementById('link-toggle');
-    const linkImage = document.getElementById('link-img');
+            const checkbox = document.getElementById('link-toggle');
+            const linkImage = document.getElementById('link-img');
 
-    checkbox.checked = !checkbox.checked; // Toggle the checkbox state
+            checkbox.checked = !checkbox.checked; // Toggle the checkbox state
 
-    // Change the image source based on whether the box is checked
-    if (checkbox.checked) {
-        linkImage.src = '../example/linked.svg'; // Path to the linked image
-        linkImage.alt = 'Linked';
-    } else {
-        linkImage.src = '../example/unlinked.svg'; // Path to the unlinked image
-        linkImage.alt = 'Unlinked';
-    }
-}
-function syncInputs(source) {
-    const linkToggle = document.getElementById('link-toggle');
-    if (!linkToggle.checked) {
-        return;
-    }
+            // Change the image source based on whether the box is checked
+            if (checkbox.checked) {
+                linkImage.src = '../example/linked.svg'; // Path to the linked image
+                linkImage.alt = 'Linked';
+            } else {
+                linkImage.src = '../example/unlinked.svg'; // Path to the unlinked image
+                linkImage.alt = 'Unlinked';
+            }
+        }
+        function syncInputs(source) {
+            const linkToggle = document.getElementById('link-toggle');
+            if (!linkToggle.checked) {
+                return;
+            }
 
-    const positionInput = document.getElementById('joint-position-xyz');
-    const originInput = document.getElementById('joint-origin-xyz');
-    const sourceInput = source === 'position' ? positionInput : originInput;
-    const targetInput = source === 'position' ? originInput : positionInput;
+            const positionInput = document.getElementById('joint-position-xyz');
+            const originInput = document.getElementById('joint-origin-xyz');
+            const sourceInput = source === 'position' ? positionInput : originInput;
+            const targetInput = source === 'position' ? originInput : positionInput;
 
-    targetInput.value = sourceInput.value;
-}
+            targetInput.value = sourceInput.value;
+        }
 
 
     </script>
@@ -420,6 +440,7 @@ function syncInputs(source) {
             }
         */
         // Function to update the URDF content based on joint changes
+        
         function updateJointProperties() {
             const jointName = document.getElementById('joint-selector').value;
             const originXYZ = document.getElementById('joint-origin-xyz').value;
@@ -453,7 +474,7 @@ function syncInputs(source) {
             }
         }
 
-      
+
     </script>
 
 
@@ -573,6 +594,8 @@ function syncInputs(source) {
             }
         }
 
+
+
         function refreshScene() {
             if (viewer && typeof viewer.updateScene === 'function') {
                 viewer.updateScene(); // Assuming your viewer has an 'updateScene' method
@@ -594,24 +617,27 @@ function syncInputs(source) {
             const jointSelector = document.getElementById('joint-selector');
             const jointName = jointSelector.value;
 
+
             if (viewer && viewer.robot && viewer.robot.joints[jointName]) {
                 const joint = viewer.robot.joints[jointName];
-                const jointNameSaved = jointName;
+                const euler = new THREE.Euler().setFromQuaternion(joint.origQuaternion, 'XYZ');
+                const rpy = [euler.x, euler.y, euler.z].map(r => (r * 180 / Math.PI).toFixed(2));
+                console.log(joint);
 
-                document.getElementById('joint-selection-save').value = jointNameSaved;
-
-                // Assuming that joint.origin, joint.origQuaternion, and joint.position are available
                 document.getElementById('joint-origin-xyz').value = joint.origPosition.toArray().join(' ');
-                //document.getElementById('joint-origin-rpy').value = (new THREE.Euler().setFromQuaternion(joint.origQuaternion, 'XYZ')).toArray().map(r => (r * 180 / Math.PI).toFixed(2));
+                document.getElementById('joint-origin-rpy').value = rpy.join(' ');
                 document.getElementById('joint-position-xyz').value = joint.position.toArray().join(' ');
-                //document.getElementById('joint-axis-xyz').value = joint.axis.toArray().join(' ');
+                document.getElementById('joint-axis-xyz').value = [joint.axis.x, joint.axis.y, joint.axis.z].map(x => x.toFixed(2)).join(' ');
                 document.getElementById('joint-lower-limit').value = (joint.limit.lower * 180 / Math.PI).toFixed(2);
                 document.getElementById('joint-upper-limit').value = (joint.limit.upper * 180 / Math.PI).toFixed(2);
             } else {
                 console.error("Joint not found or viewer not initialized properly.");
+                document.getElementById('joint-axis-xyz').value = "0.00 0.00 0.00"; // Default or placeholder value if axis is undefined
             }
-            console.log('loaded', jointName);
+            console.log('Loaded joint details for:', jointName);
+            
         }
+
 
         function populateJointNames() {
             const jointSelector = document.getElementById('joint-selector');
@@ -624,7 +650,7 @@ function syncInputs(source) {
                     jointSelector.appendChild(option);
 
                 });
-                loadJointDetails(); // Load details of the first joint
+                //loadJointDetails(); // Load details of the first joint
             }
             console.log('populated');
         }
