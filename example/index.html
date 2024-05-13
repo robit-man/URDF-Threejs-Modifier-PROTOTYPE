@@ -129,7 +129,7 @@
             font-weight: bold !important;
         }
 
-
+        #link-img{height:24px;width:24px;filter:invert(1);}
         button {
             background: rgba(255, 255, 255, 0.25);
             color: white;
@@ -156,7 +156,8 @@
             border-radius: 0.5rem;
             overflow: hidden;
         }
-
+.linkbutton{position:relative;margin-top:-2px;margin-bottom:-2px;height:0px;display:flex;flex-flow:row;justify-content: flex-end;}
+.linkbutton>img{margin-right:150px;margin-top:-15px;}
         textarea {
             border: unset !important;
             padding: 0.5rem;
@@ -188,14 +189,20 @@
                     <select id="joint-selector">
                     </select>
                 </div>
-
+                
                 <div class="inputrow">
                     <label for="joint-position-xyz">Position (XYZ):</label>
-                    <input type="text" id="joint-position-xyz" placeholder="x y z">
+                    <input type="text" id="joint-position-xyz" placeholder="x y z" oninput="syncInputs('position')">
                 </div>
+
+                <div class="linkbutton">
+                    <input type="checkbox" id="link-toggle" style="display: none;" />
+                    <img src="../example/unlinked.svg" alt="Linked" id="link-img" onclick="toggleLink()" style="cursor: pointer;">
+                </div>
+                
                 <div class="inputrow">
                     <label for="joint-origin-xyz">Origin (XYZ):</label>
-                    <input type="text" id="joint-origin-xyz" placeholder="x y z">
+                    <input type="text" id="joint-origin-xyz" placeholder="x y z" oninput="syncInputs('origin')">
                 </div>
                 <div class="inputrow">
                     <label for="joint-origin-rpy">Rotation (RPY):</label>
@@ -363,6 +370,36 @@
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
         }
+        function toggleLink() {
+    const checkbox = document.getElementById('link-toggle');
+    const linkImage = document.getElementById('link-img');
+
+    checkbox.checked = !checkbox.checked; // Toggle the checkbox state
+
+    // Change the image source based on whether the box is checked
+    if (checkbox.checked) {
+        linkImage.src = '../example/linked.svg'; // Path to the linked image
+        linkImage.alt = 'Linked';
+    } else {
+        linkImage.src = '../example/unlinked.svg'; // Path to the unlinked image
+        linkImage.alt = 'Unlinked';
+    }
+}
+function syncInputs(source) {
+    const linkToggle = document.getElementById('link-toggle');
+    if (!linkToggle.checked) {
+        return;
+    }
+
+    const positionInput = document.getElementById('joint-position-xyz');
+    const originInput = document.getElementById('joint-origin-xyz');
+    const sourceInput = source === 'position' ? positionInput : originInput;
+    const targetInput = source === 'position' ? originInput : positionInput;
+
+    targetInput.value = sourceInput.value;
+}
+
+
     </script>
 
 
