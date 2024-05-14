@@ -435,6 +435,8 @@
                     joint.appendChild(limit);
                 }
 
+                
+
                 // Set attributes
                 origin.setAttribute('xyz', originXYZ);
                 origin.setAttribute('rpy', originRPY);
@@ -457,8 +459,8 @@
                 const meshIndex = link.children.findIndex(child => child instanceof THREE.Mesh);
                 const linkValues = link.children[meshIndex];
 
-                const visualOriginXYZ = document.getElementById('visual-origin-xyz').value.split(' ').map(Number);
-                const visualOriginRPY = document.getElementById('visual-origin-rpy').value.split(' ').map(v => parseFloat(v) * Math.PI / 180);
+                const visualOriginXYZ = document.getElementById('visual-origin-xyz').value;
+                const visualOriginRPY = document.getElementById('visual-origin-rpy').value;
 
                 // Access the joint element in the URDF XML
                 const linkUrdf = urdfDoc.querySelector(`link[name="${linkName}"]`);

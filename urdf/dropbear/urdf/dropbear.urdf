@@ -172,7 +172,7 @@
 <!-- Right Hip-Pitch Knee Front and Rear Brackets -->
 <link name="right_hip_pitch_knee_front_bracket">
     <visual>
-<origin xyz="0 0 0" rpy="0 0 0"/>
+<origin xyz="5.8 1.3 -14" rpy="0 0 0"/>
         <geometry>
             <mesh filename="../meshes/rightHipPitchKneeFrontBracket.stl" scale="0.05 0.05 0.05"/>
         </geometry>
@@ -181,9 +181,9 @@
 <joint name="right_hip_pitch_to_front_bracket_joint" type="revolute">
     <parent link="right_hip_pitch_knee_motors"/>
     <child link="right_hip_pitch_knee_front_bracket"/>
-    <origin xyz="10 3.5 -9" rpy="0 0 0"/>
-    <axis xyz="0 0 1"/>
-    <limit lower="-969909733.7" upper="969909733.7" effort="0" velocity="0"/>
+    <origin xyz="7 3.5 0" rpy="0 0 0"/>
+    <axis xyz="0 0 1.0"/>
+    <limit lower="-55571734249.7" upper="55571734249.7" effort="0" velocity="0"/>
 </joint>
 
 <link name="right_hip_pitch_knee_rear_bracket">
@@ -208,9 +208,9 @@
 <joint name="right_knee_primary_hanger_joint" type="revolute">
     <parent link="right_hip_pitch_knee_front_bracket"/>
     <child link="right_knee_primary_hanger"/>
-    <origin xyz="-5.5 -17 13" rpy="0 0 0"/>
+    <origin xyz="-5.5 -17 0" rpy="0 0 0"/>
     <axis xyz="0 0 1.0"/>
-    <limit lower="-45" upper="45" effort="0" velocity="0"/>
+    <limit lower="-147725.7" upper="147725.7" effort="0" velocity="0"/>
 </joint>
 
 <!-- Right Calf -->
