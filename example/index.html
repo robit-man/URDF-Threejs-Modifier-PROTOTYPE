@@ -93,7 +93,7 @@
 
         }
 
-        #joint-selection-save {
+        #joint-selection-save, #link-selection-save {
             background: white;
             text-align: center;
             color: black;
@@ -247,6 +247,9 @@
 
 
 
+                <div class="inputrow">
+                    <input type="text" id="link-selection-save" placeholder="x y z">
+                </div>
                 <div class="inputrow">
                     <label for="link-selector">Link:</label>
                     <select id="link-selector"></select>
@@ -574,7 +577,7 @@
         }
 
         function updateLinkVisualProperties() {
-            const linkName = document.getElementById('link-selector').value; // Ensure you have a way to select links
+            const linkName = document.getElementById('link-selection-save').value; // Ensure you have a way to select links
             const visualOriginXYZ = document.getElementById('visual-origin-xyz').value.split(' ').map(Number);
             const visualOriginRPY = document.getElementById('visual-origin-rpy').value.split(' ').map(v => parseFloat(v) * Math.PI / 180);
 
@@ -639,8 +642,12 @@
         function loadLinkDetails() {
             const linkSelector = document.getElementById('link-selector');
             const linkName = linkSelector.value;
-
             const link = viewer.robot.links[linkName];
+
+            if (viewer && viewer.robot && link.children[0]) {
+                document.getElementById('link-selection-save').value = linkName;
+
+            }
             if (link.children[0].quaternion) {
                 const euler = new THREE.Euler().setFromQuaternion(link.children[0].quaternion, 'XYZ');
                 const rpy = [euler.x, euler.y, euler.z].map(r => (r * 180 / Math.PI).toFixed(dynamicPrecision(r * 180 / Math.PI)));
