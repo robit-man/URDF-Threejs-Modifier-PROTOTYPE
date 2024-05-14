@@ -244,6 +244,25 @@
                     <label for="joint-upper-limit">Upper Limit:</label>
                     <input type="number" id="joint-upper-limit" step="0.01">
                 </div>
+
+
+
+                <div class="inputrow">
+                    <label for="link-selector">Link:</label>
+                    <select id="link-selector"></select>
+                </div>
+                <div class="inputrow">
+                    <label for="visual-origin-xyz">Visual Origin (XYZ):</label>
+                    <input type="text" id="visual-origin-xyz" placeholder="x y z">
+                </div>
+                <div class="inputrow">
+                    <label for="visual-origin-rpy">Visual Rotation (RPY):</label>
+                    <input type="text" id="visual-origin-rpy" placeholder="roll pitch yaw">
+                </div>
+
+
+                <button onclick="updateLinkProperties()">Update Link</button>
+
                 <div class="buttonrow">
                     <button onclick="updateJointProperties()">Update Joint</button>
                     <button id="update-urdf-btn" onclick="updateURDF()">Update URDF</button>
@@ -284,6 +303,7 @@
 
     <script src="../example/index.js"></script>
     <script src="../example/dragAndDrop.js"></script>
+
     <script>
         let urdfDoc;  // To hold the parsed URDF document
 
@@ -315,6 +335,7 @@
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
         }
+
         function toggleLink() {
             const checkbox = document.getElementById('link-toggle');
             const linkImage = document.getElementById('link-img');
@@ -393,6 +414,47 @@
             document.getElementById('urdf-editor').value = updatedURDF;
         }
 
+        function updateLinkVisualProperties() {
+            const linkName = document.getElementById('link-selector').value; // Ensure you have a way to select links
+            const visualOriginXYZ = document.getElementById('visual-origin-xyz').value;
+            const visualOriginRPY = document.getElementById('visual-origin-rpy').value;
+
+            // Find the link in the URDF XML
+            const link = urdfDoc.querySelector(`link[name="${linkName}"]`);
+            if (link) {
+                // Set new attributes or create the origin element if it does not exist
+                let origin = link.querySelector('origin');
+                if (!origin) {
+                    origin = urdfDoc.createElement('origin');
+                    link.appendChild(origin);
+                }
+                origin.setAttribute('xyz', visualOriginXYZ);
+                origin.setAttribute('rpy', visualOriginRPY);
+            } else {
+                console.error("Link not found in the URDF:", linkName);
+            }
+
+            // Serialize and update the textarea
+            const serializer = new XMLSerializer();
+            document.getElementById('urdf-editor').value = serializer.serializeToString(urdfDoc);
+        }
+
+        // Ensure this function is called appropriately, perhaps on a button click or after input changes
+
+        // Function to populate link options
+        function populateLinkNames() {
+            const linkSelector = document.getElementById('link-selector');
+            if (viewer && viewer.robot) {
+                linkSelector.innerHTML = ''; // Clear existing options
+                Object.keys(viewer.robot.links).forEach(linkName => {
+                    const option = document.createElement('option');
+                    option.value = linkName;
+                    option.textContent = linkName;
+                    linkSelector.appendChild(option);
+                });
+            }
+        }
+
         function updateURDFContent(newURDF) {
             if (!newURDF || this.getAttribute('urdf') === newURDF) return;
 
@@ -401,12 +463,30 @@
             this._loadUrdf(this.package, newURDF);
         }
         function applyURDF() {
-            const updatedURDF = document.getElementById('urdf-editor').value; // Assume 'urdf-editor' is your textarea ID
-            if (viewer && updatedURDF) {
-                viewer.setURDF(updatedURDF); // Assuming there's a method to directly set URDF
-                viewer.dispatchEvent(new Event('urdf-change'));
+            const updatedURDFText = document.getElementById('urdf-editor').value; // Get URDF string from textarea
+            if (viewer && updatedURDFText) {
+                // Parse the new URDF text to a DOM object
+                const parser = new DOMParser();
+                const urdfDOM = parser.parseFromString(updatedURDFText, "text/xml");
+
+                // Serialize the DOM back to a string
+                const serializer = new XMLSerializer();
+                const urdfString = serializer.serializeToString(urdfDOM);
+
+                // Assuming you have a function in your URDF loader to set and reload URDF from string
+                viewer.setURDFFromString(urdfString);  // You might need to implement this in your URDF viewer component
+                viewer.dispatchEvent(new Event('urdf-change'));  // Notify the viewer of the change
             }
         }
+        URDFViewer.prototype.setURDFFromString = function (urdfString) {
+            const loader = new URDFLoader(this.manager);  // Assuming you have a loading manager
+            const urdfRobot = loader.parse(urdfString);  // Parse the URDF string
+            this.scene.add(urdfRobot);  // Add the parsed robot to the scene
+            this.recenter();  // Recenter the view, if necessary
+            this.redraw();  // Redraw the viewer
+        };
+
+
 
 
         // Function to initialize event listeners once the document is ready
@@ -648,7 +728,13 @@
             console.log('Loaded joint details for:', jointName);
         }
 
-
+        function loadLinkDetails() {
+            const linkName = document.getElementById('link-selector').value;
+            const link = urdfDoc.querySelector(`link[name="${linkName}"]`);
+            const origin = link.querySelector('origin');
+            document.getElementById('link-origin-xyz').value = origin ? origin.getAttribute('xyz') : '0 0 0';
+            document.getElementById('link-origin-rpy').value = origin ? origin.getAttribute('rpy') : '0 0 0';
+        }
 
         function populateJointNames() {
             const jointSelector = document.getElementById('joint-selector');
@@ -693,9 +779,14 @@
         document.addEventListener('DOMContentLoaded', () => {
             // Assuming URDFViewer is already initialized and populated with the robot model
             setTimeout(() => {
+
                 populateJointNames();
-                /* document.getElementById('joint-selector').addEventListener('manipulate-start', loadJointDetails);
- */    // Add event listener for when the selected joint changes
+                populateLinkNames();
+
+                document.getElementById('link-selector').addEventListener('change', function () {
+                    loadLinkDetails(); // Load details of the selected link into input fields
+                });
+
                 document.getElementById('joint-selector').addEventListener('change', function () {
                     loadJointDetails(); // Load the details of the selected joint into the input fields
                 });
@@ -706,6 +797,8 @@
                         const jointSelector = document.getElementById('joint-selector');
                         jointSelector.value = jointName;
                         loadJointDetails(); // Load the details of the clicked joint into the input fields
+
+
                     });
                 }
             }, 2000); // Ensure URDF data is loaded and delay to setup the event listener

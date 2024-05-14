@@ -146,6 +146,7 @@
 <!-- Right Hip-Pitch Knee Motors -->
 <link name="right_hip_pitch_knee_motors">
     <visual>
+    <origin xyz="0 3 3" rpy="0 0 0"/>
         <geometry>
             <mesh filename="../meshes/rightHipPitchKneeMotors.stl" scale="0.05 0.05 0.05"/>
         </geometry>
@@ -235,7 +236,6 @@
 <link name="right_foot">
     <visual>
              <origin xyz="0 20 0" rpy="0 0 0" />
-
         <geometry>
             <mesh filename="../meshes/foot.stl" scale="0.05 0.05 0.05"/>
         </geometry>
