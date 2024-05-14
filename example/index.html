@@ -264,12 +264,16 @@
                     <input type="text" id="visual-origin-rpy" placeholder="roll pitch yaw">
                 </div>
 
+                <div class="buttonrow">
 
-                <button onclick="updateLinkVisualProperties()">Update Link</button>
+                    <button onclick="updateLinkVisualProperties()">Update Link</button>
+                    <button id="update-urdf-link-btn" onclick="updateURDF('link')">Link To URDF</button>
+
+                </div>
 
                 <div class="buttonrow">
                     <button onclick="updateJointProperties()">Update Joint</button>
-                    <button id="update-urdf-btn" onclick="updateURDF()">Update URDF</button>
+                    <button id="update-urdf-joint-btn" onclick="updateURDF('joint')">Joint To URDF</button>
 
                 </div>
             </div>
@@ -384,53 +388,98 @@
             targetInput.value = sourceInput.value;
         }
 
-        function updateURDF() {
-            const jointName = document.getElementById('joint-selection-save').value;
-            const originXYZ = document.getElementById('joint-origin-xyz').value;
-            const originRPY = document.getElementById('joint-origin-rpy').value;
-            const axisXYZ = document.getElementById('joint-axis-xyz').value;
-            const lowerLimit = document.getElementById('joint-lower-limit').value;
-            const upperLimit = document.getElementById('joint-upper-limit').value;
+        function updateURDF(type) {
 
-            // Access the joint element in the URDF XML
-            const joint = urdfDoc.querySelector(`joint[name="${jointName}"]`);
-            if (!joint) {
-                console.error("Joint not found in the URDF:", jointName);
-                return;
+            if (type = 'joint') {
+
+                const jointName = document.getElementById('joint-selection-save').value;
+                const originXYZ = document.getElementById('joint-origin-xyz').value;
+                const originRPY = document.getElementById('joint-origin-rpy').value;
+                const axisXYZ = document.getElementById('joint-axis-xyz').value;
+                const lowerLimit = document.getElementById('joint-lower-limit').value;
+                const upperLimit = document.getElementById('joint-upper-limit').value;
+
+                // Access the joint element in the URDF XML
+                const joint = urdfDoc.querySelector(`joint[name="${jointName}"]`);
+
+                if (!joint) {
+                    console.error("Joint not found in the URDF:", jointName);
+                    return;
+                }
+
+                // Ensure the 'origin' element exists or create it if not
+                let origin = joint.querySelector('origin');
+                if (!origin) {
+                    origin = urdfDoc.createElement('origin');
+                    joint.appendChild(origin);
+                }
+
+                // Ensure the 'axis' element exists or create it if not
+                let axis = joint.querySelector('axis');
+                if (!axis) {
+                    axis = urdfDoc.createElement('axis');
+                    joint.appendChild(axis);
+                }
+
+                // Ensure the 'limit' element exists or create it if not
+                let limit = joint.querySelector('limit');
+                if (!limit) {
+                    limit = urdfDoc.createElement('limit');
+                    joint.appendChild(limit);
+                }
+
+                // Set attributes
+                origin.setAttribute('xyz', originXYZ);
+                origin.setAttribute('rpy', originRPY);
+                axis.setAttribute('xyz', axisXYZ);
+                limit.setAttribute('lower', lowerLimit);
+                limit.setAttribute('upper', upperLimit);
+
+                // Serialize and update the textarea
+                const serializer = new XMLSerializer();
+                const updatedURDF = serializer.serializeToString(urdfDoc);
+                document.getElementById('urdf-editor').value = updatedURDF;
             }
 
-            // Ensure the 'origin' element exists or create it if not
-            let origin = joint.querySelector('origin');
-            if (!origin) {
-                origin = urdfDoc.createElement('origin');
-                joint.appendChild(origin);
+            if (type = 'link') {
+
+
+                const linkName = document.getElementById('link-selection-save').value; // Ensure you have a way to select links
+                const link = viewer.robot.links[linkName];
+
+                const meshIndex = link.children.findIndex(child => child instanceof THREE.Mesh);
+                const linkValues = link.children[meshIndex];
+
+                const visualOriginXYZ = document.getElementById('visual-origin-xyz').value.split(' ').map(Number);
+                const visualOriginRPY = document.getElementById('visual-origin-rpy').value.split(' ').map(v => parseFloat(v) * Math.PI / 180);
+
+                // Access the joint element in the URDF XML
+                const linkUrdf = urdfDoc.querySelector(`link[name="${linkName}"]`);
+
+                if (!linkUrdf) {
+                    console.error("Link not found in the URDF:", linkName);
+                    return;
+                }
+
+                // Ensure the 'origin' element exists or create it if not
+                let origin = linkUrdf.querySelector('origin');
+                if (!origin) {
+                    origin = urdfDoc.createElement('origin');
+                    linkUrdf.appendChild(origin);
+                }
+
+
+                // Set attributes
+                origin.setAttribute('xyz', visualOriginXYZ);
+                origin.setAttribute('rpy', visualOriginRPY);
+
+                // Serialize and update the textarea
+                const serializer = new XMLSerializer();
+                const updatedURDF = serializer.serializeToString(urdfDoc);
+                document.getElementById('urdf-editor').value = updatedURDF;
             }
 
-            // Ensure the 'axis' element exists or create it if not
-            let axis = joint.querySelector('axis');
-            if (!axis) {
-                axis = urdfDoc.createElement('axis');
-                joint.appendChild(axis);
-            }
 
-            // Ensure the 'limit' element exists or create it if not
-            let limit = joint.querySelector('limit');
-            if (!limit) {
-                limit = urdfDoc.createElement('limit');
-                joint.appendChild(limit);
-            }
-
-            // Set attributes
-            origin.setAttribute('xyz', originXYZ);
-            origin.setAttribute('rpy', originRPY);
-            axis.setAttribute('xyz', axisXYZ);
-            limit.setAttribute('lower', lowerLimit);
-            limit.setAttribute('upper', upperLimit);
-
-            // Serialize and update the textarea
-            const serializer = new XMLSerializer();
-            const updatedURDF = serializer.serializeToString(urdfDoc);
-            document.getElementById('urdf-editor').value = updatedURDF;
         }
 
 
@@ -471,7 +520,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('edit-urdf-btn').addEventListener('click', editURDF);
             document.getElementById('save-urdf-btn').addEventListener('click', saveURDF);
-            document.getElementById('update-urdf-btn').addEventListener('click', updateURDF);
+            document.getElementById('update-urdf-joint-btn').addEventListener('click', updateURDF);
             document.getElementById('apply-urdf-btn').addEventListener('click', applyURDF);
             setTimeout(() => {
                 populateJointNames();
