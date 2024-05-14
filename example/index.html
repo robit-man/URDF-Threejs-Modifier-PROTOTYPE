@@ -88,8 +88,9 @@
             padding: 1rem;
             border-radius: 1rem;
             overflow-y: auto;
-            max-height: calc(100vh - 4rem);
+            max-height: calc(100vh - 5rem);
             margin-top: unset !important;
+            width: calc(100% - 4rem);
 
         }
 
@@ -134,6 +135,12 @@
             height: 24px;
             width: 24px;
             filter: invert(1);
+        }
+
+        #menu {
+            overflow-y: auto;
+            overflow-x: visible;
+            width: auto;
         }
 
         button {
@@ -216,7 +223,7 @@
                 </div>
 
                 <div class="linkbutton">
-                    <input type="checkbox" id="link-toggle"  style="display: none;" checked />
+                    <input type="checkbox" id="link-toggle" style="display: none;" checked />
                     <img src="../example/linked.svg" alt="Linked" id="link-img" onclick="toggleLink()"
                         style="cursor: pointer;">
                 </div>
@@ -247,6 +254,11 @@
                 </div>
 
 
+                <div class="buttonrow">
+                    <button onclick="updateJointProperties()">Update Joint</button>
+                    <button id="update-urdf-joint-btn" onclick="updateURDF('joint')">Joint To URDF</button>
+
+                </div>
 
                 <div class="inputrow">
                     <input type="text" id="link-selection-save" placeholder="x y z">
@@ -271,11 +283,6 @@
 
                 </div>
 
-                <div class="buttonrow">
-                    <button onclick="updateJointProperties()">Update Joint</button>
-                    <button id="update-urdf-joint-btn" onclick="updateURDF('joint')">Joint To URDF</button>
-
-                </div>
             </div>
             <div class="urdf-editor">
                 <textarea id="urdf-editor" style="width: 100%; height: 200px;"></textarea>
@@ -747,7 +754,7 @@
             } else {
                 console.error("Joint not found or viewer not initialized properly.");
             }
-            console.log('Loaded joint details for:', jointName);
+            //console.log('Loaded joint details for:', jointName);
         }
 
         function populateJointNames() {
@@ -760,7 +767,7 @@
                     option.textContent = jointName;
                     jointSelector.appendChild(option);
                 });
-                console.log('populated');
+                console.log('populated joint list');
             }
         }
 
@@ -774,8 +781,13 @@
                     option.textContent = linkName;
                     linkSelector.appendChild(option);
                 });
+                console.log('populated link list');
+
             }
         }
+
+
+
 
         document.addEventListener('DOMContentLoaded', () => {
             // Assuming URDFViewer is already initialized and populated with the robot model

@@ -2121,7 +2121,11 @@
           parent.add(obj);
           obj.add(child);
           applyRotation(obj, rpy);
-          obj.position.set(xyz[0], xyz[1], xyz[2]); // Set up the rotate function
+          obj.position.set(xyz[0], xyz[1], xyz[2]); // Add AxesHelper
+
+          var jointAxesHelper = new THREE.AxesHelper(0.5); // Customize size as needed
+
+          obj.add(jointAxesHelper); // Set up the rotate function
 
           var axisNode = children.filter(function (n) {
             return n.nodeName.toLowerCase() === 'axis';
@@ -2169,8 +2173,12 @@
             collisionNodes.forEach(function (vn) {
               return processLinkElement.call(_this4, vn, target);
             });
-          }
+          } // Add AxesHelper
 
+
+          var linkAxesHelper = new THREE.AxesHelper(0.5); // Customize size as needed
+
+          target.add(linkAxesHelper);
           return target;
         }
 

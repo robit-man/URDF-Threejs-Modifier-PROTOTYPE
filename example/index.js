@@ -61,7 +61,7 @@ viewer.addEventListener('joint-mouseover', e => {
     const meshIndex = linkChild.children.findIndex(child => child instanceof THREE.Mesh);
     const linkValues = linkChild.children[meshIndex];
     const linkName = linkChild.name;
-    console.log(linkChild.name);
+    //console.log(linkChild.name);
     if (j) {
         j.setAttribute('robot-hovered', true);
     }

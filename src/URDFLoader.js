@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { AxesHelper } from 'three';
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
 import { ColladaLoader } from 'three/examples/jsm/loaders/ColladaLoader.js';
 import { URDFRobot, URDFJoint, URDFLink, makeURDFCollider } from './URDFClasses.js';
@@ -55,7 +56,7 @@ function applyRotation(obj, rpy, additive = false) {
 /* URDFLoader Class */
 // Loads and reads a URDF file into a THREEjs Object3D format
 export default
-class URDFLoader {
+    class URDFLoader {
 
     constructor(manager, allowMeshBVH = false) {
 
@@ -78,9 +79,9 @@ class URDFLoader {
 
         const errors = {};
 
-        let managerOnErrorDefault = function() {};
-        let managerOnProgressDefault = function() {};
-        let managerOnLoadDefault = function() {};
+        let managerOnErrorDefault = function () { };
+        let managerOnProgressDefault = function () { };
+        let managerOnLoadDefault = function () { };
         let model;
 
         if (manager.onError) {
@@ -102,7 +103,7 @@ class URDFLoader {
         }
 
         const that = this;
-        manager.onError = function(url) {
+        manager.onError = function (url) {
 
             errors[url] = 'Error in loading resource';
 
@@ -119,7 +120,7 @@ class URDFLoader {
 
         };
 
-        manager.onProgress = function(url, itemsLoaded, itemsTotal) {
+        manager.onProgress = function (url, itemsLoaded, itemsTotal) {
 
             if (onProgress) {
 
@@ -131,7 +132,7 @@ class URDFLoader {
 
         };
 
-        manager.onLoad = function() {
+        manager.onLoad = function () {
 
             if (onComplete) {
 
@@ -219,7 +220,7 @@ class URDFLoader {
 
                 } else {
 
-                    console.error(`URDFLoader : ${ targetPkg } not found in provided package list.`);
+                    console.error(`URDFLoader : ${targetPkg} not found in provided package list.`);
                     return null;
 
                 }
@@ -233,19 +234,19 @@ class URDFLoader {
 
             const parser = new DOMParser();
             const urdf = parser.parseFromString(data, 'text/xml');
-            const children = [ ...urdf.children ];
+            const children = [...urdf.children];
 
             const robotNode = children.filter(c => c.nodeName === 'robot').pop();
             return processRobot.call(this, robotNode);
 
         };
 
-        
+
 
         // Process the <robot> node
         function processRobot(robot) {
 
-            const robotNodes = [ ...robot.children ];
+            const robotNodes = [...robot.children];
             const links = robotNodes.filter(c => c.nodeName.toLowerCase() === 'link');
             const joints = robotNodes.filter(c => c.nodeName.toLowerCase() === 'joint');
             const materials = robotNodes.filter(c => c.nodeName.toLowerCase() === 'material');
@@ -266,7 +267,7 @@ class URDFLoader {
             links.forEach(l => {
 
                 const name = l.getAttribute('name');
-                const isRoot = robot.querySelector(`child[link="${ name }"]`) === null;
+                const isRoot = robot.querySelector(`child[link="${name}"]`) === null;
                 linkMap[name] = processLink.call(this, l, isRoot ? obj : null);
 
             });
@@ -289,7 +290,7 @@ class URDFLoader {
         // Process joint nodes and parent them
         function processJoint(joint) {
 
-            const children = [ ...joint.children ];
+            const children = [...joint.children];
             const jointType = joint.getAttribute('type');
             const obj = new URDFJoint();
             obj.urdfNode = joint;
@@ -333,6 +334,11 @@ class URDFLoader {
             applyRotation(obj, rpy);
             obj.position.set(xyz[0], xyz[1], xyz[2]);
 
+
+            // Add AxesHelper
+            const jointAxesHelper = new AxesHelper(0.5); // Customize size as needed
+            obj.add(jointAxesHelper);
+
             // Set up the rotate function
             const axisNode = children.filter(n => n.nodeName.toLowerCase() === 'axis')[0];
 
@@ -357,7 +363,7 @@ class URDFLoader {
 
             }
 
-            const children = [ ...link.children ];
+            const children = [...link.children];
             target.name = link.getAttribute('name');
             target.urdfNode = link;
 
@@ -369,6 +375,9 @@ class URDFLoader {
                 const collisionNodes = children.filter(n => n.nodeName.toLowerCase() === 'collision');
                 collisionNodes.forEach(vn => processLinkElement.call(this, vn, target));
             }
+            // Add AxesHelper
+            const linkAxesHelper = new AxesHelper(0.5); // Customize size as needed
+            target.add(linkAxesHelper);
 
             return target;
 
@@ -376,7 +385,7 @@ class URDFLoader {
 
         function processMaterial(node) {
 
-            const matNodes = [ ...node.children ];
+            const matNodes = [...node.children];
             const material = new THREE.MeshPhongMaterial();
 
             material.name = node.getAttribute('name') || '';
@@ -420,7 +429,7 @@ class URDFLoader {
             let rpy = [0, 0, 0];
             let scale = [1, 1, 1];
 
-            const children = [ ...vn.children ];
+            const children = [...vn.children];
             let material = null;
             let primitiveModel = null;
 
@@ -621,7 +630,7 @@ class URDFLoader {
 
         } else {
 
-            console.warn(`URDFLoader: Could not load model at ${ path }.\nNo loader available`);
+            console.warn(`URDFLoader: Could not load model at ${path}.\nNo loader available`);
 
         }
 
@@ -629,7 +638,7 @@ class URDFLoader {
 
 };
 // Add or modify URDFJoint to handle updates more dynamically
-URDFJoint.prototype.updateProperties = function(params) {
+URDFJoint.prototype.updateProperties = function (params) {
     if (params.origin) {
         this.origin.set(...params.origin.xyz);
         const euler = new THREE.Euler(...params.origin.rpy, 'XYZ');
@@ -647,7 +656,7 @@ URDFJoint.prototype.updateProperties = function(params) {
     this.updateTransform();
 }
 
-URDFJoint.prototype.updateTransform = function() {
+URDFJoint.prototype.updateTransform = function () {
     // Apply new position and rotation
     this.position.set(...this.origin.toArray());
     this.quaternion.copy(this.origQuaternion);
@@ -674,7 +683,7 @@ function refreshScene() {
 // Assuming URDFLoader, URDFRobot, and URDFJoint are already defined elsewhere in your script
 
 /* Add update joint functionality to URDFRobot */
-URDFRobot.prototype.updateJoint = function(jointName, params) {
+URDFRobot.prototype.updateJoint = function (jointName, params) {
     const joint = this.joints[jointName];
     if (joint) {
         // Update joint parameters like origin, axis, limits, etc.
@@ -694,7 +703,7 @@ URDFRobot.prototype.updateJoint = function(jointName, params) {
 };
 
 /* Method to refresh the visual scene, to be defined based on how you're managing your THREE.js scene */
-URDFRobot.prototype.refreshScene = function() {
+URDFRobot.prototype.refreshScene = function () {
     // Implementation depends on how the scene is managed, but you would typically mark the scene or object for update
     // For example:
     if (this.mesh) {
@@ -705,7 +714,7 @@ URDFRobot.prototype.refreshScene = function() {
     render(); // This function would need to be defined in your global scope or passed in
 };
 // Extend URDFLoader to handle scene updates
-URDFLoader.prototype.applyUpdates = function() {
+URDFLoader.prototype.applyUpdates = function () {
     // This could be a method to apply pending updates or simply refresh parts of the model
     if (window.model) {
         window.model.refreshScene();
