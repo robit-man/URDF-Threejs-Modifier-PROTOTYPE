@@ -93,7 +93,8 @@
 
         }
 
-        #joint-selection-save, #link-selection-save {
+        #joint-selection-save,
+        #link-selection-save {
             background: white;
             text-align: center;
             color: black;
@@ -310,19 +311,32 @@
     <script>
         /* eslint-disable */
         /* globals viewer */
-        let urdfDoc;  // To hold the parsed URDF document
+        /* eslint-disable */
+        /* globals viewer */
 
-        // Function to fetch and edit the current URDF
-        function editURDF() {
-            const urdfContent = viewer.urdf;
-            fetch(urdfContent)
-                .then(response => response.text())
-                .then(data => {
-                    document.getElementById('urdf-editor').value = data;
-                    urdfDoc = new DOMParser().parseFromString(data, "text/xml");
-                })
-                .catch(error => console.error('Error loading URDF:', error));
+        // Declaring urdfDoc globally
+        let urdfDoc;
+
+        // Function to edit the current URDF
+        function editURDF(urdfContent) {
+            // Check if content is provided, if not, fetch using viewer's current URDF setting
+            if (!urdfContent && viewer.urdf) {
+                fetch(viewer.urdf)
+                    .then(response => response.text())
+                    .then(data => {
+                        document.getElementById('urdf-editor').value = data;
+                        urdfDoc = new DOMParser().parseFromString(data, "text/xml");
+                    })
+                    .catch(error => console.error('Error loading URDF:', error));
+            } else if (urdfContent) {
+                document.getElementById('urdf-editor').value = urdfContent;
+                urdfDoc = new DOMParser().parseFromString(urdfContent, "text/xml");
+            }
         }
+
+        // Ensure this function is available globally if needed elsewhere
+        window.editURDF = editURDF;
+
 
         // Function to save the modified URDF content as a local file
         function saveURDF(event) {
@@ -538,12 +552,6 @@
         });
 
 
-
-
-
-
-
-
         function updateJointProperties() {
             const jointName = document.getElementById('joint-selection-save').value;
             const originXYZ = document.getElementById('joint-origin-xyz').value.split(' ').map(Number);
@@ -627,10 +635,6 @@
             console.log('refreshed');
         }
 
-
-
-
-
         function dynamicPrecision(value) {
             // Handle zero separately to avoid unnecessary decimals
             if (value === 0) return 0;
@@ -671,7 +675,6 @@
             }
         }
 
-
         function loadJointDetails() {
             const jointSelector = document.getElementById('joint-selector');
             const jointName = jointSelector.value;
@@ -697,11 +700,6 @@
             }
             console.log('Loaded joint details for:', jointName);
         }
-
-
-
-
-
 
         function populateJointNames() {
             const jointSelector = document.getElementById('joint-selector');
