@@ -2401,7 +2401,42 @@
 
     return URDFLoader;
   }();
-  ; // Add or modify URDFJoint to handle updates more dynamically
+  ;
+
+  URDFLoader.prototype.parseFromString = function (urdfString, options) {
+    try {
+      var parser = new DOMParser();
+      var urdfDom = parser.parseFromString(urdfString, "text/xml"); // Directly use the existing parse method if it can handle a DOM object
+      // Alternatively, convert the DOM to a string or another format as required by your parse method
+
+      var model = this.parse(urdfDom, options);
+
+      if (options.onComplete) {
+        options.onComplete(model);
+      }
+    } catch (error) {
+      if (options.onError) {
+        options.onError(error);
+      }
+    }
+  }; // In URDFLoader.js
+
+
+  URDFLoader.prototype.loadFromString = function (urdfString, onComplete) {
+    try {
+      // Assuming the existing parse method can handle XML DOM, convert the string to DOM first
+      var parser = new DOMParser();
+      var urdfDOM = parser.parseFromString(urdfString, "text/xml");
+      var model = this.parse(urdfDOM, {});
+
+      if (onComplete) {
+        onComplete(model);
+      }
+    } catch (error) {
+      console.error('Failed to parse URDF string:', error);
+    }
+  }; // Add or modify URDFJoint to handle updates more dynamically
+
 
   URDFJoint.prototype.updateProperties = function (params) {
     if (params.origin) {

@@ -149,7 +149,6 @@ viewer.addEventListener('urdf-processed', () => {
     });
 });
 
-applyURDFBtn.addEventListener('click', applyURDF); // Hook apply URDF function to the button
 
 document.addEventListener('WebComponentsReady', () => {
     viewer.loadMeshFunc = (path, manager, done) => {

@@ -112,16 +112,22 @@ document.addEventListener('drop', e => {
             const [path, file] = urdfEntry;
             console.log("URDF file path:", path); // Log the path of the URDF file
 
-            const reader = new FileReader();
-            reader.onload = () => {
-                const urdfContent = reader.result;
-                console.log("Loaded URDF Content:", urdfContent); // Log the contents of the URDF file
-
-                // Use the custom function to handle the new URDF content
-                editURDF(urdfContent); // Assuming `editURDF` is a global function
-            };
-            reader.onerror = () => console.error("Failed to read the URDF file.");
-            reader.readAsText(file);
+            // Loading the URDF content directly if URDFLoader supports it
+            if (viewer.urdfLoader && typeof viewer.urdfLoader.loadFromString === 'function') {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const urdfContent = reader.result;
+                    console.log("Loaded URDF Content:", urdfContent); // Log the contents of the URDF file
+                    viewer.urdfLoader.loadFromString(urdfContent, function(model) {
+                        viewer.setModel(model);  // Update the viewer with the new model
+                        viewer.dispatchEvent(new Event('urdf-changed'));
+                    });
+                };
+                reader.onerror = () => console.error("Failed to read the URDF file.");
+                reader.readAsText(file);
+            } else {
+                console.error("URDF loader is not configured to load from string.");
+            }
         }
 
         // Update viewer properties
@@ -131,6 +137,7 @@ document.addEventListener('drop', e => {
         animToggle.classList.remove('checked');
     });
 });
+
 
 // Helper function to process DataTransfer into a structured object of files
 function dataTransferToFiles(dataTransfer) {

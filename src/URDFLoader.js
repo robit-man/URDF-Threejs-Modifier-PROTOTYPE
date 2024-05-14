@@ -637,6 +637,42 @@ export default
     }
 
 };
+
+URDFLoader.prototype.parseFromString = function(urdfString, options) {
+    try {
+        const parser = new DOMParser();
+        const urdfDom = parser.parseFromString(urdfString, "text/xml");
+        
+        // Directly use the existing parse method if it can handle a DOM object
+        // Alternatively, convert the DOM to a string or another format as required by your parse method
+        const model = this.parse(urdfDom, options);
+        
+        if (options.onComplete) {
+            options.onComplete(model);
+        }
+    } catch (error) {
+        if (options.onError) {
+            options.onError(error);
+        }
+    }
+};
+
+
+// In URDFLoader.js
+URDFLoader.prototype.loadFromString = function(urdfString, onComplete) {
+    try {
+        // Assuming the existing parse method can handle XML DOM, convert the string to DOM first
+        const parser = new DOMParser();
+        const urdfDOM = parser.parseFromString(urdfString, "text/xml");
+        const model = this.parse(urdfDOM, {});
+        if (onComplete) {
+            onComplete(model);
+        }
+    } catch (error) {
+        console.error('Failed to parse URDF string:', error);
+    }
+};
+
 // Add or modify URDFJoint to handle updates more dynamically
 URDFJoint.prototype.updateProperties = function (params) {
     if (params.origin) {
@@ -713,6 +749,7 @@ URDFRobot.prototype.refreshScene = function () {
     // You might need to re-render the scene
     render(); // This function would need to be defined in your global scope or passed in
 };
+
 // Extend URDFLoader to handle scene updates
 URDFLoader.prototype.applyUpdates = function () {
     // This could be a method to apply pending updates or simply refresh parts of the model

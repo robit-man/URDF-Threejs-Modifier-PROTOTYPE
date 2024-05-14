@@ -347,6 +347,37 @@
 
         // Ensure this function is available globally if needed elsewhere
         window.editURDF = editURDF;
+        
+        function applyURDF() {
+            const updatedURDFText = document.getElementById('urdf-editor').value; // Get URDF string from textarea
+            if (viewer && updatedURDFText) {
+                // Parse the new URDF text to a DOM object
+                const parser = new DOMParser();
+                const urdfDOM = parser.parseFromString(updatedURDFText, "text/xml");
+
+                // Adjust mesh URLs in the URDF DOM
+                const meshElements = urdfDOM.querySelectorAll('[filename]');
+                meshElements.forEach(element => {
+                    let originalPath = element.getAttribute('filename');
+                    if (originalPath.startsWith('../meshes/')) {
+                        // Adjust the path to point to the correct location
+                        let correctedPath = `urdf/dropbear/meshes/${originalPath.substring(10)}`;
+                        element.setAttribute('filename', correctedPath);
+                    }
+                });
+
+                // Serialize the DOM back to a string
+                const serializer = new XMLSerializer();
+                const modifiedURDFString = serializer.serializeToString(urdfDOM);
+
+                // Convert modified URDF string to a Blob and set it as the new URDF on the viewer
+                const blob = new Blob([modifiedURDFString], { type: 'text/xml' });
+                const url = URL.createObjectURL(blob);
+                viewer.urdf = url; // Assuming 'viewer.urdf' is a property that can be set to change the URDF
+            }
+        }
+
+
 
 
         // Function to save the modified URDF content as a local file
@@ -435,7 +466,7 @@
                     joint.appendChild(limit);
                 }
 
-                
+
 
                 // Set attributes
                 origin.setAttribute('xyz', originXYZ);
@@ -499,31 +530,6 @@
             viewer.setAttribute('urdf', newURDF);
             viewer._loadUrdf(viewer.package, newURDF);
         }
-
-        function applyURDF() {
-            const updatedURDFText = document.getElementById('urdf-editor').value; // Get URDF string from textarea
-            if (viewer && updatedURDFText) {
-                // Parse the new URDF text to a DOM object
-                const parser = new DOMParser();
-                const urdfDOM = parser.parseFromString(updatedURDFText, "text/xml");
-
-                // Serialize the DOM back to a string
-                const serializer = new XMLSerializer();
-                const urdfString = serializer.serializeToString(urdfDOM);
-
-                // Assuming you have a function in your URDF loader to set and reload URDF from string
-                viewer.setURDFFromString(urdfString);  // You might need to implement this in your URDF viewer component
-                viewer.dispatchEvent(new Event('urdf-change'));  // Notify the viewer of the change
-            }
-        }
-
-        URDFViewer.prototype.setURDFFromString = function (urdfString) {
-            const loader = new URDFLoader(this.manager);  // Assuming you have a loading manager
-            const urdfRobot = loader.parse(urdfString);  // Parse the URDF string
-            this.scene.add(urdfRobot);  // Add the parsed robot to the scene
-            this.recenter();  // Recenter the view, if necessary
-            this.redraw();  // Redraw the viewer
-        };
 
         // Function to initialize event listeners once the document is ready
         document.addEventListener('DOMContentLoaded', () => {
