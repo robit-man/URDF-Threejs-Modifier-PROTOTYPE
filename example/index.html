@@ -612,31 +612,40 @@
             console.log('refreshed');
 
         }
+        function dynamicPrecision(value) {
+    // Handle zero separately to avoid unnecessary decimals
+    if (value === 0) return 0;
 
-        function loadJointDetails() {
-            const jointSelector = document.getElementById('joint-selector');
-            const jointName = jointSelector.value;
+    const absValue = Math.abs(value);
+    if (absValue < 0.0001) return 4;
+    if (absValue < 0.001) return 3;
+    if (absValue < 0.01) return 2;
+    if (absValue < 0.1) return 2;
+    return 1; // Default to 1 decimal for values larger than 0.1
+}
 
+function loadJointDetails() {
+    const jointSelector = document.getElementById('joint-selector');
+    const jointName = jointSelector.value;
 
-            if (viewer && viewer.robot && viewer.robot.joints[jointName]) {
-                const joint = viewer.robot.joints[jointName];
-                const euler = new THREE.Euler().setFromQuaternion(joint.origQuaternion, 'XYZ');
-                const rpy = [euler.x, euler.y, euler.z].map(r => (r * 180 / Math.PI).toFixed(2));
-                console.log(joint);
+    if (viewer && viewer.robot && viewer.robot.joints[jointName]) {
+        const joint = viewer.robot.joints[jointName];
+        const euler = new THREE.Euler().setFromQuaternion(joint.origQuaternion, 'XYZ');
+        const rpy = [euler.x, euler.y, euler.z].map(r => (r * 180 / Math.PI).toFixed(dynamicPrecision(r * 180 / Math.PI)));
 
-                document.getElementById('joint-origin-xyz').value = joint.origPosition.toArray().join(' ');
-                document.getElementById('joint-origin-rpy').value = rpy.join(' ');
-                document.getElementById('joint-position-xyz').value = joint.position.toArray().join(' ');
-                document.getElementById('joint-axis-xyz').value = [joint.axis.x, joint.axis.y, joint.axis.z].map(x => x.toFixed(2)).join(' ');
-                document.getElementById('joint-lower-limit').value = (joint.limit.lower * 180 / Math.PI).toFixed(2);
-                document.getElementById('joint-upper-limit').value = (joint.limit.upper * 180 / Math.PI).toFixed(2);
-            } else {
-                console.error("Joint not found or viewer not initialized properly.");
-                document.getElementById('joint-axis-xyz').value = "0.00 0.00 0.00"; // Default or placeholder value if axis is undefined
-            }
-            console.log('Loaded joint details for:', jointName);
-            
-        }
+        document.getElementById('joint-selection-save').value = jointName;
+        document.getElementById('joint-origin-xyz').value = joint.origPosition.toArray().join(' ');
+        document.getElementById('joint-origin-rpy').value = rpy.join(' ');
+        document.getElementById('joint-position-xyz').value = joint.position.toArray().join(' ');
+        document.getElementById('joint-axis-xyz').value = [joint.axis.x, joint.axis.y, joint.axis.z].map(x => x.toFixed(dynamicPrecision(x))).join(' ');
+        document.getElementById('joint-lower-limit').value = (joint.limit.lower * 180 / Math.PI).toFixed(dynamicPrecision(joint.limit.lower * 180 / Math.PI));
+        document.getElementById('joint-upper-limit').value = (joint.limit.upper * 180 / Math.PI).toFixed(dynamicPrecision(joint.limit.upper * 180 / Math.PI));
+    } else {
+        console.error("Joint not found or viewer not initialized properly.");
+    }
+    console.log('Loaded joint details for:', jointName);
+}
+
 
 
         function populateJointNames() {
