@@ -578,6 +578,11 @@
 
         function updateLinkVisualProperties() {
             const linkName = document.getElementById('link-selection-save').value; // Ensure you have a way to select links
+            const link = viewer.robot.links[linkName];
+
+            const meshIndex = link.children.findIndex(child => child instanceof THREE.Mesh);
+            const linkValues = link.children[meshIndex];
+
             const visualOriginXYZ = document.getElementById('visual-origin-xyz').value.split(' ').map(Number);
             const visualOriginRPY = document.getElementById('visual-origin-rpy').value.split(' ').map(v => parseFloat(v) * Math.PI / 180);
 
@@ -591,13 +596,13 @@
                 quaternion.setFromEuler(euler);
 
                 // Update joint properties
-                link.children[0].position.set(visualOriginXYZ[0], visualOriginXYZ[1], visualOriginXYZ[2]); // Assuming the joint class has origPosition
-                link.children[0].quaternion = quaternion; // Assuming the joint class has origQuaternion
+                linkValues.position.set(visualOriginXYZ[0], visualOriginXYZ[1], visualOriginXYZ[2]); // Assuming the joint class has origPosition
+                linkValues.quaternion = quaternion; // Assuming the joint class has origQuaternion
 
 
                 // Find the link in the URDF XML
-                console.log(link.children[0].position);
-                console.log(link.children[0].quaternion);
+                console.log(linkValues.position);
+                console.log(linkValues.quaternion);
                 // Refresh scene to apply changes
                 refreshScene();
             } else {
@@ -643,11 +648,11 @@
             const linkSelector = document.getElementById('link-selector');
             const linkName = linkSelector.value;
             const link = viewer.robot.links[linkName];
-            
+
             const meshIndex = link.children.findIndex(child => child instanceof THREE.Mesh);
             const linkValues = link.children[meshIndex];
 
-            if (viewer && viewer.robot && link.children[0]) {
+            if (viewer && viewer.robot && viewer.robot.links[linkName]) {
                 document.getElementById('link-selection-save').value = linkName;
 
             }
