@@ -3,6 +3,7 @@
     <!-- Torso Link -->
     <link name="torso">
         <visual>
+<origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
                 <mesh filename="../meshes/torso.stl" scale="0.05 0.05 0.05"/>
             </geometry>
@@ -12,6 +13,7 @@
     <!-- Hips Link -->
     <link name="hips">
         <visual>
+<origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
                 <mesh filename="../meshes/hipRollAssembly.stl" scale="0.05 0.05 0.05"/>
             </geometry>
@@ -34,6 +36,7 @@
 <!-- Left Hip Roll Motor -->
 <link name="left_hip_roll_motor">
     <visual>
+<origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
             <mesh filename="../meshes/leftHipRollMotor.stl" scale="0.05 0.05 0.05"/>
         </geometry>
@@ -50,6 +53,7 @@
 <!-- Left Hip-Pitch Knee Motors -->
 <link name="left_hip_pitch_knee_motors">
     <visual>
+<origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
             <mesh filename="../meshes/leftHipPitchKneeMotors.stl" scale="0.05 0.05 0.05"/>
         </geometry>
@@ -66,6 +70,7 @@
 <!-- Left Knee Primary and Secondary Hangers -->
 <link name="left_knee_primary_hanger">
     <visual>
+<origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
             <mesh filename="../meshes/kneePrimaryHangar.stl" scale="0.05 0.05 0.05"/>
         </geometry>
@@ -82,6 +87,7 @@
 <!-- Left Calf -->
 <link name="left_calf">
     <visual>
+<origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
             <mesh filename="../meshes/leftCalf.stl" scale="0.05 0.05 0.05"/>
         </geometry>
@@ -98,6 +104,7 @@
 <!-- Left Ankle and Foot -->
 <link name="left_ankle">
     <visual>
+<origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
             <mesh filename="../meshes/ankle.stl" scale="0.05 0.05 0.05"/>
         </geometry>
@@ -113,6 +120,7 @@
 
 <link name="left_foot">
     <visual>
+<origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
             <mesh filename="../meshes/foot.stl" scale="0.05 0.05 0.05"/>
         </geometry>
@@ -130,6 +138,7 @@
 <!-- Right Hip Roll Motor -->
 <link name="right_hip_roll_motor">
     <visual>
+<origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
             <mesh filename="../meshes/rightHipRollMotor.stl" scale="0.05 0.05 0.05"/>
         </geometry>
@@ -146,7 +155,7 @@
 <!-- Right Hip-Pitch Knee Motors -->
 <link name="right_hip_pitch_knee_motors">
     <visual>
-    <origin xyz="0 3 3" rpy="0 0 0"/>
+<origin xyz="0 5 0" rpy="0 0 0"/>
         <geometry>
             <mesh filename="../meshes/rightHipPitchKneeMotors.stl" scale="0.05 0.05 0.05"/>
         </geometry>
@@ -163,6 +172,7 @@
 <!-- Right Hip-Pitch Knee Front and Rear Brackets -->
 <link name="right_hip_pitch_knee_front_bracket">
     <visual>
+<origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
             <mesh filename="../meshes/rightHipPitchKneeFrontBracket.stl" scale="0.05 0.05 0.05"/>
         </geometry>
@@ -172,12 +182,13 @@
     <parent link="right_hip_pitch_knee_motors"/>
     <child link="right_hip_pitch_knee_front_bracket"/>
     <origin xyz="10 3.5 -9" rpy="0 0 0"/>
-    <axis xyz="0 1.0 0"/>
-    <limit lower="-16928118.3" upper="16928118.3" effort="0" velocity="0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-969909733.7" upper="969909733.7" effort="0" velocity="0"/>
 </joint>
 
 <link name="right_hip_pitch_knee_rear_bracket">
     <visual>
+<origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
             <mesh filename="../meshes/rightHipPitchKneeRearBracket.stl" scale="0.05 0.05 0.05"/>
         </geometry>
@@ -188,6 +199,7 @@
 <!-- Right Knee Primary and Secondary Hangers -->
 <link name="right_knee_primary_hanger">
     <visual>
+<origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
             <mesh filename="../meshes/kneePrimaryHangar.stl" scale="0.05 0.05 0.05"/>
         </geometry>
@@ -204,6 +216,7 @@
 <!-- Right Calf -->
 <link name="right_calf">
     <visual>
+<origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
             <mesh filename="../meshes/rightCalf.stl" scale="0.05 0.05 0.05"/>
         </geometry>
@@ -220,6 +233,7 @@
 <!-- Right Ankle and Foot -->
 <link name="right_ankle">
     <visual>
+<origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
             <mesh filename="../meshes/ankle.stl" scale="0.05 0.05 0.05"/>
         </geometry>
@@ -235,7 +249,7 @@
 
 <link name="right_foot">
     <visual>
-             <origin xyz="0 20 0" rpy="0 0 0" />
+             <origin xyz="0 20 0" rpy="0 0 0"/>
         <geometry>
             <mesh filename="../meshes/foot.stl" scale="0.05 0.05 0.05"/>
         </geometry>

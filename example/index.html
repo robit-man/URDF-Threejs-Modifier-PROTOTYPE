@@ -643,20 +643,23 @@
             const linkSelector = document.getElementById('link-selector');
             const linkName = linkSelector.value;
             const link = viewer.robot.links[linkName];
+            
+            const meshIndex = link.children.findIndex(child => child instanceof THREE.Mesh);
+            const linkValues = link.children[meshIndex];
 
             if (viewer && viewer.robot && link.children[0]) {
                 document.getElementById('link-selection-save').value = linkName;
 
             }
-            if (link.children[0].quaternion) {
-                const euler = new THREE.Euler().setFromQuaternion(link.children[0].quaternion, 'XYZ');
+            if (linkValues.quaternion) {
+                const euler = new THREE.Euler().setFromQuaternion(linkValues.quaternion, 'XYZ');
                 const rpy = [euler.x, euler.y, euler.z].map(r => (r * 180 / Math.PI).toFixed(dynamicPrecision(r * 180 / Math.PI)));
 
                 document.getElementById('visual-origin-rpy').value = rpy.join(' ');
 
-            } if (link.children[0].position) {
+            } if (linkValues.position) {
 
-                document.getElementById('visual-origin-xyz').value = link.children[0].position.toArray().join(' ');
+                document.getElementById('visual-origin-xyz').value = linkValues.position.toArray().join(' ');
 
             } else {
                 console.error("Quaternion is undefined for the link:", linkName);
