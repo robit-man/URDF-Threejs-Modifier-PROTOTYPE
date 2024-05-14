@@ -54,9 +54,12 @@ viewer.addEventListener('angle-change', e => {
 viewer.addEventListener('joint-mouseover', e => {
     const jointName = e.detail; // Assuming `e.detail` contains the name of the hovered joint
     const jointSelector = document.getElementById('joint-selector');
+    const linkSelector = document.getElementById('link-selector');
     const jointOption = document.querySelector(`#joint-selector option[value="${jointName}"]`);
     const j = document.querySelector(`li[joint-name="${jointName}"]`);
-
+    const linkChild = viewer.robot.joints[jointName].children[0].name;
+    console.log('Joint', jointName);
+    console.log('Link', linkChild);
     if (j) {
         j.setAttribute('robot-hovered', true);
     }
@@ -71,6 +74,7 @@ viewer.addEventListener('joint-mouseover', e => {
 
     // Set the select element's value to the hovered joint name
     jointSelector.value = jointName;
+    linkSelector.value = linkChild;
 
 });
 
