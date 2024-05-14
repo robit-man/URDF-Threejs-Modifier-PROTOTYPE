@@ -8,6 +8,7 @@ const upSelect = document.getElementById('up-select');
 const sliderList = document.querySelector('#controls ul');
 const controlsel = document.getElementById('controls');
 const controlsToggle = document.getElementById('toggle-controls');
+const applyURDFBtn = document.getElementById('apply-urdf-btn'); // Button to apply URDF updates
 var DEG2RAD = Math.PI / 180;
 const RAD2DEG = 1 / DEG2RAD;
 let sliders = {};
@@ -18,8 +19,16 @@ window.setColor = color => {
     viewer.highlightColor = '#' + (new THREE.Color(0xffffff)).lerp(new THREE.Color(color), 0.35).getHexString();
 };
 
-// Events
+// Function to apply the updated URDF XML to the viewer
+function applyURDF() {
+    const updatedURDF = document.getElementById('urdf-editor').value; // Assume 'urdf-editor' is your textarea ID
+    if (viewer && updatedURDF) {
+        viewer.setURDF(updatedURDF); // Assuming there's a method to directly set URDF
+        viewer.dispatchEvent(new Event('urdf-change'));
+    }
+}
 
+// Events
 limitsToggle.addEventListener('click', () => {
     limitsToggle.classList.toggle('checked');
     viewer.ignoreLimits = limitsToggle.classList.contains('checked');
@@ -68,7 +77,6 @@ viewer.addEventListener('joint-mouseover', e => {
 viewer.addEventListener('joint-mouseout', e => {
     const j = document.querySelector(`li[joint-name="${e.detail}"]`);
     if (j) j.removeAttribute('robot-hovered');
-
 });
 
 let originalNoAutoRecenter;
@@ -135,7 +143,7 @@ viewer.addEventListener('urdf-processed', () => {
     });
 });
 
-
+applyURDFBtn.addEventListener('click', applyURDF); // Hook apply URDF function to the button
 
 document.addEventListener('WebComponentsReady', () => {
     viewer.loadMeshFunc = (path, manager, done) => {

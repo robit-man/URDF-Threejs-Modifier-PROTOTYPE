@@ -79,73 +79,64 @@ function dataTransferToFiles(dataTransfer) {
 document.addEventListener('dragover', e => e.preventDefault());
 document.addEventListener('dragenter', e => e.preventDefault());
 document.addEventListener('drop', e => {
-
     e.preventDefault();
 
-    // convert the files
+    // Convert the DataTransfer object to files
     dataTransferToFiles(e.dataTransfer)
         .then(files => {
-
-            // removes '..' and '.' tokens and normalizes slashes
+            // Normalize and clean file paths
             const cleanFilePath = path => {
-
-                return path
-                    .replace(/\\/g, '/')
+                return path.replace(/\\/g, '/')
                     .split(/\//g)
                     .reduce((acc, el) => {
-
                         if (el === '..') acc.pop();
                         else if (el !== '.') acc.push(el);
                         return acc;
-
                     }, [])
                     .join('/');
-
             };
 
-            // set the loader url modifier to check the list
-            // of files
             const fileNames = Object.keys(files).map(n => cleanFilePath(n));
+            console.log("All uploaded files:", fileNames); // Log all files that were uploaded
+
+            // Set URL modifier for THREE.js loader based on the dragged files
             viewer.urlModifierFunc = url => {
-
-                // find the matching file given the requested url
                 const cleaned = cleanFilePath(url.replace(viewer.package, ''));
-                const fileName = fileNames
-                    .filter(name => {
+                const fileName = fileNames.find(name => {
+                    const len = Math.min(name.length, cleaned.length);
+                    return cleaned.substr(cleaned.length - len) === name.substr(name.length - len);
+                });
 
-                        // check if the end of file and url are the same
-                        const len = Math.min(name.length, cleaned.length);
-                        return cleaned.substr(cleaned.length - len) === name.substr(name.length - len);
-
-                    }).pop();
-
-                if (fileName !== undefined) {
-
-                    // revoke the url after it's been used
-                    const bloburl = URL.createObjectURL(files[fileName]);
-                    requestAnimationFrame(() => URL.revokeObjectURL(bloburl));
-
-                    return bloburl;
-
+                if (fileName) {
+                    const blobUrl = URL.createObjectURL(files[fileName]);
+                    console.log(`Mapped URL for ${fileName}:`, blobUrl); // Log the blob URL
+                    requestAnimationFrame(() => URL.revokeObjectURL(blobUrl));
+                    return blobUrl;
                 }
 
                 return url;
-
             };
 
-            // set the source of the element to the most likely intended display model
-            const filesNames = Object.keys(files);
+            // Identify and load the URDF file content
+            const urdfEntry = Object.entries(files).find(([path]) => path.endsWith('.urdf'));
+            if (urdfEntry) {
+                const [path, file] = urdfEntry;
+                console.log("URDF file path:", path); // Log the path of the URDF file
+
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const urdfContent = reader.result;
+                    console.log("URDF Content:", urdfContent); // Log the contents of the URDF file
+                    viewer.urdfContent = urdfContent; // Assuming you have a way to store this in your viewer
+                };
+                reader.onerror = () => console.error("Failed to read the URDF file.");
+                reader.readAsText(file);
+            }
+
+            // Setting viewer properties
             viewer.up = '+Z';
             document.getElementById('up-select').value = viewer.up;
-
-            viewer.urdf =
-                filesNames
-                    .filter(n => /urdf$/i.test(n))
-                    .shift();
-
+            setColor('#263238');
+            animToggle.classList.remove('checked');
         });
-
-    setColor('#263238');
-    window.animToggle.classList.remove('checked');
-
 });

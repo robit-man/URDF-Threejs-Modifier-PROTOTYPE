@@ -287,81 +287,6 @@
     <script>
         let urdfDoc;  // To hold the parsed URDF document
 
-        function updateURDF() {
-            const jointName = document.getElementById('joint-selector').value;
-            const originXYZ = document.getElementById('joint-origin-xyz').value;
-            const originRPY = document.getElementById('joint-origin-rpy').value;
-            const axisXYZ = document.getElementById('joint-axis-xyz').value;
-            const lowerLimit = document.getElementById('joint-lower-limit').value;
-            const upperLimit = document.getElementById('joint-upper-limit').value;
-
-            // Access the joint element in the URDF XML
-            const joint = urdfDoc.querySelector(`joint[name="${jointName}"]`);
-            if (!joint) {
-                console.error("Joint not found in the URDF:", jointName);
-                return;
-            }
-
-            // Ensure the 'origin' element exists or create it if not
-            let origin = joint.querySelector('origin');
-            if (!origin) {
-                origin = urdfDoc.createElement('origin');
-                joint.appendChild(origin);
-            }
-
-            // Ensure the 'axis' element exists or create it if not
-            let axis = joint.querySelector('axis');
-            if (!axis) {
-                axis = urdfDoc.createElement('axis');
-                joint.appendChild(axis);
-            }
-
-            // Ensure the 'limit' element exists or create it if not
-            let limit = joint.querySelector('limit');
-            if (!limit) {
-                limit = urdfDoc.createElement('limit');
-                joint.appendChild(limit);
-            }
-
-            // Set attributes
-            origin.setAttribute('xyz', originXYZ);
-            origin.setAttribute('rpy', originRPY);
-            axis.setAttribute('xyz', axisXYZ);
-            limit.setAttribute('lower', lowerLimit);
-            limit.setAttribute('upper', upperLimit);
-
-            // Serialize and update the textarea
-            const serializer = new XMLSerializer();
-            const updatedURDF = serializer.serializeToString(urdfDoc);
-            document.getElementById('urdf-editor').value = updatedURDF;
-        }
-
-        function applyURDF() {
-            const updatedURDF = document.getElementById('urdf-editor').value;
-            const viewerElement = document.querySelector('urdf-viewer');
-            if (viewerElement.updateURDFContent) {
-                viewerElement.updateURDFContent(updatedURDF);
-            } else {
-                console.error("Method updateURDFContent not found on viewerElement.");
-            }
-        }
-
-        function updateURDFContent(newURDF) {
-            if (!newURDF || this.getAttribute('urdf') === newURDF) return;
-
-            // Set new URDF and force reload of the model
-            this.setAttribute('urdf', newURDF);
-            this._loadUrdf(this.package, newURDF);
-        }
-
-
-        // Function to initialize event listeners once the document is ready
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('edit-urdf-btn').addEventListener('click', editURDF);
-            document.getElementById('save-urdf-btn').addEventListener('click', saveURDF);
-            document.getElementById('update-urdf-btn').addEventListener('click', updateURDF);
-            document.getElementById('apply-urdf-btn').addEventListener('click', applyURDF);
-        });
 
         // Function to fetch and edit the current URDF
         function editURDF() {
@@ -419,6 +344,82 @@
             targetInput.value = sourceInput.value;
         }
 
+        function updateURDF() {
+            const jointName = document.getElementById('joint-selection-save').value;
+            const originXYZ = document.getElementById('joint-origin-xyz').value;
+            const originRPY = document.getElementById('joint-origin-rpy').value;
+            const axisXYZ = document.getElementById('joint-axis-xyz').value;
+            const lowerLimit = document.getElementById('joint-lower-limit').value;
+            const upperLimit = document.getElementById('joint-upper-limit').value;
+
+            // Access the joint element in the URDF XML
+            const joint = urdfDoc.querySelector(`joint[name="${jointName}"]`);
+            if (!joint) {
+                console.error("Joint not found in the URDF:", jointName);
+                return;
+            }
+
+            // Ensure the 'origin' element exists or create it if not
+            let origin = joint.querySelector('origin');
+            if (!origin) {
+                origin = urdfDoc.createElement('origin');
+                joint.appendChild(origin);
+            }
+
+            // Ensure the 'axis' element exists or create it if not
+            let axis = joint.querySelector('axis');
+            if (!axis) {
+                axis = urdfDoc.createElement('axis');
+                joint.appendChild(axis);
+            }
+
+            // Ensure the 'limit' element exists or create it if not
+            let limit = joint.querySelector('limit');
+            if (!limit) {
+                limit = urdfDoc.createElement('limit');
+                joint.appendChild(limit);
+            }
+
+            // Set attributes
+            origin.setAttribute('xyz', originXYZ);
+            origin.setAttribute('rpy', originRPY);
+            axis.setAttribute('xyz', axisXYZ);
+            limit.setAttribute('lower', lowerLimit);
+            limit.setAttribute('upper', upperLimit);
+
+            // Serialize and update the textarea
+            const serializer = new XMLSerializer();
+            const updatedURDF = serializer.serializeToString(urdfDoc);
+            document.getElementById('urdf-editor').value = updatedURDF;
+        }
+
+        function updateURDFContent(newURDF) {
+            if (!newURDF || this.getAttribute('urdf') === newURDF) return;
+
+            // Set new URDF and force reload of the model
+            this.setAttribute('urdf', newURDF);
+            this._loadUrdf(this.package, newURDF);
+        }
+        function applyURDF() {
+            const updatedURDF = document.getElementById('urdf-editor').value; // Assume 'urdf-editor' is your textarea ID
+            if (viewer && updatedURDF) {
+                viewer.setURDF(updatedURDF); // Assuming there's a method to directly set URDF
+                viewer.dispatchEvent(new Event('urdf-change'));
+            }
+        }
+
+
+        // Function to initialize event listeners once the document is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('edit-urdf-btn').addEventListener('click', editURDF);
+            document.getElementById('save-urdf-btn').addEventListener('click', saveURDF);
+            document.getElementById('update-urdf-btn').addEventListener('click', updateURDF);
+            document.getElementById('apply-urdf-btn').addEventListener('click', applyURDF);
+        });
+
+
+        document.getElementById('apply-urdf-btn').addEventListener('click', applyURDF);
+
 
     </script>
 
@@ -440,7 +441,7 @@
             }
         */
         // Function to update the URDF content based on joint changes
-        
+
         function updateJointProperties() {
             const jointName = document.getElementById('joint-selector').value;
             const originXYZ = document.getElementById('joint-origin-xyz').value;
@@ -613,38 +614,38 @@
 
         }
         function dynamicPrecision(value) {
-    // Handle zero separately to avoid unnecessary decimals
-    if (value === 0) return 0;
+            // Handle zero separately to avoid unnecessary decimals
+            if (value === 0) return 0;
 
-    const absValue = Math.abs(value);
-    if (absValue < 0.0001) return 4;
-    if (absValue < 0.001) return 3;
-    if (absValue < 0.01) return 2;
-    if (absValue < 0.1) return 2;
-    return 1; // Default to 1 decimal for values larger than 0.1
-}
+            const absValue = Math.abs(value);
+            if (absValue < 0.0001) return 4;
+            if (absValue < 0.001) return 3;
+            if (absValue < 0.01) return 2;
+            if (absValue < 0.1) return 2;
+            return 1; // Default to 1 decimal for values larger than 0.1
+        }
 
-function loadJointDetails() {
-    const jointSelector = document.getElementById('joint-selector');
-    const jointName = jointSelector.value;
+        function loadJointDetails() {
+            const jointSelector = document.getElementById('joint-selector');
+            const jointName = jointSelector.value;
 
-    if (viewer && viewer.robot && viewer.robot.joints[jointName]) {
-        const joint = viewer.robot.joints[jointName];
-        const euler = new THREE.Euler().setFromQuaternion(joint.origQuaternion, 'XYZ');
-        const rpy = [euler.x, euler.y, euler.z].map(r => (r * 180 / Math.PI).toFixed(dynamicPrecision(r * 180 / Math.PI)));
+            if (viewer && viewer.robot && viewer.robot.joints[jointName]) {
+                const joint = viewer.robot.joints[jointName];
+                const euler = new THREE.Euler().setFromQuaternion(joint.origQuaternion, 'XYZ');
+                const rpy = [euler.x, euler.y, euler.z].map(r => (r * 180 / Math.PI).toFixed(dynamicPrecision(r * 180 / Math.PI)));
 
-        document.getElementById('joint-selection-save').value = jointName;
-        document.getElementById('joint-origin-xyz').value = joint.origPosition.toArray().join(' ');
-        document.getElementById('joint-origin-rpy').value = rpy.join(' ');
-        document.getElementById('joint-position-xyz').value = joint.position.toArray().join(' ');
-        document.getElementById('joint-axis-xyz').value = [joint.axis.x, joint.axis.y, joint.axis.z].map(x => x.toFixed(dynamicPrecision(x))).join(' ');
-        document.getElementById('joint-lower-limit').value = (joint.limit.lower * 180 / Math.PI).toFixed(dynamicPrecision(joint.limit.lower * 180 / Math.PI));
-        document.getElementById('joint-upper-limit').value = (joint.limit.upper * 180 / Math.PI).toFixed(dynamicPrecision(joint.limit.upper * 180 / Math.PI));
-    } else {
-        console.error("Joint not found or viewer not initialized properly.");
-    }
-    console.log('Loaded joint details for:', jointName);
-}
+                document.getElementById('joint-selection-save').value = jointName;
+                document.getElementById('joint-origin-xyz').value = joint.origPosition.toArray().join(' ');
+                document.getElementById('joint-origin-rpy').value = rpy.join(' ');
+                document.getElementById('joint-position-xyz').value = joint.position.toArray().join(' ');
+                document.getElementById('joint-axis-xyz').value = [joint.axis.x, joint.axis.y, joint.axis.z].map(x => x.toFixed(dynamicPrecision(x))).join(' ');
+                document.getElementById('joint-lower-limit').value = (joint.limit.lower * 180 / Math.PI).toFixed(dynamicPrecision(joint.limit.lower * 180 / Math.PI));
+                document.getElementById('joint-upper-limit').value = (joint.limit.upper * 180 / Math.PI).toFixed(dynamicPrecision(joint.limit.upper * 180 / Math.PI));
+            } else {
+                console.error("Joint not found or viewer not initialized properly.");
+            }
+            console.log('Loaded joint details for:', jointName);
+        }
 
 
 
