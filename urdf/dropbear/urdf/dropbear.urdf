@@ -47,7 +47,7 @@
     <child link="left_hip_roll_motor"/>
     <origin xyz="0 0 -4" rpy="0 0 0"/>
     <axis xyz="0 1.0 0"/>
-    <limit lower="-2578.3" upper="2578.3" effort="0" velocity="0"/>
+    <limit lower="-6.28319" upper="6.28319" effort="0" velocity="0"/>
 </joint>
 
 <!-- Left Hip-Pitch Knee Motors -->
@@ -64,7 +64,7 @@
     <child link="left_hip_pitch_knee_motors"/>
     <origin xyz="0 0 -10.05" rpy="0 0 0"/>
     <axis xyz="0 1.0 0"/>
-    <limit lower="-90.0" upper="90.0" effort="0" velocity="0"/>
+    <limit lower="-6.28319" upper="6.28319" effort="0" velocity="0"/>
 </joint>
 
 <!-- Left Knee Primary and Secondary Hangers -->
@@ -81,7 +81,7 @@
     <child link="left_knee_primary_hanger"/>
     <origin xyz="0 0 -0.1" rpy="0 0 0"/>
     <axis xyz="0 0 1"/>
-    <limit lower="-2.356" upper="0" effort="0" velocity="0"/>
+    <limit lower="-6.28319" upper="6.28319" effort="0" velocity="0"/>
 </joint>
 
 <!-- Left Calf -->
@@ -98,7 +98,7 @@
     <child link="left_calf"/>
     <origin xyz="0 0 10.05" rpy="0 0 0"/>
     <axis xyz="0 1.0 0"/>
-    <limit lower="-90.0" upper="90.0" effort="0" velocity="0"/>
+    <limit lower="-6.28319" upper="6.28319" effort="0" velocity="0"/>
 </joint>
 
 <!-- Left Ankle and Foot -->
@@ -115,7 +115,7 @@
     <child link="left_ankle"/>
     <origin xyz="0 0 -0.05" rpy="0 0 0"/>
     <axis xyz="1 0 0"/>
-    <limit lower="-0.785" upper="0.785" effort="0" velocity="0"/>
+    <limit lower="-6.28319" upper="6.28319" effort="0" velocity="0"/>
 </joint>
 
 <link name="left_foot">
@@ -131,7 +131,7 @@
     <child link="left_foot"/>
     <origin xyz="0 -0 -10.05" rpy="0 0 0"/>
     <axis xyz="0 1.0 0"/>
-    <limit lower="-295451.4" upper="295451.4" effort="0" velocity="0"/>
+    <limit lower="-6.28319" upper="6.28319" effort="0" velocity="0"/>
 </joint>
 
 
@@ -149,7 +149,7 @@
     <child link="right_hip_roll_motor"/>
     <origin xyz="1.1 0 3" rpy="0 0 0"/>
     <axis xyz="1.0 0 0"/>
-    <limit lower="-2578.3" upper="2578.3" effort="0" velocity="0"/>
+    <limit lower="-6.28319" upper="6.28319" effort="0" velocity="0"/>
 </joint>
 
 <!-- Right Hip-Pitch Knee Motors -->
@@ -166,7 +166,7 @@
     <child link="right_hip_pitch_knee_motors"/>
     <origin xyz="0 -5 2" rpy="0.17453292519943295 0 0"/>
     <axis xyz="0 0 1.0"/>
-    <limit lower="-89.9996482083396" upper="89.9996482083396" effort="0" velocity="0"/>
+    <limit lower="-6.28319" upper="6.28319" effort="0" velocity="0"/>
 </joint>
 
 <!-- Right Hip-Pitch Knee Front and Rear Brackets -->
@@ -183,7 +183,7 @@
     <child link="right_hip_pitch_knee_front_bracket"/>
     <origin xyz="2.48 -0.8 3.6" rpy="0 0 0"/>
     <axis xyz="0 0 1.0"/>
-    <limit lower="-3184025832730.4" upper="3184025832730.4" effort="0" velocity="0"/>
+    <limit lower="-6.28319" upper="6.28319" effort="0" velocity="0"/>
 </joint>
 
 <link name="right_hip_pitch_knee_rear_bracket">
@@ -210,7 +210,7 @@
     <child link="right_knee_primary_hanger"/>
     <origin xyz="-2 -17 -0.75" rpy="0 0 0"/>
     <axis xyz="0 0 1.0"/>
-    <limit lower="-8464059.1" upper="8464059.1" effort="0" velocity="0"/>
+    <limit lower="-6.28319" upper="6.28319" effort="0" velocity="0"/>
 </joint>
 
 <!-- Right Calf -->
@@ -227,7 +227,7 @@
     <child link="right_calf"/>
     <origin xyz="0 -3 1.5" rpy="0 0 0"/>
     <axis xyz="0 0 1.0"/>
-    <limit lower="-16928118.3" upper="16928118.3" effort="0" velocity="0"/>
+    <limit lower="-6.28319" upper="6.28319" effort="0" velocity="0"/>
 </joint>
 
 <!-- Right Ankle and Foot -->
@@ -244,7 +244,7 @@
     <child link="right_ankle"/>
     <origin xyz="2.2 -21.5 3" rpy="0 1.5707963267948966 0"/>
     <axis xyz="1.0 0 0"/>
-    <limit lower="-89.9996482083396" upper="89.9996482083396" effort="0" velocity="0"/>
+    <limit lower="-6.28319" upper="6.28319" effort="0" velocity="0"/>
 </joint>
 
 <link name="right_foot">
@@ -260,7 +260,7 @@
     <child link="right_foot"/>
     <origin xyz="0 -2 1.2" rpy="0 -1.5707963267948966 0"/>
     <axis xyz="1.0 0 0"/>
-    <limit lower="-89.9996482083396" upper="89.9996482083396" effort="0" velocity="0"/>
+    <limit lower="-6.28319" upper="6.28319" effort="0" velocity="0"/>
 </joint>
 
 
