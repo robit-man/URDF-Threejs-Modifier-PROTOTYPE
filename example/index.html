@@ -9,6 +9,7 @@
 
     <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-bundle.js"></script>
     <script src="../node_modules/three/build/three.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ammo.js/1.0.0/ammo.js"></script>
     <script src="../node_modules/three/examples/js/controls/OrbitControls.js"></script>
     <script src="../node_modules/three/examples/js/loaders/GLTFLoader.js"></script>
     <script src="../node_modules/three/examples/js/loaders/OBJLoader.js"></script>
@@ -604,7 +605,6 @@
                 const visualOriginXYZ = document.getElementById('visual-origin-xyz').value;
                 const visualOriginRPYElement = document.getElementById('visual-origin-rpy');
                 const visualOriginRPY = visualOriginRPYElement.value.split(' ').map(v => parseFloat(v) * Math.PI / 180);
-
                 const linkUrdf = urdfDoc.querySelector(`link[name="${linkName}"]`);
 
                 if (!linkUrdf) {
@@ -612,7 +612,9 @@
                     return;
                 }
 
-                let origin = linkUrdf.querySelector('origin');
+                let visual = linkUrdf.querySelector('visual');
+                let origin = visual.querySelector('origin');
+
                 if (!origin) {
                     origin = urdfDoc.createElement('origin');
                     linkUrdf.appendChild(origin);
@@ -620,6 +622,7 @@
 
                 origin.setAttribute('xyz', visualOriginXYZ);
                 origin.setAttribute('rpy', visualOriginRPY.join(' '));
+                console.log(visualOriginRPY);
 
                 const serializer = new XMLSerializer();
                 const updatedURDF = serializer.serializeToString(urdfDoc);
@@ -756,6 +759,8 @@
 
             const convertedRPY = originRPY.map(value => value * (Math.PI / 180));
 
+            console.log('Converted J : ', convertedRPY)
+
             const positionXYZ = document.getElementById('joint-position-xyz').value.split(' ').map(Number);
             const axisXYZ = document.getElementById('joint-axis-xyz').value.split(' ').map(Number);
             const lowerLimit = parseFloat(document.getElementById('joint-lower-limit').value) * Math.PI / 180;
@@ -768,7 +773,6 @@
                 const euler = new THREE.Euler(...convertedRPY, 'XYZ');
                 quaternion.setFromEuler(euler);
 
-                //console.log(quaternion);
 
 
                 joint.origPosition.set(originXYZ[0], originXYZ[1], originXYZ[2]);
@@ -776,6 +780,8 @@
                 joint.axis = new THREE.Vector3(...axisXYZ);
                 joint.limit = { lower: lowerLimit, upper: upperLimit };
                 joint.position.set(positionXYZ[0], positionXYZ[1], positionXYZ[2]);
+
+                console.log('Joint Quat: ', joint.origQuaternion);
 
                 refreshScene();
             } else {
@@ -785,24 +791,48 @@
 
         function updateLinkVisualProperties() {
             const linkName = document.getElementById('link-selection-save').value;
+           
             const link = viewer.robot.links[linkName];
-
             const meshIndex = link.children.findIndex(child => child instanceof THREE.Mesh);
             const linkValues = link.children[meshIndex];
-
+            console.log(meshIndex);
             const visualOriginXYZ = document.getElementById('visual-origin-xyz').value.split(' ').map(Number);
+            
             const visualOriginRPYElement = document.getElementById('visual-origin-rpy');
+            
             const visualOriginRPY = visualOriginRPYElement.getAttribute('data-unit') === '°' ?
-                visualOriginRPYElement.value.split(' ').map(v => parseFloat(v) * Math.PI / 180) :
-                visualOriginRPYElement.value.split(' ').map(Number);
+            visualOriginRPYElement.value.split(' ').map(v => parseFloat(v)) :
+            visualOriginRPYElement.value.split(' ').map(Number);
 
-            if (viewer && viewer.robot && viewer.robot.links[linkName]) {
-                const quaternion = new THREE.Quaternion();
-                const euler = new THREE.Euler(...visualOriginRPY, 'XYZ');
-                quaternion.setFromEuler(euler);
+            const visualConvertedRPY = visualOriginRPY.map(value => value * (Math.PI / 180));
+            
+            console.log('Converted L : ', visualConvertedRPY)
 
-                linkValues.position.set(visualOriginXYZ[0], visualOriginXYZ[1], visualOriginXYZ[2]);
-                linkValues.quaternion = quaternion;
+            if (viewer && viewer.robot && viewer.robot.links[linkName].children[meshIndex]) {
+                const linkWrite = viewer.robot.links[linkName].children[meshIndex];
+                console.log('Link Pre Write : ', linkWrite)
+
+                const linkQuaternion = new THREE.Quaternion();
+                const linkEuler = new THREE.Euler(...visualConvertedRPY, 'XYZ');
+                linkQuaternion.setFromEuler(linkEuler);
+
+                console.log('Quaternion To X : ', linkQuaternion._x);
+                console.log('Quaternion To Y : ', linkQuaternion._y);
+                console.log('Quaternion To Z : ', linkQuaternion._z);
+                console.log('Quaternion To W : ', linkQuaternion._w);
+                
+
+                linkWrite.position.set(visualOriginXYZ[0], visualOriginXYZ[1], visualOriginXYZ[2]);
+                linkWrite.quaternion._x = linkQuaternion._x;
+                linkWrite.quaternion._y = linkQuaternion._y;
+                linkWrite.quaternion._z = linkQuaternion._z;
+                linkWrite.quaternion._w = linkQuaternion._w;
+                
+                
+                console.log('Link Quaternion X : ', linkWrite.quaternion._x);
+                console.log('Link Quaternion Y : ', linkWrite.quaternion._y);
+                console.log('Link Quaternion Z : ', linkWrite.quaternion._z);
+                console.log('Link Quaternion W : ', linkWrite.quaternion._w);
 
                 refreshScene();
             } else {
@@ -840,12 +870,21 @@
             const link = viewer.robot.links[linkName];
             const meshIndex = link.children.findIndex(child => child instanceof THREE.Mesh);
             const linkValues = link.children[meshIndex];
+            
             if (viewer && viewer.robot && viewer.robot.links[linkName]) {
                 document.getElementById('link-selection-save').value = linkName;
             }
+
+            console.log(link);
+
             if (linkValues.quaternion) {
                 const euler = new THREE.Euler().setFromQuaternion(linkValues.quaternion, 'XYZ');
-                const rpy = [euler.x, euler.y, euler.z].map(r => (r * 180 / Math.PI).toFixed(dynamicPrecision(r * 180 / Math.PI)));
+
+                const rpy = [euler.x, euler.y, euler.z].map(r => {
+                            let degrees = r * 180 / Math.PI;
+                            return degrees.toFixed(dynamicPrecision(degrees));
+                        });
+
                 document.getElementById('visual-origin-rpy').value = rpy.join(' ');
             }
             if (linkValues.position) {
