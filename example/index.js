@@ -51,6 +51,20 @@ viewer.addEventListener('angle-change', e => {
     if (sliders[e.detail]) sliders[e.detail].update();
 });
 
+let lastSelectedJoint = null;
+
+function setTransparency(jointName, isTransparent) {
+    const joint = viewer.robot.joints[jointName];
+    if (joint) {
+        joint.traverse(child => {
+            if (child instanceof THREE.Mesh) {
+                child.material.transparent = true;
+                child.material.opacity = isTransparent ? 0.5 : 1.0; // Set to 50% transparency or fully opaque
+            }
+        });
+    }
+}
+
 viewer.addEventListener('joint-mouseover', e => {
     const jointName = e.detail; // Assuming `e.detail` contains the name of the hovered joint
     const jointSelector = document.getElementById('joint-selector');
@@ -65,6 +79,13 @@ viewer.addEventListener('joint-mouseover', e => {
     if (j) {
         j.setAttribute('robot-hovered', true);
     }
+
+    if (lastSelectedJoint && lastSelectedJoint !== jointName) {
+        setTransparency(lastSelectedJoint, false); // Revert the last selected joint to opaque
+    }
+
+    setTransparency(jointName, true); // Make the current joint transparent
+    lastSelectedJoint = jointName; // Update the last selected joint
 
     // Check if the option exists in the select dropdown, if not, create and append it
     if (!jointOption) {
@@ -81,13 +102,22 @@ viewer.addEventListener('joint-mouseover', e => {
 });
 
 viewer.addEventListener('joint-mouseout', e => {
+    //const jointName = e.detail;
     const j = document.querySelector(`li[joint-name="${e.detail}"]`);
+    //setTransparency(jointName, false); // Revert to opaque when the mouse leaves
     if (j) j.removeAttribute('robot-hovered');
 });
 
-let originalNoAutoRecenter;
+
 viewer.addEventListener('manipulate-start', e => {
-    const j = document.querySelector(`li[joint-name="${e.detail}"]`);
+    const jointName = e.detail; // e.detail should contain the name of the joint being manipulated
+    if (lastSelectedJoint && lastSelectedJoint !== jointName) {
+        setTransparency(lastSelectedJoint, false); // Revert the last selected joint to opaque
+    }
+    setTransparency(jointName, true); // Make the current joint transparent
+    lastSelectedJoint = jointName; // Update the last selected joint
+
+    const j = document.querySelector(`li[joint-name="${jointName}"]`);
     if (j) {
         j.scrollIntoView({ block: 'nearest' });
         window.scrollTo(0, 0);
@@ -99,6 +129,7 @@ viewer.addEventListener('manipulate-start', e => {
 viewer.addEventListener('manipulate-end', e => {
     viewer.noAutoRecenter = originalNoAutoRecenter;
 });
+
 
 viewer.addEventListener('urdf-processed', () => {
     const r = viewer.robot;

@@ -324,10 +324,10 @@
         /* globals viewer */
         /* eslint-disable */
         /* globals viewer */
-
+    
         // Declaring urdfDoc globally
         let urdfDoc;
-
+    
         // Function to edit the current URDF
         function editURDF(urdfContent) {
             // Check if content is provided, if not, fetch using viewer's current URDF setting
@@ -344,17 +344,17 @@
                 urdfDoc = new DOMParser().parseFromString(urdfContent, "text/xml");
             }
         }
-
+    
         // Ensure this function is available globally if needed elsewhere
         window.editURDF = editURDF;
-        
+    
         function applyURDF() {
             const updatedURDFText = document.getElementById('urdf-editor').value; // Get URDF string from textarea
             if (viewer && updatedURDFText) {
                 // Parse the new URDF text to a DOM object
                 const parser = new DOMParser();
                 const urdfDOM = parser.parseFromString(updatedURDFText, "text/xml");
-
+    
                 // Adjust mesh URLs in the URDF DOM
                 const meshElements = urdfDOM.querySelectorAll('[filename]');
                 meshElements.forEach(element => {
@@ -365,28 +365,25 @@
                         element.setAttribute('filename', correctedPath);
                     }
                 });
-
+    
                 // Serialize the DOM back to a string
                 const serializer = new XMLSerializer();
                 const modifiedURDFString = serializer.serializeToString(urdfDOM);
-
+    
                 // Convert modified URDF string to a Blob and set it as the new URDF on the viewer
                 const blob = new Blob([modifiedURDFString], { type: 'text/xml' });
                 const url = URL.createObjectURL(blob);
                 viewer.urdf = url; // Assuming 'viewer.urdf' is a property that can be set to change the URDF
             }
         }
-
-
-
-
+    
         // Function to save the modified URDF content as a local file
         function saveURDF(event) {
             event.preventDefault();
             const updatedContent = document.getElementById('urdf-editor').value;
             const blob = new Blob([updatedContent], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
-
+    
             const a = document.createElement('a');
             a.href = url;
             a.download = 'updated-urdf.urdf';
@@ -395,13 +392,13 @@
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
         }
-
+    
         function toggleLink() {
             const checkbox = document.getElementById('link-toggle');
             const linkImage = document.getElementById('link-img');
-
+    
             checkbox.checked = !checkbox.checked; // Toggle the checkbox state
-
+    
             // Change the image source based on whether the box is checked
             if (checkbox.checked) {
                 linkImage.src = '../example/linked.svg'; // Path to the linked image
@@ -411,126 +408,125 @@
                 linkImage.alt = 'Unlinked';
             }
         }
-
+    
         function syncInputs(source) {
             const linkToggle = document.getElementById('link-toggle');
             if (!linkToggle.checked) {
                 return;
             }
-
+    
             const positionInput = document.getElementById('joint-position-xyz');
             const originInput = document.getElementById('joint-origin-xyz');
             const sourceInput = source === 'position' ? positionInput : originInput;
             const targetInput = source === 'position' ? originInput : positionInput;
-
+    
             targetInput.value = sourceInput.value;
         }
-
+    
         function updateURDF(type) {
-
-            if (type = 'joint') {
-
+            if (type === 'joint') {
                 const jointName = document.getElementById('joint-selection-save').value;
                 const originXYZ = document.getElementById('joint-origin-xyz').value;
-                const originRPY = document.getElementById('joint-origin-rpy').value;
+                const originRPYElement = document.getElementById('joint-origin-rpy');
+                const originRPY = originRPYElement.value.split(' ').map(v => parseFloat(v) * Math.PI / 180);
                 const axisXYZ = document.getElementById('joint-axis-xyz').value;
-                const lowerLimit = document.getElementById('joint-lower-limit').value;
-                const upperLimit = document.getElementById('joint-upper-limit').value;
-
-                // Access the joint element in the URDF XML
+                const lowerLimit = parseFloat(document.getElementById('joint-lower-limit').value) * Math.PI / 180;
+                const upperLimit = parseFloat(document.getElementById('joint-upper-limit').value) * Math.PI / 180;
+    
                 const joint = urdfDoc.querySelector(`joint[name="${jointName}"]`);
-
+    
                 if (!joint) {
                     console.error("Joint not found in the URDF:", jointName);
                     return;
                 }
-
-                // Ensure the 'origin' element exists or create it if not
+    
                 let origin = joint.querySelector('origin');
                 if (!origin) {
                     origin = urdfDoc.createElement('origin');
                     joint.appendChild(origin);
                 }
-
-                // Ensure the 'axis' element exists or create it if not
+    
                 let axis = joint.querySelector('axis');
                 if (!axis) {
                     axis = urdfDoc.createElement('axis');
                     joint.appendChild(axis);
                 }
-
-                // Ensure the 'limit' element exists or create it if not
+    
                 let limit = joint.querySelector('limit');
                 if (!limit) {
                     limit = urdfDoc.createElement('limit');
                     joint.appendChild(limit);
                 }
-
-
-
-                // Set attributes
+    
                 origin.setAttribute('xyz', originXYZ);
-                origin.setAttribute('rpy', originRPY);
+                origin.setAttribute('rpy', originRPY.join(' '));
                 axis.setAttribute('xyz', axisXYZ);
                 limit.setAttribute('lower', lowerLimit);
                 limit.setAttribute('upper', upperLimit);
-
-                // Serialize and update the textarea
+    
                 const serializer = new XMLSerializer();
                 const updatedURDF = serializer.serializeToString(urdfDoc);
                 document.getElementById('urdf-editor').value = updatedURDF;
             }
-
-            if (type = 'link') {
-
-
-                const linkName = document.getElementById('link-selection-save').value; // Ensure you have a way to select links
-                const link = viewer.robot.links[linkName];
-
-                const meshIndex = link.children.findIndex(child => child instanceof THREE.Mesh);
-                const linkValues = link.children[meshIndex];
-
+    
+            if (type === 'link') {
+                const linkName = document.getElementById('link-selection-save').value;
                 const visualOriginXYZ = document.getElementById('visual-origin-xyz').value;
-                const visualOriginRPY = document.getElementById('visual-origin-rpy').value;
-
-                // Access the joint element in the URDF XML
+                const visualOriginRPYElement = document.getElementById('visual-origin-rpy');
+                const visualOriginRPY = visualOriginRPYElement.value.split(' ').map(v => parseFloat(v) * Math.PI / 180);
+    
                 const linkUrdf = urdfDoc.querySelector(`link[name="${linkName}"]`);
-
+    
                 if (!linkUrdf) {
                     console.error("Link not found in the URDF:", linkName);
                     return;
                 }
-
-                // Ensure the 'origin' element exists or create it if not
+    
                 let origin = linkUrdf.querySelector('origin');
                 if (!origin) {
                     origin = urdfDoc.createElement('origin');
                     linkUrdf.appendChild(origin);
                 }
-
-
-                // Set attributes
+    
                 origin.setAttribute('xyz', visualOriginXYZ);
-                origin.setAttribute('rpy', visualOriginRPY);
-
-                // Serialize and update the textarea
+                origin.setAttribute('rpy', visualOriginRPY.join(' '));
+    
                 const serializer = new XMLSerializer();
                 const updatedURDF = serializer.serializeToString(urdfDoc);
                 document.getElementById('urdf-editor').value = updatedURDF;
             }
-
-
         }
-
-
+    
+        function toggleUnit(inputId, buttonId) {
+            const rpyInput = document.getElementById(inputId);
+            const unitToggleBtn = document.getElementById(buttonId);
+            let currentUnit = rpyInput.getAttribute('data-unit') === '°' ? 'degrees' : 'radians';
+    
+            if (currentUnit === 'degrees') {
+                const rpyValues = rpyInput.value.split(' ').map(deg => (parseFloat(deg) * Math.PI / 180).toFixed(4));
+                rpyInput.value = rpyValues.join(' ');
+                rpyInput.setAttribute('data-unit', 'rad');
+                unitToggleBtn.textContent = 'Switch to Degrees';
+                unitToggleBtn.classList.remove('degrees');
+                unitToggleBtn.classList.add('radians');
+            } else {
+                const rpyValues = rpyInput.value.split(' ').map(rad => (parseFloat(rad) * 180 / Math.PI).toFixed(2));
+                rpyInput.value = rpyValues.join(' ');
+                rpyInput.setAttribute('data-unit', '°');
+                unitToggleBtn.textContent = 'Switch to Radians';
+                unitToggleBtn.classList.remove('radians');
+                unitToggleBtn.classList.add('degrees');
+            }
+        }
+    
         function updateURDFContent(newURDF) {
             if (!newURDF || viewer.getAttribute('urdf') === newURDF) return;
-
+    
             // Set new URDF and force reload of the model
             viewer.setAttribute('urdf', newURDF);
             viewer._loadUrdf(viewer.package, newURDF);
         }
-
+    
         // Function to initialize event listeners once the document is ready
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('edit-urdf-btn').addEventListener('click', editURDF);
@@ -540,10 +536,10 @@
             setTimeout(() => {
                 populateJointNames();
                 populateLinkNames();
-
+    
                 document.getElementById('link-selector').addEventListener('change', loadLinkDetails);
                 document.getElementById('joint-selector').addEventListener('change', loadJointDetails);
-
+    
                 if (viewer) {
                     viewer.addEventListener('manipulate-start', function (e) {
                         const jointName = e.detail; // Assuming the event detail contains the joint name
@@ -554,49 +550,49 @@
                 }
             }, 2000); // Ensure URDF data is loaded and delay to setup the event listener
         });
-
+    
         var DEG2RAD = Math.PI / 180;
         window.animToggle = document.getElementById('do-animate');
-
+    
         const lerp = (from, to, ratio) => from + (to - from) * ratio;
-
+    
         const updateAngles = () => {
             if (!viewer.setAngle) return;
-
+    
             // reset everything to 0 first
             const resetangles = viewer.angles;
             for (const name in resetangles) resetangles[name] = 0;
             viewer.setAngles(resetangles);
-
+    
             // animate the legs
             const time = Date.now() / 3e2;
             for (let i = 1; i <= 6; i++) {
                 const offset = i * Math.PI / 3;
                 const ratio = Math.max(0, Math.sin(time + offset));
-
+    
                 viewer.setAngle(`HP${i}`, lerp(30, 0, ratio) * DEG2RAD);
                 viewer.setAngle(`KP${i}`, lerp(90, 150, ratio) * DEG2RAD);
                 viewer.setAngle(`AP${i}`, lerp(-30, -60, ratio) * DEG2RAD);
-
+    
                 viewer.setAngle(`TC${i}A`, lerp(0, 0.065, ratio));
                 viewer.setAngle(`TC${i}B`, lerp(0, 0.065, ratio));
-
+    
                 viewer.setAngle(`W${i}`, window.performance.now() * 0.001);
             }
         };
-
+    
         const updateLoop = () => {
             if (animToggle.classList.contains('checked')) {
                 updateAngles();
             }
             requestAnimationFrame(updateLoop);
         };
-
+    
         document.querySelectorAll('#urdf-options li[urdf]').forEach(el => {
             el.addEventListener('click', e => {
                 const urdf = e.target.getAttribute('urdf');
                 const color = e.target.getAttribute('color');
-
+    
                 viewer.up = '+Y';
                 document.getElementById('up-select').value = viewer.up;
                 viewer.urdf = urdf;
@@ -604,232 +600,218 @@
                 setColor(color);
             });
         });
-
+    
         document.addEventListener('WebComponentsReady', () => {
             animToggle.addEventListener('click', () => animToggle.classList.toggle('checked'));
-
+    
             // stop the animation if user tried to manipulate the model
             viewer.addEventListener('manipulate-start', e => animToggle.classList.remove('checked'));
             viewer.addEventListener('urdf-processed', e => updateAngles());
             updateLoop();
             viewer.camera.position.set(-5.5, 3.5, 5.5);
         });
-
-
+    
         function updateJointProperties() {
+            const originDeg2Rad = Math.PI / 180;
+
             const jointName = document.getElementById('joint-selection-save').value;
             const originXYZ = document.getElementById('joint-origin-xyz').value.split(' ').map(Number);
-            const originRPY = document.getElementById('joint-origin-rpy').value.split(' ').map(v => parseFloat(v) * Math.PI / 180);
-            const positionXYZ = document.getElementById('joint-position-xyz').value.split(' ').map(Number); // Assuming you have a UI input for this
+            const originRPYElement = document.getElementById('joint-origin-rpy');
+
+            console.log(originRPYElement);
+
+            const originRPY = originRPYElement.getAttribute('data-unit') === '°' ?
+                originRPYElement.value.split(' ').map(v => parseFloat(v)) :
+                originRPYElement.value.split(' ').map(Number);
+
+            const convertedRPY = originRPY.map(value => value * (Math.PI / 180));
+
+            const positionXYZ = document.getElementById('joint-position-xyz').value.split(' ').map(Number);
             const axisXYZ = document.getElementById('joint-axis-xyz').value.split(' ').map(Number);
             const lowerLimit = parseFloat(document.getElementById('joint-lower-limit').value) * Math.PI / 180;
             const upperLimit = parseFloat(document.getElementById('joint-upper-limit').value) * Math.PI / 180;
-
+    
             if (viewer && viewer.robot && viewer.robot.joints[jointName]) {
                 const joint = viewer.robot.joints[jointName];
-
-                // Convert RPY to a Quaternion
+    
                 const quaternion = new THREE.Quaternion();
-                const euler = new THREE.Euler(...originRPY, 'XYZ');
+                const euler = new THREE.Euler(...convertedRPY, 'XYZ');
                 quaternion.setFromEuler(euler);
 
-                // Update joint properties
-                joint.origPosition.set(originXYZ[0], originXYZ[1], originXYZ[2]); // Assuming the joint class has origPosition
-                joint.origQuaternion = quaternion; // Assuming the joint class has origQuaternion
+                console.log(quaternion);
+
+    
+                joint.origPosition.set(originXYZ[0], originXYZ[1], originXYZ[2]);
+                joint.origQuaternion = quaternion;
                 joint.axis = new THREE.Vector3(...axisXYZ);
                 joint.limit = { lower: lowerLimit, upper: upperLimit };
                 joint.position.set(positionXYZ[0], positionXYZ[1], positionXYZ[2]);
-
-                console.log(joint);
-                // Refresh scene to apply changes
+    
                 refreshScene();
             } else {
                 console.error("Joint not found or viewer not initialized properly.");
             }
         }
-
+    
         function updateLinkVisualProperties() {
-            const linkName = document.getElementById('link-selection-save').value; // Ensure you have a way to select links
+            const linkName = document.getElementById('link-selection-save').value;
             const link = viewer.robot.links[linkName];
-
+    
             const meshIndex = link.children.findIndex(child => child instanceof THREE.Mesh);
             const linkValues = link.children[meshIndex];
-
+    
             const visualOriginXYZ = document.getElementById('visual-origin-xyz').value.split(' ').map(Number);
-            const visualOriginRPY = document.getElementById('visual-origin-rpy').value.split(' ').map(v => parseFloat(v) * Math.PI / 180);
-
-
+            const visualOriginRPYElement = document.getElementById('visual-origin-rpy');
+            const visualOriginRPY = visualOriginRPYElement.getAttribute('data-unit') === '°' ?
+                visualOriginRPYElement.value.split(' ').map(v => parseFloat(v) * Math.PI / 180) :
+                visualOriginRPYElement.value.split(' ').map(Number);
+    
             if (viewer && viewer.robot && viewer.robot.links[linkName]) {
-                // Set new attributes or create the origin element if it does not exist
-                const link = viewer.robot.links[linkName];
-                // Convert RPY to a Quaternion
                 const quaternion = new THREE.Quaternion();
                 const euler = new THREE.Euler(...visualOriginRPY, 'XYZ');
                 quaternion.setFromEuler(euler);
-
-                // Update joint properties
-                linkValues.position.set(visualOriginXYZ[0], visualOriginXYZ[1], visualOriginXYZ[2]); // Assuming the joint class has origPosition
-                linkValues.quaternion = quaternion; // Assuming the joint class has origQuaternion
-
-
-                // Find the link in the URDF XML
-                console.log(linkValues.position);
-                console.log(linkValues.quaternion);
-                // Refresh scene to apply changes
+    
+                linkValues.position.set(visualOriginXYZ[0], visualOriginXYZ[1], visualOriginXYZ[2]);
+                linkValues.quaternion = quaternion;
+    
                 refreshScene();
             } else {
                 console.error("Link not found in the URDF:", linkName);
             }
         }
-
-
+    
         function refreshScene() {
             if (viewer && typeof viewer.updateScene === 'function') {
-                viewer.updateScene(); // Assuming your viewer has an 'updateScene' method
+                viewer.updateScene();
             } else {
-                // Fallback: manually trigger the necessary updates and re-render
                 viewer.scene.updateMatrixWorld(true);
                 if (viewer.controls) {
-                    viewer.controls.update(); // Update controls after modifying the scene
+                    viewer.controls.update();
                 }
                 if (typeof render === 'function') {
-                    render(); // Call your rendering function if it's defined
+                    render();
                 }
             }
-            console.log('refreshed');
         }
-
+    
         function dynamicPrecision(value) {
-            // Handle zero separately to avoid unnecessary decimals
             if (value === 0) return 0;
-
             const absValue = Math.abs(value);
             if (absValue < 0.0001) return 4;
             if (absValue < 0.001) return 3;
             if (absValue < 0.01) return 2;
             if (absValue < 0.1) return 2;
-            return 1; // Default to 1 decimal for values larger than 0.1
+            return 1;
         }
-
-
+    
         function loadLinkDetails() {
             const linkSelector = document.getElementById('link-selector');
             const linkName = linkSelector.value;
             const link = viewer.robot.links[linkName];
-
             const meshIndex = link.children.findIndex(child => child instanceof THREE.Mesh);
             const linkValues = link.children[meshIndex];
-
             if (viewer && viewer.robot && viewer.robot.links[linkName]) {
                 document.getElementById('link-selection-save').value = linkName;
-
             }
             if (linkValues.quaternion) {
                 const euler = new THREE.Euler().setFromQuaternion(linkValues.quaternion, 'XYZ');
                 const rpy = [euler.x, euler.y, euler.z].map(r => (r * 180 / Math.PI).toFixed(dynamicPrecision(r * 180 / Math.PI)));
-
                 document.getElementById('visual-origin-rpy').value = rpy.join(' ');
-
-            } if (linkValues.position) {
-
+            }
+            if (linkValues.position) {
                 document.getElementById('visual-origin-xyz').value = linkValues.position.toArray().join(' ');
-
             } else {
                 console.error("Quaternion is undefined for the link:", linkName);
             }
         }
-
+    
         function loadJointDetails() {
             const jointSelector = document.getElementById('joint-selector');
             const jointName = jointSelector.value;
-
+    
             if (viewer && viewer.robot && viewer.robot.joints[jointName]) {
                 const joint = viewer.robot.joints[jointName];
+    
                 if (joint.origQuaternion) {
-                    const euler = new THREE.Euler().setFromQuaternion(joint.origQuaternion, 'XYZ');
-                    const rpy = [euler.x, euler.y, euler.z].map(r => (r * 180 / Math.PI).toFixed(dynamicPrecision(r * 180 / Math.PI)));
+                    if (joint.origQuaternion.isQuaternion === true) {
+                        const euler = new THREE.Euler().setFromQuaternion(joint.origQuaternion, 'XYZ');
+                        console.log(joint.origQuaternion);
 
-                    document.getElementById('joint-selection-save').value = jointName;
-                    document.getElementById('joint-origin-xyz').value = joint.origPosition.toArray().join(' ');
-                    document.getElementById('joint-origin-rpy').value = rpy.join(' ');
-                    document.getElementById('joint-position-xyz').value = joint.position.toArray().join(' ');
-                    document.getElementById('joint-axis-xyz').value = [joint.axis.x, joint.axis.y, joint.axis.z].map(x => x.toFixed(dynamicPrecision(x))).join(' ');
-                    document.getElementById('joint-lower-limit').value = (joint.limit.lower * 180 / Math.PI).toFixed(dynamicPrecision(joint.limit.lower * 180 / Math.PI));
-                    document.getElementById('joint-upper-limit').value = (joint.limit.upper * 180 / Math.PI).toFixed(dynamicPrecision(joint.limit.upper * 180 / Math.PI));
+                        const rpy = [euler.x, euler.y, euler.z].map(r => {
+                            let degrees = r * 180 / Math.PI;
+                            return degrees.toFixed(dynamicPrecision(degrees));
+                        });
+                        console.log(rpy);
+    
+                        document.getElementById('joint-selection-save').value = jointName;
+                        document.getElementById('joint-origin-xyz').value = joint.origPosition.toArray().join(' ');
+                        document.getElementById('joint-origin-rpy').value = rpy.join(' ');
+                        document.getElementById('joint-position-xyz').value = joint.position.toArray().join(' ');
+                        document.getElementById('joint-axis-xyz').value = [joint.axis.x, joint.axis.y, joint.axis.z].map(x => x.toFixed(dynamicPrecision(x))).join(' ');
+                        document.getElementById('joint-lower-limit').value = (joint.limit.lower * 180 / Math.PI).toFixed(dynamicPrecision(joint.limit.lower * 180 / Math.PI));
+                        document.getElementById('joint-upper-limit').value = (joint.limit.upper * 180 / Math.PI).toFixed(dynamicPrecision(joint.limit.upper * 180 / Math.PI));
+                    } else {
+                        console.error("Invalid Quaternion object for the joint:", jointName);
+                    }
                 } else {
                     console.error("Quaternion is undefined for the joint:", jointName);
                 }
             } else {
                 console.error("Joint not found or viewer not initialized properly.");
             }
-            //console.log('Loaded joint details for:', jointName);
         }
-
+    
         function populateJointNames() {
             const jointSelector = document.getElementById('joint-selector');
             if (viewer && viewer.robot) {
-                jointSelector.innerHTML = ''; // Clear existing options
+                jointSelector.innerHTML = '';
                 Object.keys(viewer.robot.joints).forEach(jointName => {
                     const option = document.createElement('option');
                     option.value = jointName;
                     option.textContent = jointName;
                     jointSelector.appendChild(option);
                 });
-                console.log('populated joint list');
             }
         }
-
+    
         function populateLinkNames() {
             const linkSelector = document.getElementById('link-selector');
             if (viewer && viewer.robot) {
-                linkSelector.innerHTML = ''; // Clear existing options
+                linkSelector.innerHTML = '';
                 Object.keys(viewer.robot.links).forEach(linkName => {
                     const option = document.createElement('option');
                     option.value = linkName;
                     option.textContent = linkName;
                     linkSelector.appendChild(option);
                 });
-                console.log('populated link list');
-
             }
         }
-
-
-
-
+    
         document.addEventListener('DOMContentLoaded', () => {
-            // Assuming URDFViewer is already initialized and populated with the robot model
             setTimeout(() => {
-
                 populateJointNames();
                 populateLinkNames();
-
                 document.getElementById('link-selector').addEventListener('change', function () {
-                    loadLinkDetails(); // Load details of the selected link into input fields
+                    loadLinkDetails();
                 });
-
                 document.getElementById('joint-selector').addEventListener('change', function () {
-                    loadJointDetails(); // Load the details of the selected joint into the input fields
+                    loadJointDetails();
                 });
-                // Add listener to the viewer for joint click events
                 if (viewer) {
                     viewer.addEventListener('manipulate-start', function (e) {
-                        const jointName = e.detail; // Assuming the event detail contains the joint name
+                        const jointName = e.detail;
                         const jointSelector = document.getElementById('joint-selector');
                         jointSelector.value = jointName;
-                        loadJointDetails(); // Load the details of the clicked joint into the input fields
-
-                        const linkSelector = document.getElementById('link-selector');
-                        loadLinkDetails(); // Load the details of the clicked joint into the input fields
-
-
+                        loadJointDetails();
+                        loadLinkDetails();
                     });
                 }
-            }, 2000); // Ensure URDF data is loaded and delay to setup the event listener
+            }, 2000);
         });
-
-
+    
     </script>
+    
+    
 
 </body>
 
