@@ -164,9 +164,9 @@
 <joint name="right_hip_pitch_joint" type="revolute">
     <parent link="right_hip_roll_motor"/>
     <child link="right_hip_pitch_knee_motors"/>
-    <origin xyz="0 -5 2" rpy="-0.1745329 0 0"/>
+    <origin xyz="0 -5 2" rpy="0.17453292519943295 0 0"/>
     <axis xyz="0 0 1.0"/>
-    <limit lower="-90.0" upper="90.0" effort="0" velocity="0"/>
+    <limit lower="-89.9996482083396" upper="89.9996482083396" effort="0" velocity="0"/>
 </joint>
 
 <!-- Right Hip-Pitch Knee Front and Rear Brackets -->
@@ -242,9 +242,9 @@
 <joint name="right_ankle_joint" type="revolute">
     <parent link="right_calf"/>
     <child link="right_ankle"/>
-    <origin xyz="2.2 -21.5 3" rpy="-10.0 90.0 0"/>
+    <origin xyz="2.2 -21.5 3" rpy="0 1.5707963267948966 0"/>
     <axis xyz="1.0 0 0"/>
-    <limit lower="-90.0" upper="90.0" effort="0" velocity="0"/>
+    <limit lower="-89.9996482083396" upper="89.9996482083396" effort="0" velocity="0"/>
 </joint>
 
 <link name="right_foot">
@@ -258,9 +258,9 @@
 <joint name="right_foot_joint" type="revolute">
     <parent link="right_ankle"/>
     <child link="right_foot"/>
-    <origin xyz="0 -2 1.2" rpy="0 -90.0 0"/>
+    <origin xyz="0 -2 1.2" rpy="0 -1.5707963267948966 0"/>
     <axis xyz="1.0 0 0"/>
-    <limit lower="-90.0" upper="90.0" effort="0" velocity="0"/>
+    <limit lower="-89.9996482083396" upper="89.9996482083396" effort="0" velocity="0"/>
 </joint>
 
 

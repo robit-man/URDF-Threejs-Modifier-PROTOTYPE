@@ -97,7 +97,7 @@ class URDFViewer extends HTMLElement {
         renderer.gammaOutput = true;
 
         // Camera setup
-        const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+        const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 2000);
         camera.position.z = -10;
 
         // World setup
@@ -121,7 +121,7 @@ class URDFViewer extends HTMLElement {
         controls.panSpeed = 2;
         controls.enableZoom = true;
         controls.enableDamping = false;
-        controls.maxDistance = 50;
+        controls.maxDistance = 150;
         controls.minDistance = 0.25;
         controls.addEventListener('change', () => this.recenter());
 

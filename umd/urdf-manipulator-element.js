@@ -2685,7 +2685,7 @@
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       renderer.gammaOutput = true; // Camera setup
 
-      var camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+      var camera = new THREE.PerspectiveCamera(75, 1, 0.1, 2000);
       camera.position.z = -10; // World setup
 
       var world = new THREE.Object3D();
@@ -2707,7 +2707,7 @@
       controls.panSpeed = 2;
       controls.enableZoom = true;
       controls.enableDamping = false;
-      controls.maxDistance = 50;
+      controls.maxDistance = 150;
       controls.minDistance = 0.25;
       controls.addEventListener('change', function () {
         return _this.recenter();
