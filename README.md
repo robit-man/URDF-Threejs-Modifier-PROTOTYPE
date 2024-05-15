@@ -5,7 +5,7 @@
 
 Fork of [gkjohnson/urdf-loaders](https://github.com/gkjohnson/urdf-loaders) with only the JS component, and (soon) incorporating deeper sim2real control of systems connected over serial / websockets.
 
-![image](https://github.com/robit-man/URDF-Threejs-Modifier/assets/36677806/0efaea1c-8c84-412f-ae0c-14dc188b19da)
+![Uploading image.png…]()
 
 # Project Overview
 
@@ -15,8 +15,13 @@ As projects progress, changes are made to robots that will affect RL policies, o
 
 # To Be Developed:
 
-- URDF Export after modification
+- ~~URDF Export after modification~~
 - URDF Mesh Manipulation in multiple modalities
+- Support drop of URDF only and use existing meshes that have been uploaded prior
+- Support for VR input to control appendages
+- Close-Loop kinematics from URDF
+- AmmoJS Physics for accurate display of URDF inertial characteristics
+- Application of linear AND dynamic animations (dynamic form RL policy import)
 - Multi-modal Communication Protocol for interaction with low-level hardware
 - Handling of sensor data (imu, encoders) and appropriate application to joints and links
 - Refined description of the above components, integrations libraries to support mentioned goals
