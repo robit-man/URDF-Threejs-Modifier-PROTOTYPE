@@ -16,6 +16,7 @@ As projects progress, changes are made to robots that will affect RL policies, o
 # To Be Developed:
 
 - ~~URDF Export after modification~~
+- ~~Degrees as input for YPR, and bi-directional conversion from RAD in urdf and Quaternion in threejs~~
 - URDF Mesh Manipulation in multiple modalities
 - Support drop of URDF only and use existing meshes that have been uploaded prior
 - Support for VR input to control appendages
