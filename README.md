@@ -5,7 +5,7 @@
 
 Fork of [gkjohnson/urdf-loaders](https://github.com/gkjohnson/urdf-loaders) with only the JS component, and (soon) incorporating deeper sim2real control of systems connected over serial / websockets.
 
-![image](https://github.com/robit-man/URDF-Threejs-Modifier/assets/36677806/bf725a51-e88f-4cb9-b4b4-76af14e4b7f5)
+![image](https://github.com/robit-man/URDF-Threejs-Modifier/assets/36677806/0efaea1c-8c84-412f-ae0c-14dc188b19da)
 
 # Project Overview
 
@@ -20,16 +20,6 @@ As projects progress, changes are made to robots that will affect RL policies, o
 - Multi-modal Communication Protocol for interaction with low-level hardware
 - Handling of sensor data (imu, encoders) and appropriate application to joints and links
 - Refined description of the above components, integrations libraries to support mentioned goals
-
-### Community Notes -------->
-
-
-
-
-
-
-
-### Community Notes -------->
 
 # Dev
 
