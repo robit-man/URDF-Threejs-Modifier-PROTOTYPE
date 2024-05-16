@@ -1,7 +1,7 @@
 [![Group 2](https://github.com/robit-man/dropbear-neck-assembly/assets/36677806/bd13c6f5-7a3f-4262-9891-4259f17abbe0)](https://t.me/fractionalrobots)
 
 
-# urdf-js mod - Work In Progress
+# URDF-ThreeJS EDITOR WebApp
 
 Fork of [gkjohnson/urdf-loaders](https://github.com/gkjohnson/urdf-loaders) with only the JS component, and (soon) incorporating deeper sim2real control of systems connected over serial / websockets.
 
