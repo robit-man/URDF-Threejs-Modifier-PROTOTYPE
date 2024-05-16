@@ -45,7 +45,6 @@
     "@babel/preset-env": "^7.6.3",
     "@webcomponents/webcomponentsjs": "^2.0.0",
     "concurrently": "^4.0.1",
-    "eslint": "^5.14.1",
     "jest": "^24.1.0",
     "jest-cli": "^24.1.0",
     "nyc": "^13.3.0",
