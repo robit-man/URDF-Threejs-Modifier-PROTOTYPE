@@ -5,7 +5,9 @@
   "main": "umd/URDFLoader.js",
   "scripts": {
     "start": "concurrently --kill-others \"rollup -c -w\" \"static-server\"",
-    "build": "rollup -c && cd example && webpack",
+    "build:rollup": "rollup -c",
+    "build:webpack": "cd example && webpack --config ../webpack.config.js",
+    "build": "npm run build:rollup && npm run build:webpack",
     "test": "rollup -c && jest",
     "lint": "eslint src/*.js ./test/*.js",
     "coverage": "nyc report --reporter=html & opn coverage/index.html"
@@ -20,12 +22,12 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rapyuta-robotics/urdf-js.git"
+    "url": "git+https:///rapyuta-robotics/urdf-js.git"
   },
   "bugs": {
-    "url": "https://github.com/rapyuta-robotics/urdf-js/issues"
+    "url": "https://github.com//rapyuta-robotics/urdf-js/issues"
   },
-  "homepage": "https://github.com/rapyuta-robotics/urdf-js#readme",
+  "homepage": "https://github.com//rapyuta-robotics/urdf-js#readme",
   "keywords": [
     "javascript",
     "threejs",
@@ -45,19 +47,22 @@
     "@babel/preset-env": "^7.6.3",
     "@webcomponents/webcomponentsjs": "^2.0.0",
     "concurrently": "^4.0.1",
-    "eslint": "5.14.1",
+    "eslint": "^5.14.1",
+    "file-loader": "^6.2.0",
+    "html-loader": "^0.5.5",
     "jest": "^24.1.0",
     "jest-cli": "^24.1.0",
     "nyc": "^13.3.0",
     "opn-cli": "^3.1.0",
     "puppeteer": "^1.19.0",
     "puppeteer-to-istanbul": "^1.2.2",
-    "rollup": "^1.16.7",
+    "rollup": "^2.57.5",
     "rollup-plugin-babel": "^4.3.3",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-svg": "^2.0.0",
     "script-loader": "^0.7.0",
     "static-server": "^3.0.0",
+    "svg-inline-loader": "^0.8.2",
     "three": "^0.109.0",
     "threejs-model-loader": "0.0.1",
     "wc-loader": "^1.1.12",
@@ -70,11 +75,5 @@
     "start": "^5.1.0",
     "three-mesh-bvh": "^0.1.4",
     "xacro-parser": "^0.3.9"
-  },
-  "resolutions": {
-    "ajv": "^6.12.6",
-    "html-minifier": "^4.0.0",
-    "trim-newlines": "^3.0.1",
-    "schema-utils": "^3.0.0"
   }
 }
