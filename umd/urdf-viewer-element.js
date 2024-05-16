@@ -1,8 +1,28 @@
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('three'), require('three/examples/js/controls/OrbitControls'), require('three/examples/jsm/loaders/STLLoader.js'), require('three/examples/jsm/loaders/ColladaLoader.js'), require('three-mesh-bvh')) :
   typeof define === 'function' && define.amd ? define(['three', 'three/examples/js/controls/OrbitControls', 'three/examples/jsm/loaders/STLLoader.js', 'three/examples/jsm/loaders/ColladaLoader.js', 'three-mesh-bvh'], factory) :
-  (global = global || self, global.URDFViewer = factory(global.THREE, global.THREE, global.THREE, global.THREE, global.THREE));
-}(this, (function (THREE, OrbitControls, STLLoader_js, ColladaLoader_js, threeMeshBvh) { 'use strict';
+  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.URDFViewer = factory(global.THREE, global.THREE, global.THREE, global.THREE, global.THREE));
+})(this, (function (THREE, OrbitControls, STLLoader_js, ColladaLoader_js, threeMeshBvh) { 'use strict';
+
+  function _interopNamespace(e) {
+    if (e && e.__esModule) return e;
+    var n = Object.create(null);
+    if (e) {
+      Object.keys(e).forEach(function (k) {
+        if (k !== 'default') {
+          var d = Object.getOwnPropertyDescriptor(e, k);
+          Object.defineProperty(n, k, d.get ? d : {
+            enumerable: true,
+            get: function () { return e[k]; }
+          });
+        }
+      });
+    }
+    n["default"] = e;
+    return Object.freeze(n);
+  }
+
+  var THREE__namespace = /*#__PURE__*/_interopNamespace(THREE);
 
   function _AsyncGenerator(e) {
     var r, t;
@@ -3108,8 +3128,8 @@
 
   */
 
-  var tempQuaternion = new THREE.Quaternion();
-  var tempEuler = new THREE.Euler();
+  var tempQuaternion = new THREE__namespace.Quaternion();
+  var tempEuler = new THREE__namespace.Euler();
 
   // take a vector "x y z" and process it into
   // an array [x, y, z]
@@ -3138,7 +3158,7 @@
     function URDFLoader(manager) {
       var allowMeshBVH = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
       _classCallCheck(this, URDFLoader);
-      this.manager = manager || THREE.DefaultLoadingManager;
+      this.manager = manager || THREE__namespace.DefaultLoadingManager;
       this.allowMeshBVH = allowMeshBVH;
       this.retryMap = {};
     }
@@ -3153,7 +3173,7 @@
         // Check if a full URI is specified before
         // prepending the package info
         var manager = this.manager;
-        var workingPath = THREE.LoaderUtils.extractUrlBase(urdf);
+        var workingPath = THREE__namespace.LoaderUtils.extractUrlBase(urdf);
         var urdfPath = this.manager.resolveURL(urdf);
         var errors = {};
         var managerOnErrorDefault = function managerOnErrorDefault() {};
@@ -3353,7 +3373,7 @@
             var axisXYZ = axisNode.getAttribute('xyz').split(/\s+/g).map(function (num) {
               return parseFloat(num);
             });
-            obj.axis = new THREE.Vector3(axisXYZ[0], axisXYZ[1], axisXYZ[2]);
+            obj.axis = new THREE__namespace.Vector3(axisXYZ[0], axisXYZ[1], axisXYZ[2]);
             obj.axis.normalize();
           }
           return obj;
@@ -3393,7 +3413,7 @@
         function processMaterial(node) {
           var _this5 = this;
           var matNodes = _toConsumableArray(node.children);
-          var material = new THREE.MeshPhongMaterial();
+          var material = new THREE__namespace.MeshPhongMaterial();
           material.name = node.getAttribute('name') || '';
           matNodes.forEach(function (n) {
             var type = n.nodeName.toLowerCase();
@@ -3405,7 +3425,7 @@
               material.opacity = rgba[3];
               material.transparent = rgba[3] < 1;
             } else if (type === 'texture') {
-              var loader = new THREE.TextureLoader(manager);
+              var loader = new THREE__namespace.TextureLoader(manager);
               var filename = n.getAttribute('filename');
               var filePath = resolvePath(filename);
               var onError = function onError() {
@@ -3451,7 +3471,7 @@
               material = processMaterial.call(this, materialNode);
             }
           } else {
-            material = new THREE.MeshPhongMaterial();
+            material = new THREE__namespace.MeshPhongMaterial();
           }
           children.forEach(function (n) {
             var type = n.nodeName.toLowerCase();
@@ -3472,7 +3492,7 @@
                         return loadMeshCb(filePath, manager, cb);
                       };
                     } else if (obj) {
-                      if (obj instanceof THREE.Mesh) {
+                      if (obj instanceof THREE__namespace.Mesh) {
                         obj.material = material;
                         if (_this6.allowMeshBVH) {
                           obj.raycast = threeMeshBvh.acceleratedRaycast;
@@ -3499,8 +3519,8 @@
                   loadMeshCb(filePath, manager, cb);
                 }
               } else if (geoType === 'box') {
-                primitiveModel = new THREE.Mesh();
-                primitiveModel.geometry = new THREE.BoxBufferGeometry(1, 1, 1);
+                primitiveModel = new THREE__namespace.Mesh();
+                primitiveModel.geometry = new THREE__namespace.BoxBufferGeometry(1, 1, 1);
                 primitiveModel.material = material;
                 if (_this6.allowMeshBVH) {
                   primitiveModel.raycast = threeMeshBvh.acceleratedRaycast;
@@ -3513,8 +3533,8 @@
                   makeURDFCollider(primitiveModel);
                 }
               } else if (geoType === 'sphere') {
-                primitiveModel = new THREE.Mesh();
-                primitiveModel.geometry = new THREE.SphereBufferGeometry(1, 30, 30);
+                primitiveModel = new THREE__namespace.Mesh();
+                primitiveModel.geometry = new THREE__namespace.SphereBufferGeometry(1, 30, 30);
                 primitiveModel.material = material;
                 if (_this6.allowMeshBVH) {
                   primitiveModel.raycast = threeMeshBvh.acceleratedRaycast;
@@ -3527,8 +3547,8 @@
                   makeURDFCollider(primitiveModel);
                 }
               } else if (geoType === 'cylinder') {
-                primitiveModel = new THREE.Mesh();
-                primitiveModel.geometry = new THREE.CylinderBufferGeometry(1, 1, 1, 30);
+                primitiveModel = new THREE__namespace.Mesh();
+                primitiveModel.geometry = new THREE__namespace.CylinderBufferGeometry(1, 1, 1, 30);
                 primitiveModel.material = material;
                 if (_this6.allowMeshBVH) {
                   primitiveModel.raycast = threeMeshBvh.acceleratedRaycast;
@@ -3567,7 +3587,7 @@
         if (/\.stl(?:\?|$)/i.test(path)) {
           var loader = new STLLoader_js.STLLoader(manager);
           loader.load(path, function (geom) {
-            var mesh = new THREE.Mesh(geom, new THREE.MeshPhongMaterial());
+            var mesh = new THREE__namespace.Mesh(geom, new THREE__namespace.MeshPhongMaterial());
             done(mesh);
           });
         } else if (/\.dae(?:\?|$)/i.test(path)) {
@@ -3620,7 +3640,7 @@
     if (params.origin) {
       var _this$origin;
       (_this$origin = this.origin).set.apply(_this$origin, _toConsumableArray(params.origin.xyz));
-      var euler = _construct(THREE.Euler, _toConsumableArray(params.origin.rpy).concat(['XYZ']));
+      var euler = _construct(THREE__namespace.Euler, _toConsumableArray(params.origin.rpy).concat(['XYZ']));
       this.origQuaternion.setFromEuler(euler);
     }
     if (params.axis) {
@@ -3731,15 +3751,15 @@
       _this.urlModifierFunc = null;
 
       // Scene setup
-      var scene = new THREE.Scene();
-      var ambientLight = new THREE.HemisphereLight(_this.ambientColor, '#000');
+      var scene = new THREE__namespace.Scene();
+      var ambientLight = new THREE__namespace.HemisphereLight(_this.ambientColor, '#000');
       ambientLight.groundColor.lerp(ambientLight.color, 0.5);
       ambientLight.intensity = 0.5;
       ambientLight.position.set(0, 1, 0);
       scene.add(ambientLight);
 
       // Light setup
-      var dirLight = new THREE.DirectionalLight(0xffffff);
+      var dirLight = new THREE__namespace.DirectionalLight(0xffffff);
       dirLight.position.set(4, 10, 1);
       dirLight.shadow.mapSize.width = 2048;
       dirLight.shadow.mapSize.height = 2048;
@@ -3748,25 +3768,25 @@
       scene.add(dirLight.target);
 
       // Renderer setup
-      var renderer = new THREE.WebGLRenderer({
+      var renderer = new THREE__namespace.WebGLRenderer({
         antialias: true,
         alpha: true
       });
       renderer.setClearColor(0xffffff);
       renderer.setClearAlpha(0);
       renderer.shadowMap.enabled = true;
-      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.shadowMap.type = THREE__namespace.PCFSoftShadowMap;
       renderer.gammaOutput = true;
 
       // Camera setup
-      var camera = new THREE.PerspectiveCamera(75, 1, 0.1, 2000);
+      var camera = new THREE__namespace.PerspectiveCamera(75, 1, 0.1, 2000);
       camera.position.z = -10;
 
       // World setup
-      var world = new THREE.Object3D();
+      var world = new THREE__namespace.Object3D();
       scene.add(world);
-      var plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(40, 40), new THREE.ShadowMaterial({
-        side: THREE.DoubleSide,
+      var plane = new THREE__namespace.Mesh(new THREE__namespace.PlaneBufferGeometry(40, 40), new THREE__namespace.ShadowMaterial({
+        side: THREE__namespace.DoubleSide,
         transparent: true,
         opacity: 0.5
       }));
@@ -3958,7 +3978,7 @@
         var r = this.renderer;
         var w = this.clientWidth;
         var h = this.clientHeight;
-        var currsize = new THREE.Vector2();
+        var currsize = new THREE__namespace.Vector2();
         r.getSize(currsize);
         if (currsize.width !== w || currsize.height !== h) {
           this.recenter();
@@ -4013,8 +4033,8 @@
       value: function _updateEnvironment() {
         if (!this.robot) return;
         this.world.updateMatrixWorld();
-        var bbox = new THREE.Box3();
-        var temp = new THREE.Box3();
+        var bbox = new THREE__namespace.Box3();
+        var temp = new THREE__namespace.Box3();
         this.robot.traverse(function (c) {
           var geometry = c.geometry;
           if (geometry) {
@@ -4026,7 +4046,7 @@
             bbox.union(temp);
           }
         });
-        var center = bbox.getCenter(new THREE.Vector3());
+        var center = bbox.getCenter(new THREE__namespace.Vector3());
         this.controls.target.y = center.y;
         this.plane.position.y = bbox.min.y - 1e-3;
         var dirLight = this.directionalLight;
@@ -4035,7 +4055,7 @@
           // Update the shadow camera rendering bounds to encapsulate the
           // model. We use the bounding sphere of the bounding box for
           // simplicity -- this could be a tighter fit.
-          var sphere = bbox.getBoundingSphere(new THREE.Sphere());
+          var sphere = bbox.getBoundingSphere(new THREE__namespace.Sphere());
           var minmax = sphere.radius;
           var cam = dirLight.shadow.camera;
           cam.left = cam.bottom = -minmax;
@@ -4099,11 +4119,11 @@
                 c.receiveShadow = true;
                 if (c.material) {
                   var mats = (Array.isArray(c.material) ? c.material : [c.material]).map(function (m) {
-                    if (m instanceof THREE.MeshBasicMaterial) {
-                      m = new THREE.MeshPhongMaterial();
+                    if (m instanceof THREE__namespace.MeshBasicMaterial) {
+                      m = new THREE__namespace.MeshPhongMaterial();
                     }
                     if (m.map) {
-                      m.map.encoding = THREE.GammaEncoding;
+                      m.map.encoding = THREE__namespace.GammaEncoding;
                     }
                     return m;
                   });
@@ -4130,7 +4150,7 @@
             }, {});
           }
           var robot = null;
-          var manager = new THREE.LoadingManager();
+          var manager = new THREE__namespace.LoadingManager();
           manager.onLoad = function () {
             // If another request has come in to load a new
             // robot, then ignore this one
@@ -4231,5 +4251,5 @@
 
   return URDFViewer;
 
-})));
+}));
 //# sourceMappingURL=urdf-viewer-element.js.map
