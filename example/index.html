@@ -248,6 +248,11 @@
             width: auto;
         }
 
+        #controls li span {
+            margin-left: unset !important;
+            padding-left: unset !important;
+        }
+
         button {
             background: #fff5;
             color: white;
@@ -791,21 +796,21 @@
 
         function updateLinkVisualProperties() {
             const linkName = document.getElementById('link-selection-save').value;
-           
+
             const link = viewer.robot.links[linkName];
             const meshIndex = link.children.findIndex(child => child instanceof THREE.Mesh);
             const linkValues = link.children[meshIndex];
             console.log(meshIndex);
             const visualOriginXYZ = document.getElementById('visual-origin-xyz').value.split(' ').map(Number);
-            
+
             const visualOriginRPYElement = document.getElementById('visual-origin-rpy');
-            
+
             const visualOriginRPY = visualOriginRPYElement.getAttribute('data-unit') === '°' ?
-            visualOriginRPYElement.value.split(' ').map(v => parseFloat(v)) :
-            visualOriginRPYElement.value.split(' ').map(Number);
+                visualOriginRPYElement.value.split(' ').map(v => parseFloat(v)) :
+                visualOriginRPYElement.value.split(' ').map(Number);
 
             const visualConvertedRPY = visualOriginRPY.map(value => value * (Math.PI / 180));
-            
+
             console.log('Converted L : ', visualConvertedRPY)
 
             if (viewer && viewer.robot && viewer.robot.links[linkName].children[meshIndex]) {
@@ -820,15 +825,15 @@
                 console.log('Quaternion To Y : ', linkQuaternion._y);
                 console.log('Quaternion To Z : ', linkQuaternion._z);
                 console.log('Quaternion To W : ', linkQuaternion._w);
-                
+
 
                 linkWrite.position.set(visualOriginXYZ[0], visualOriginXYZ[1], visualOriginXYZ[2]);
                 linkWrite.quaternion._x = linkQuaternion._x;
                 linkWrite.quaternion._y = linkQuaternion._y;
                 linkWrite.quaternion._z = linkQuaternion._z;
                 linkWrite.quaternion._w = linkQuaternion._w;
-                
-                
+
+
                 console.log('Link Quaternion X : ', linkWrite.quaternion._x);
                 console.log('Link Quaternion Y : ', linkWrite.quaternion._y);
                 console.log('Link Quaternion Z : ', linkWrite.quaternion._z);
@@ -870,7 +875,7 @@
             const link = viewer.robot.links[linkName];
             const meshIndex = link.children.findIndex(child => child instanceof THREE.Mesh);
             const linkValues = link.children[meshIndex];
-            
+
             if (viewer && viewer.robot && viewer.robot.links[linkName]) {
                 document.getElementById('link-selection-save').value = linkName;
             }
@@ -881,9 +886,9 @@
                 const euler = new THREE.Euler().setFromQuaternion(linkValues.quaternion, 'XYZ');
 
                 const rpy = [euler.x, euler.y, euler.z].map(r => {
-                            let degrees = r * 180 / Math.PI;
-                            return degrees.toFixed(dynamicPrecision(degrees));
-                        });
+                    let degrees = r * 180 / Math.PI;
+                    return degrees.toFixed(dynamicPrecision(degrees));
+                });
 
                 document.getElementById('visual-origin-rpy').value = rpy.join(' ');
             }

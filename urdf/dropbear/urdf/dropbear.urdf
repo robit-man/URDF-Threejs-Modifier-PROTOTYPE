@@ -3,265 +3,199 @@
     <!-- Torso Link -->
     <link name="torso">
         <visual>
-<origin xyz="0 0 0" rpy="0 0 0"/>
+            <origin xyz="5 26 -2.35" rpy="0 0 0"/>
             <geometry>
                 <mesh filename="../meshes/torso.stl" scale="0.05 0.05 0.05"/>
             </geometry>
         </visual>
     </link>
+    
+    <joint name="torso_to_hips_joint" type="fixed">
+        <parent link="torso"/>
+        <child link="hipRollAssembly"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <axis xyz="0 1 0"/>
+        <limit lower="-45.0" upper="45.0"/>
+    </joint>
 
-    <!-- Hips Link -->
-    <link name="hips">
+    <!-- Hip Roll Assembly -->
+    <link name="hipRollAssembly">
         <visual>
-<origin xyz="0 0 0" rpy="0 0 0"/>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
                 <mesh filename="../meshes/hipRollAssembly.stl" scale="0.05 0.05 0.05"/>
             </geometry>
         </visual>
     </link>
+    
+    <!-- Right Hip Roll Motor -->
+    <link name="rightHipRollMotor">
+        <visual>
+            <origin xyz="0 0 1" rpy="-0.17453292519943295 0 0"/>
+            <geometry>
+                <mesh filename="../meshes/rightHipRollMotor.stl" scale="0.05 0.05 0.05"/>
+            </geometry>
+        </visual>
+    </link>
+    <joint name="hipRollAssembly_to_rightHipRollMotor" type="revolute">
+        <parent link="hipRollAssembly"/>
+        <child link="rightHipRollMotor"/>
+        <origin xyz="1.1 0 3" rpy="0.17453292519943295 0 0"/>
+        <axis xyz="1.0 0 0"/>
+        <limit lower="-6.283185307179586" upper="6.283185307179586" effort="0" velocity="0"/>
+    </joint>
 
-    <!-- Joints from Torso to Hips -->
-    <joint name="torso_to_hips_joint" type="fixed">
-        <parent link="torso"/>
-        <child link="hips"/>
-        <origin xyz="-4.5 -26 2.25" rpy="0 0 0"/>
-    <axis xyz="0 1.0 0"/><limit lower="-45.0" upper="45.0"/></joint>
+    <!-- Right Hip Yaw Bracket -->
+    <link name="hipYawBracket">
+        <visual>
+            <origin xyz="0 -2 0.2" rpy="-0.17453292519943295 0 0"/>
+            <geometry>
+                <mesh filename="../meshes/hipYawBracket.stl" scale="0.05 0.05 0.05"/>
+            </geometry>
+        </visual>
+    </link>
+    <joint name="rightHipRollMotor_to_hipYawBracket" type="revolute">
+        <parent link="rightHipRollMotor"/>
+        <child link="hipYawBracket"/>
+        <origin xyz="1 -2 0" rpy="0 0 0"/>
+        <axis xyz="0 1.0 0"/>
+        <limit lower="-6.283185307179586" upper="6.283185307179586" effort="0" velocity="0"/>
+    </joint>
 
-    <!-- Left Leg Chain -->
-   <!--<include filename="left_leg.urdf"/>--> 
+    <!-- Right Hip Pitch Knee Motors -->
+    <link name="rightHipPitchKneeMotors">
+        <visual>
+            <origin xyz="-1.6 -2.45 0" rpy="0 0 0"/>
+            <geometry>
+                <mesh filename="../meshes/rightHipPitchKneeMotors.stl" scale="0.05 0.05 0.05"/>
+            </geometry>
+        </visual>
+    </link>
+    <joint name="hipYawBracket_to_rightHipPitchKneeMotors" type="revolute">
+        <parent link="hipYawBracket"/>
+        <child link="rightHipPitchKneeMotors"/>
+        <origin xyz="0 -3 3" rpy="0 0 -0.06981317007977318"/>
+        <axis xyz="0 0 1.0"/>
+        <limit lower="-6.283185307179586" upper="6.283185307179586" effort="0" velocity="0"/>
+    </joint>
 
-    <!-- Right Leg Chain -->
-  <!--   <include filename="right_leg.urdf"/>--> 
+    <!-- Right Hip Pitch Knee Front Bracket -->
+    <link name="rightHipPitchKneeFrontBracket">
+        <visual>
+            <origin xyz="5.8 1.3 -14" rpy="0 0 0"/>
+            <geometry>
+                <mesh filename="../meshes/rightHipPitchKneeFrontBracket.stl" scale="0.05 0.05 0.05"/>
+            </geometry>
+        </visual>
+    </link>
+    <joint name="rightHipPitchKneeMotors_to_rightHipPitchKneeFrontBracket" type="revolute">
+        <parent link="rightHipPitchKneeMotors"/>
+        <child link="rightHipPitchKneeFrontBracket"/>
+        <origin xyz="2.48 -0.8 3.6" rpy="0 0 0"/>
+        <axis xyz="0 0 1.0"/>
+        <limit lower="-6.283185307179586" upper="6.283185307179586" effort="0" velocity="0"/>
+    </joint>
 
-<!-- Left Hip Roll Motor -->
-<link name="left_hip_roll_motor">
-    <visual>
-<origin xyz="0 0 0" rpy="0 0 0"/>
-        <geometry>
-            <mesh filename="../meshes/leftHipRollMotor.stl" scale="0.05 0.05 0.05"/>
-        </geometry>
-    </visual>
-</link>
-<joint name="left_hip_roll_joint" type="revolute">
-    <parent link="hips"/>
-    <child link="left_hip_roll_motor"/>
-    <origin xyz="0 0 -4" rpy="0 0 0"/>
-    <axis xyz="0 1.0 0"/>
-    <limit lower="-6.28319" upper="6.28319" effort="0" velocity="0"/>
-</joint>
+    <!-- Right Hip Pitch Knee Rear Bracket -->
+    <link name="rightHipPitchKneeRearBracket">
+        <visual>
+            <origin xyz="0.6 -6.7 2" rpy="0 0 0"/>
+            <geometry>
+                <mesh filename="../meshes/rightHipPitchKneeRearBracket.stl" scale="0.05 0.05 0.05"/>
+            </geometry>
+        </visual>
+    </link>
+    <joint name="rightHipPitchKneeMotors_to_rightHipPitchKneeRearBracket" type="revolute">
+        <parent link="rightHipPitchKneeMotors"/>
+        <child link="rightHipPitchKneeRearBracket"/>
+        <origin xyz="-4 -5 3" rpy="0 0 0"/>
+        <axis xyz="0 0 1.0"/>
+        <limit lower="-6.283185307179586" upper="6.283185307179586" effort="0" velocity="0"/>
+    </joint>
 
-<!-- Left Hip-Pitch Knee Motors -->
-<link name="left_hip_pitch_knee_motors">
-    <visual>
-<origin xyz="0 0 0" rpy="0 0 0"/>
-        <geometry>
-            <mesh filename="../meshes/leftHipPitchKneeMotors.stl" scale="0.05 0.05 0.05"/>
-        </geometry>
-    </visual>
-</link>
-<joint name="left_hip_pitch_joint" type="revolute">
-    <parent link="left_hip_roll_motor"/>
-    <child link="left_hip_pitch_knee_motors"/>
-    <origin xyz="0 0 -10.05" rpy="0 0 0"/>
-    <axis xyz="0 1.0 0"/>
-    <limit lower="-6.28319" upper="6.28319" effort="0" velocity="0"/>
-</joint>
+    <!-- Right Knee Primary Hanger -->
+    <link name="rightKneePrimaryHangar">
+        <visual>
+            <origin xyz="-1.6 -1.3 0" rpy="0 0 0"/>
+            <geometry>
+                <mesh filename="../meshes/kneePrimaryHangar.stl" scale="0.05 0.05 0.05"/>
+            </geometry>
+        </visual>
+    </link>
+    <joint name="rightHipPitchKneeFrontBracket_to_rightKneePrimaryHangar" type="revolute">
+        <parent link="rightHipPitchKneeFrontBracket"/>
+        <child link="rightKneePrimaryHangar"/>
+        <origin xyz="-0.1 -16 -0.75" rpy="0 0 0"/>
+        <axis xyz="0 0 1.0"/>
+        <limit lower="-6.283185307179586" upper="6.283185307179586" effort="0" velocity="0"/>
+    </joint>
 
-<!-- Left Knee Primary and Secondary Hangers -->
-<link name="left_knee_primary_hanger">
-    <visual>
-<origin xyz="0 0 0" rpy="0 0 0"/>
-        <geometry>
-            <mesh filename="../meshes/kneePrimaryHangar.stl" scale="0.05 0.05 0.05"/>
-        </geometry>
-    </visual>
-</link>
-<joint name="left_knee_primary_hanger_joint" type="revolute">
-    <parent link="left_hip_pitch_knee_motors"/>
-    <child link="left_knee_primary_hanger"/>
-    <origin xyz="0 0 -0.1" rpy="0 0 0"/>
-    <axis xyz="0 0 1"/>
-    <limit lower="-6.28319" upper="6.28319" effort="0" velocity="0"/>
-</joint>
+    <!-- Right Knee Secondary Hanger -->
+    <link name="rightKneeSecondaryHangar">
+        <visual>
+            <origin xyz="1.7 -2.4 0" rpy="0 0 0"/>
+            <geometry>
+                <mesh filename="../meshes/kneeSecondaryHangar.stl" scale="0.05 0.05 0.05"/>
+            </geometry>
+        </visual>
+    </link>
+    <joint name="rightHipPitchKneeFrontBracket_to_rightKneeSecondaryHangar" type="revolute">
+        <parent link="rightHipPitchKneeFrontBracket"/>
+        <child link="rightKneeSecondaryHangar"/>
+        <origin xyz="-3.2 -16.7 -0.8" rpy="0 0 0.17453292519943295"/>
+        <axis xyz="0 0 1.0"/>
+        <limit lower="-6.283185307179586" upper="6.283185307179586" effort="0" velocity="0"/>
+    </joint>
 
-<!-- Left Calf -->
-<link name="left_calf">
-    <visual>
-<origin xyz="0 0 0" rpy="0 0 0"/>
-        <geometry>
-            <mesh filename="../meshes/leftCalf.stl" scale="0.05 0.05 0.05"/>
-        </geometry>
-    </visual>
-</link>
-<joint name="left_knee_to_calf_joint" type="revolute">
-    <parent link="left_knee_primary_hanger"/>
-    <child link="left_calf"/>
-    <origin xyz="0 0 10.05" rpy="0 0 0"/>
-    <axis xyz="0 1.0 0"/>
-    <limit lower="-6.28319" upper="6.28319" effort="0" velocity="0"/>
-</joint>
+    <!-- Right Calf -->
+    <link name="rightCalf">
+        <visual>
+            <origin xyz="1.5 -10 0" rpy="0 0 0"/>
+            <geometry>
+                <mesh filename="../meshes/rightCalf.stl" scale="0.05 0.05 0.05"/>
+            </geometry>
+        </visual>
+    </link>
+    <joint name="rightKneePrimaryHangar_to_rightCalf" type="revolute">
+        <parent link="rightKneePrimaryHangar"/>
+        <child link="rightCalf"/>
+        <origin xyz="-3.65 -5 1.5" rpy="0 0 0"/>
+        <axis xyz="0 0 1.0"/>
+        <limit lower="-6.283185307179586" upper="6.283185307179586" effort="0" velocity="0"/>
+    </joint>
 
-<!-- Left Ankle and Foot -->
-<link name="left_ankle">
-    <visual>
-<origin xyz="0 0 0" rpy="0 0 0"/>
-        <geometry>
-            <mesh filename="../meshes/ankle.stl" scale="0.05 0.05 0.05"/>
-        </geometry>
-    </visual>
-</link>
-<joint name="left_ankle_joint" type="revolute">
-    <parent link="left_calf"/>
-    <child link="left_ankle"/>
-    <origin xyz="0 0 -0.05" rpy="0 0 0"/>
-    <axis xyz="1 0 0"/>
-    <limit lower="-6.28319" upper="6.28319" effort="0" velocity="0"/>
-</joint>
+    <!-- Right Ankle -->
+    <link name="ankle">
+        <visual>
+            <origin xyz="0 -2 -1" rpy="0 0 0"/>
+            <geometry>
+                <mesh filename="../meshes/ankle.stl" scale="0.05 0.05 0.05"/>
+            </geometry>
+        </visual>
+    </link>
+    <joint name="rightCalf_to_ankle" type="revolute">
+        <parent link="rightCalf"/>
+        <child link="ankle"/>
+        <origin xyz="3.5 -21.5 2" rpy="-0.17453292519943295 1.5707963267948966 0"/>
+        <axis xyz="1.0 0 0"/>
+        <limit lower="-6.283185307179586" upper="6.283185307179586" effort="0" velocity="0"/>
+    </joint>
 
-<link name="left_foot">
-    <visual>
-<origin xyz="0 0 0" rpy="0 0 0"/>
-        <geometry>
-            <mesh filename="../meshes/foot.stl" scale="0.05 0.05 0.05"/>
-        </geometry>
-    </visual>
-</link>
-<joint name="left_foot_joint" type="revolute">
-    <parent link="left_ankle"/>
-    <child link="left_foot"/>
-    <origin xyz="0 -0 -10.05" rpy="0 0 0"/>
-    <axis xyz="0 1.0 0"/>
-    <limit lower="-6.28319" upper="6.28319" effort="0" velocity="0"/>
-</joint>
-
-
-<!-- Right Hip Roll Motor -->
-<link name="right_hip_roll_motor">
-    <visual>
-<origin xyz="0 0 1" rpy="0 0 0"/>
-        <geometry>
-            <mesh filename="../meshes/rightHipRollMotor.stl" scale="0.05 0.05 0.05"/>
-        </geometry>
-    </visual>
-</link>
-<joint name="right_hip_roll_joint" type="revolute">
-    <parent link="hips"/>
-    <child link="right_hip_roll_motor"/>
-    <origin xyz="1.1 0 3" rpy="0 0 0"/>
-    <axis xyz="1.0 0 0"/>
-    <limit lower="-6.28319" upper="6.28319" effort="0" velocity="0"/>
-</joint>
-
-<!-- Right Hip-Pitch Knee Motors -->
-<link name="right_hip_pitch_knee_motors">
-    <visual>
-<origin xyz="-1.6 -2.42 0" rpy="0 0 0"/>
-        <geometry>
-            <mesh filename="../meshes/rightHipPitchKneeMotors.stl" scale="0.05 0.05 0.05"/>
-        </geometry>
-    </visual>
-</link>
-<joint name="right_hip_pitch_joint" type="revolute">
-    <parent link="right_hip_roll_motor"/>
-    <child link="right_hip_pitch_knee_motors"/>
-    <origin xyz="0 -5 2" rpy="0.17453292519943295 0 0"/>
-    <axis xyz="0 0 1.0"/>
-    <limit lower="-6.28319" upper="6.28319" effort="0" velocity="0"/>
-</joint>
-
-<!-- Right Hip-Pitch Knee Front and Rear Brackets -->
-<link name="right_hip_pitch_knee_front_bracket">
-    <visual>
-<origin xyz="5.8 1.3 -14" rpy="0 0 0"/>
-        <geometry>
-            <mesh filename="../meshes/rightHipPitchKneeFrontBracket.stl" scale="0.05 0.05 0.05"/>
-        </geometry>
-    </visual>
-</link>
-<joint name="right_hip_pitch_to_front_bracket_joint" type="revolute">
-    <parent link="right_hip_pitch_knee_motors"/>
-    <child link="right_hip_pitch_knee_front_bracket"/>
-    <origin xyz="2.48 -0.8 3.6" rpy="0 0 0"/>
-    <axis xyz="0 0 1.0"/>
-    <limit lower="-6.28319" upper="6.28319" effort="0" velocity="0"/>
-</joint>
-
-<link name="right_hip_pitch_knee_rear_bracket">
-    <visual>
-<origin xyz="0 0 0" rpy="0 0 0"/>
-        <geometry>
-            <mesh filename="../meshes/rightHipPitchKneeRearBracket.stl" scale="0.05 0.05 0.05"/>
-        </geometry>
-    </visual>
-</link>
-<!-- Additional joint if necessary -->
-
-<!-- Right Knee Primary and Secondary Hangers -->
-<link name="right_knee_primary_hanger">
-    <visual>
-<origin xyz="0 0 0" rpy="0 0 0"/>
-        <geometry>
-            <mesh filename="../meshes/kneePrimaryHangar.stl" scale="0.05 0.05 0.05"/>
-        </geometry>
-    </visual>
-</link>
-<joint name="right_knee_primary_hanger_joint" type="revolute">
-    <parent link="right_hip_pitch_knee_front_bracket"/>
-    <child link="right_knee_primary_hanger"/>
-    <origin xyz="-2 -17 -0.75" rpy="0 0 0"/>
-    <axis xyz="0 0 1.0"/>
-    <limit lower="-6.28319" upper="6.28319" effort="0" velocity="0"/>
-</joint>
-
-<!-- Right Calf -->
-<link name="right_calf">
-    <visual>
-<origin xyz="0 -10 0" rpy="0 0 0"/>
-        <geometry>
-            <mesh filename="../meshes/rightCalf.stl" scale="0.05 0.05 0.05"/>
-        </geometry>
-    </visual>
-</link>
-<joint name="right_knee_to_calf_joint" type="revolute">
-    <parent link="right_knee_primary_hanger"/>
-    <child link="right_calf"/>
-    <origin xyz="0 -3 1.5" rpy="0 0 0"/>
-    <axis xyz="0 0 1.0"/>
-    <limit lower="-6.28319" upper="6.28319" effort="0" velocity="0"/>
-</joint>
-
-<!-- Right Ankle and Foot -->
-<link name="right_ankle">
-    <visual>
-<origin xyz="0 -2 -1" rpy="0 0 0"/>
-        <geometry>
-            <mesh filename="../meshes/ankle.stl" scale="0.05 0.05 0.05"/>
-        </geometry>
-    </visual>
-</link>
-<joint name="right_ankle_joint" type="revolute">
-    <parent link="right_calf"/>
-    <child link="right_ankle"/>
-    <origin xyz="2.2 -21.5 3" rpy="0 1.5707963267948966 0"/>
-    <axis xyz="1.0 0 0"/>
-    <limit lower="-6.28319" upper="6.28319" effort="0" velocity="0"/>
-</joint>
-
-<link name="right_foot">
-    <visual>
-             <origin xyz="0 23.5 -0.5" rpy="0 0 0"/>
-        <geometry>
-            <mesh filename="../meshes/foot.stl" scale="0.05 0.05 0.05"/>
-        </geometry>
-    </visual>
-</link>
-<joint name="right_foot_joint" type="revolute">
-    <parent link="right_ankle"/>
-    <child link="right_foot"/>
-    <origin xyz="0 -2 1.2" rpy="0 -1.5707963267948966 0"/>
-    <axis xyz="1.0 0 0"/>
-    <limit lower="-6.28319" upper="6.28319" effort="0" velocity="0"/>
-</joint>
-
+    <!-- Right Foot -->
+    <link name="foot">
+        <visual>
+            <origin xyz="0 23.5 -0.5" rpy="0 0 0"/>
+            <geometry>
+                <mesh filename="../meshes/foot.stl" scale="0.05 0.05 0.05"/>
+            </geometry>
+        </visual>
+    </link>
+    <joint name="ankle_to_foot" type="revolute">
+        <parent link="ankle"/>
+        <child link="foot"/>
+        <origin xyz="0 -2 1.2" rpy="0 -1.5707963267948966 0"/>
+        <axis xyz="1.0 0 0"/>
+        <limit lower="-6.283185307179586" upper="6.283185307179586" effort="0" velocity="0"/>
+    </joint>
 
 </robot>
