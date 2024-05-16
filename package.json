@@ -20,12 +20,12 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https:///rapyuta-robotics/urdf-js.git"
+    "url": "git+https://github.com/rapyuta-robotics/urdf-js.git"
   },
   "bugs": {
-    "url": "https://github.com//rapyuta-robotics/urdf-js/issues"
+    "url": "https://github.com/rapyuta-robotics/urdf-js/issues"
   },
-  "homepage": "https://github.com//rapyuta-robotics/urdf-js#readme",
+  "homepage": "https://github.com/rapyuta-robotics/urdf-js#readme",
   "keywords": [
     "javascript",
     "threejs",
@@ -55,6 +55,7 @@
     "rollup": "^1.16.7",
     "rollup-plugin-babel": "^4.3.3",
     "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-svg": "^2.0.0",
     "script-loader": "^0.7.0",
     "static-server": "^3.0.0",
     "three": "^0.109.0",
@@ -64,7 +65,16 @@
   },
   "dependencies": {
     "codemirror": "^6.0.1",
+    "npm": "^10.8.0",
+    "run": "^1.5.0",
+    "start": "^5.1.0",
     "three-mesh-bvh": "^0.1.4",
     "xacro-parser": "^0.3.9"
+  },
+  "resolutions": {
+    "ajv": "^6.12.6",
+    "html-minifier": "^4.0.0",
+    "trim-newlines": "^3.0.1",
+    "schema-utils": "^3.0.0"
   }
 }
