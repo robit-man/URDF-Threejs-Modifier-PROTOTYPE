@@ -5,7 +5,9 @@
   "main": "umd/URDFLoader.js",
   "scripts": {
     "start": "concurrently --kill-others \"rollup -c -w\" \"static-server\"",
-    "build": "rollup -c && cd example && webpack",
+    "build:rollup": "rollup -c",
+    "build:webpack": "cd example && webpack --config ../webpack.config.js",
+    "build": "npm run build:rollup && npm run build:webpack",
     "test": "rollup -c && jest",
     "lint": "eslint src/*.js ./test/*.js",
     "coverage": "nyc report --reporter=html & opn coverage/index.html"
@@ -47,6 +49,7 @@
     "concurrently": "^4.0.1",
     "eslint": "^5.14.1",
     "file-loader": "^6.2.0",
+    "html-loader": "^0.5.5",
     "jest": "^24.1.0",
     "jest-cli": "^24.1.0",
     "nyc": "^13.3.0",

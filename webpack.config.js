@@ -5,12 +5,12 @@ module.exports = {
     rules: [
       {
         test: /\.svg$/,
-        use: 'svg-inline-loader'
+        use: 'file-loader'
       },
       // other rules...
     ]
   },
-  entry: './src/index.js', // Update this path based on your entry point
+  entry: './index.js', // Update this path based on your entry point
   output: {
     filename: 'index.bundle.js',
     path: path.resolve(__dirname, 'dist')

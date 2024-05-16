@@ -28,7 +28,7 @@ export default Object.entries(files).map(([name, file]) => {
                 presets: ['@babel/env'],
             }),
             commonjs(),
-            svg() // Add the SVG plugin here
+            svg(), // Add the SVG plugin here
         ],
 
         output: {
