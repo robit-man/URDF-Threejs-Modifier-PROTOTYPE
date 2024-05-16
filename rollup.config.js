@@ -1,6 +1,7 @@
 const path = require('path');
 import commonjs from 'rollup-plugin-commonjs';
 import babel from 'rollup-plugin-babel';
+import svg from 'rollup-plugin-svg';
 
 const files = {
     URDFLoader: 'URDFLoader.js',
@@ -28,6 +29,7 @@ Object.entries(files).map(([name, file]) => {
                 presets: ['@babel/env'],
             }),
             commonjs(),
+            svg() // Add the SVG plugin here
         ],
 
         output: {
