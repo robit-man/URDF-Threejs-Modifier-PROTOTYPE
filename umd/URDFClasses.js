@@ -1,8 +1,8 @@
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('three')) :
   typeof define === 'function' && define.amd ? define(['exports', 'three'], factory) :
-  (global = global || self, factory(global.URDFClasses = global.URDFClasses || {}, global.THREE));
-}(this, function (exports, three) { 'use strict';
+  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.URDFClasses = global.URDFClasses || {}, global.THREE));
+})(this, (function (exports, three) { 'use strict';
 
   function _typeof(obj) {
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
