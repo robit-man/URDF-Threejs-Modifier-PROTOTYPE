@@ -52,7 +52,7 @@
     "opn-cli": "^3.1.0",
     "puppeteer": "^1.19.0",
     "puppeteer-to-istanbul": "^1.2.2",
-    "rollup": "^1.16.7",
+    "rollup": "^2.57.5",
     "rollup-plugin-babel": "^4.3.3",
     "rollup-plugin-commonjs": "^10.1.0",
     "script-loader": "^0.7.0",
