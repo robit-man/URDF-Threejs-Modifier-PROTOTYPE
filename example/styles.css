@@ -181,7 +181,6 @@ input:focus {
     font-weight: bold;
     font-size: 2rem;
     text-transform: uppercase;
-    height: 32px;
 }
 
 #controls #buttoncol>#toggle-controls:hover {
@@ -192,6 +191,7 @@ input:focus {
 #toggle-controls {
     border-radius: 4px;
     width: 100%;
+    background-color:#333;height:41px;
     background-image: radial-gradient(#0002, transparent, transparent);
 }
 
@@ -223,6 +223,13 @@ input:focus {
     width: 32px;
     height: auto !important;
     border: 0px solid #0004;
+}
+
+
+/* hidden state */
+#controls.hidden #buttoncol>#toggle-controls {
+  background-color:unset;
+  height:unset;
 }
 
 #controls.hidden:hover #buttoncol>#toggle-controls:before {
