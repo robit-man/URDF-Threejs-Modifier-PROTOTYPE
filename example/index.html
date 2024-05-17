@@ -520,135 +520,157 @@
 
         // Declaring urdfDoc globally
         let urdfDoc;
+// Global counter for tracking URDF changes
+let urdfChangeCounter = 0;
 
-        // Function to edit the current URDF
-        function editURDF(urdfContent) {
+viewer.addEventListener('urdf-change', () => {
+    // Remove existing sliders
+    Object.values(sliders).forEach(sl => sl.remove());
+    sliders = {};
 
-            populateJointNames();
-            populateLinkNames();
+    // Repopulate joint and link names
+    populateJointNames();
+    populateLinkNames();
+    editURDF();
 
-            console.log(uploadedURDFPath);
-            // Check if content is provided, if not, fetch using viewer's current URDF setting
-            if (!urdfContent && viewer.urdf) {
-                fetch(viewer.urdf)
-                    .then(response => response.text())
-                    .then(data => {
-                        document.getElementById('urdf-editor').value = data;
-                        urdfDoc = new DOMParser().parseFromString(data, "text/xml");
-                    })
-                    .catch(error => console.error('Error loading URDF:', error));
-            } else if (urdfContent) {
-                document.getElementById('urdf-editor').value = urdfContent;
-                urdfDoc = new DOMParser().parseFromString(urdfContent, "text/xml");
+    // Increment the URDF change counter
+    urdfChangeCounter++;
+    console.log('URDF has been changed', urdfChangeCounter, 'times');
+});
+
+// Function to edit the current URDF
+function editURDF(urdfContent) {
+    populateJointNames();
+    populateLinkNames();
+
+    console.log(uploadedURDFPath);
+    // Check if content is provided, if not, fetch using viewer's current URDF setting
+    if (!urdfContent && viewer.urdf) {
+        fetch(viewer.urdf)
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('urdf-editor').value = data;
+                urdfDoc = new DOMParser().parseFromString(data, "text/xml");
+            })
+            .catch(error => console.error('Error loading URDF:', error));
+    } else if (urdfContent) {
+        document.getElementById('urdf-editor').value = urdfContent;
+        urdfDoc = new DOMParser().parseFromString(urdfContent, "text/xml");
+    }
+}
+
+// Ensure this function is available globally if needed elsewhere
+window.editURDF = editURDF;
+
+async function fileExists(url) {
+    try {
+        const response = await fetch(url, { method: 'HEAD' });
+        return response.ok;
+    } catch {
+        return false;
+    }
+}
+
+function applyURDF() {
+    const updatedURDFText = document.getElementById('urdf-editor').value; // Get URDF string from textarea
+    if (viewer && updatedURDFText) {
+        // Parse the new URDF text to a DOM object
+        const parser = new DOMParser();
+        const urdfDOM = parser.parseFromString(updatedURDFText, "text/xml");
+
+        // Adjust mesh URLs in the URDF DOM
+        const meshElements = urdfDOM.querySelectorAll('[filename]');
+        meshElements.forEach(async element => {
+            let originalPath = element.getAttribute('filename');
+            let correctedPath = originalPath;
+            console.log('Original: ', originalPath);
+
+            if (originalPath.startsWith('../meshes/')) {
+                // Adjust the path to point to the correct location
+                correctedPath = `../urdf/dropbear/meshes/${originalPath.substring(10)}`;
+                console.log('Corrected: ', correctedPath);
+
+                // Check if the corrected path exists
+                const exists = await fileExists(`/${correctedPath}`);
+
+                // If the file does not exist at the corrected path, revert to original path
+                if (!exists) {
+                    correctedPath = originalPath;
+                }
             }
-        }
+            element.setAttribute('filename', correctedPath);
+        });
 
+        // Serialize the DOM back to a string
+        const serializer = new XMLSerializer();
+        const modifiedURDFString = serializer.serializeToString(urdfDOM);
 
-        // Ensure this function is available globally if needed elsewhere
-        window.editURDF = editURDF;
+        // Convert modified URDF string to a Blob and set it as the new URDF on the viewer
+        const blob = new Blob([modifiedURDFString], { type: 'text/xml' });
+        const url = URL.createObjectURL(blob);
+        viewer.urdf = url; // Assuming 'viewer.urdf' is a property that can be set to change the URDF
 
-        async function fileExists(url) {
-            try {
-                const response = await fetch(url, { method: 'HEAD' });
-                return response.ok;
-            } catch {
-                return false;
+        // Increment the URDF change counter
+        urdfChangeCounter++;
+        console.log('URDF has been changed', urdfChangeCounter, 'times');
+    }
+}
+
+// Function to save the modified URDF content as a local file
+function saveURDF(event) {
+    event.preventDefault();
+
+    const updatedURDFText = document.getElementById('urdf-editor').value; // Get URDF string from textarea
+    if (viewer && updatedURDFText) {
+        // Parse the new URDF text to a DOM object
+        const parser = new DOMParser();
+        const urdfDOM = parser.parseFromString(updatedURDFText, "text/xml");
+
+        // Adjust mesh URLs in the URDF DOM
+        const meshElements = urdfDOM.querySelectorAll('[filename]');
+        meshElements.forEach(async element => {
+            let originalPath = element.getAttribute('filename');
+            let correctedPath = originalPath;
+            console.log('Original: ', originalPath);
+
+            if (originalPath.startsWith('../meshes/')) {
+                // Adjust the path to point to the correct location
+                correctedPath = `../urdf/dropbear/meshes/${originalPath.substring(10)}`;
+                console.log('Corrected: ', correctedPath);
+
+                // Check if the corrected path exists
+                const exists = await fileExists(`/${correctedPath}`);
+
+                // If the file does not exist at the corrected path, revert to original path
+                if (!exists) {
+                    correctedPath = originalPath;
+                }
             }
-        }
+            element.setAttribute('filename', correctedPath);
+        });
 
-        function applyURDF() {
-            const updatedURDFText = document.getElementById('urdf-editor').value; // Get URDF string from textarea
-            if (viewer && updatedURDFText) {
-                // Parse the new URDF text to a DOM object
-                const parser = new DOMParser();
-                const urdfDOM = parser.parseFromString(updatedURDFText, "text/xml");
+        // Serialize the DOM back to a string
+        const serializer = new XMLSerializer();
+        const modifiedURDFString = serializer.serializeToString(urdfDOM);
 
-                // Adjust mesh URLs in the URDF DOM
-                const meshElements = urdfDOM.querySelectorAll('[filename]');
-                meshElements.forEach(async element => {
-                    let originalPath = element.getAttribute('filename');
-                    let correctedPath = originalPath;
-                    console.log('Original: ', originalPath);
+        // Convert modified URDF string to a Blob and set it as the new URDF on the viewer
+        const blob = new Blob([modifiedURDFString], { type: 'text/xml' });
+        const url = URL.createObjectURL(blob);
 
-                    if (originalPath.startsWith('../meshes/')) {
-                        // Adjust the path to point to the correct location
-                        correctedPath = `../urdf/dropbear/meshes/${originalPath.substring(10)}`;
-                        console.log('Corrected: ', correctedPath);
+        // Create a download link and trigger the download
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'updated-urdf.urdf';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+}
 
-                        // Check if the corrected path exists
-                        const exists = await fileExists(`/${correctedPath}`);
+// Add event listener to the save button
+document.getElementById('save-urdf-btn').addEventListener('click', saveURDF);
 
-                        // If the file does not exist at the corrected path, revert to original path
-                        if (!exists) {
-                            correctedPath = originalPath;
-                        }
-                    }
-                    element.setAttribute('filename', correctedPath);
-                });
-
-                // Serialize the DOM back to a string
-                const serializer = new XMLSerializer();
-                const modifiedURDFString = serializer.serializeToString(urdfDOM);
-
-                // Convert modified URDF string to a Blob and set it as the new URDF on the viewer
-                const blob = new Blob([modifiedURDFString], { type: 'text/xml' });
-                const url = URL.createObjectURL(blob);
-                viewer.urdf = url; // Assuming 'viewer.urdf' is a property that can be set to change the URDF
-            }
-        }
-
-        // Function to save the modified URDF content as a local file
-        // Function to save the modified URDF content as a local file
-        function saveURDF(event) {
-            //event.preventDefault();
-
-            const updatedURDFText = document.getElementById('urdf-editor').value; // Get URDF string from textarea
-            if (viewer && updatedURDFText) {
-                // Parse the new URDF text to a DOM object
-                const parser = new DOMParser();
-                const urdfDOM = parser.parseFromString(updatedURDFText, "text/xml");
-
-                // Adjust mesh URLs in the URDF DOM
-                const meshElements = urdfDOM.querySelectorAll('[filename]');
-                meshElements.forEach(async element => {
-                    let originalPath = element.getAttribute('filename');
-                    let correctedPath = originalPath;
-                    console.log('Original: ', originalPath);
-
-                    if (originalPath.startsWith('../meshes/')) {
-                        // Adjust the path to point to the correct location
-                        correctedPath = `../urdf/dropbear/meshes/${originalPath.substring(10)}`;
-                        console.log('Corrected: ', correctedPath);
-
-                        // Check if the corrected path exists
-                        const exists = await fileExists(`/${correctedPath}`);
-
-                        // If the file does not exist at the corrected path, revert to original path
-                        if (!exists) {
-                            correctedPath = originalPath;
-                        }
-                    }
-                    element.setAttribute('filename', correctedPath);
-                });
-
-                // Serialize the DOM back to a string
-                const serializer = new XMLSerializer();
-                const modifiedURDFString = serializer.serializeToString(urdfDOM);
-
-                // Convert modified URDF string to a Blob and set it as the new URDF on the viewer
-                const blob = new Blob([modifiedURDFString], { type: 'text/xml' });
-                const url = URL.createObjectURL(blob);
-
-                // Create a download link and trigger the download
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'updated-urdf.urdf';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            }
-        }
 
         function toggleLink() {
             const checkbox = document.getElementById('link-toggle');
