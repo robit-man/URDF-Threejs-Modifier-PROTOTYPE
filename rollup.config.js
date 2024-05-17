@@ -35,7 +35,7 @@ export default Object.entries(files).map(([name, file]) => {
 
             name,
             extend: true,
-            format: 'example',
+            format: 'umd',
             file: outputPath,
             sourcemap: true,
 
