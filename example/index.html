@@ -64,6 +64,8 @@
             justify-content: space-between;
         }
 
+        .inputrow label{margin-right:4px;}
+
         .buttonrow {
             width: 100%;
             display: flex;
@@ -160,7 +162,7 @@
             background-size: 24px;
             background-repeat: no-repeat;
             background-position: right center;
-            background-image: url(./down.svg);
+            background-image: url(../example/down.svg);
 
         }
 
@@ -175,7 +177,7 @@
             background-size: 24px;
             background-repeat: no-repeat;
             background-position: right center;
-            background-image: url(./down.svg);
+            background-image: url(../example/down.svg);
         }
 
         #generic-selection::placeholder {
@@ -189,7 +191,7 @@
             background-size: 24px;
             background-repeat: no-repeat;
             background-position: right center;
-            background-image: url(./down.svg);
+            background-image: url(../example/down.svg);
         }
 
 
@@ -248,6 +250,18 @@
             width: auto;
         }
 
+        #controls li {
+            display: flex;
+            flex-flow: row;
+            justify-content: space-between;
+        }
+
+        #controls li input[type="range"] {
+            max-width: 200px !important;
+            margin-left: auto;
+            margin-right: 1rem;
+        }
+
         #controls li span {
             margin-left: unset !important;
             padding-left: unset !important;
@@ -279,12 +293,45 @@
             outline: none;
         }
 
+        .smallbutton {
+            background: unset;
+            padding: unset;
+            height: 24px;
+            width: 24px;
+            border: unset;
+            margin: unset;
+            display: flex;
+            flex-flow: row;
+            justify-content: center;
+            border-radius: 4px;
+
+            backdrop-filter: blur(10px) brightness(0.77);
+        }
+
+        .smallbutton>img {
+            width: 1rem;
+            height: 1rem;
+            margin: auto;
+        }
+
+        .smallbuttons {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            display: flex;
+            flex-flow: row;
+            gap: 4px;
+
+        }
+
         .urdf-editor {
             border-radius: 0.25rem;
             margin: unset;
             margin-top: unset !important;
             overflow: hidden;
             min-height: 200px;
+            position: relative;
+            margin-bottom: 10px !important;
 
         }
 
@@ -353,7 +400,8 @@
                     </div>
                     <div class="inputrow">
                         <label for="joint-position-xyz">Position (XYZ):</label>
-                        <input type="text" id="joint-position-xyz" placeholder="x y z" oninput="syncInputs('position')">
+                        <input type="text" id="joint-position-xyz" placeholder="x° y° z°"
+                            oninput="syncInputs('position')">
                     </div>
                     <div class="linkbutton">
                         <input type="checkbox" id="link-toggle" style="display: none;" checked />
@@ -362,23 +410,23 @@
                     </div>
                     <div class="inputrow">
                         <label for="joint-origin-xyz">Origin (XYZ):</label>
-                        <input type="text" id="joint-origin-xyz" placeholder="x y z" oninput="syncInputs('origin')">
+                        <input type="text" id="joint-origin-xyz" placeholder="x° y° z°" oninput="syncInputs('origin')">
                     </div>
                     <div class="inputrow">
                         <label for="joint-origin-rpy">Rotation (RPY):</label>
-                        <input type="text" id="joint-origin-rpy" placeholder="roll pitch yaw">
+                        <input type="text" id="joint-origin-rpy" placeholder="roll° pitch° yaw°">
                     </div>
                     <div class="inputrow">
                         <label for="joint-axis-xyz">Axis (XYZ):</label>
-                        <input type="text" id="joint-axis-xyz" placeholder="x y z">
+                        <input type="text" id="joint-axis-xyz" placeholder="x° y° z°">
                     </div>
                     <div class="inputrow">
                         <label for="joint-lower-limit">Lower Limit:</label>
-                        <input type="number" id="joint-lower-limit" step="0.01">
+                        <input type="number" id="joint-lower-limit" placeholder="Lower Limit°" step="0.01">
                     </div>
                     <div class="inputrow">
                         <label for="joint-upper-limit">Upper Limit:</label>
-                        <input type="number" id="joint-upper-limit" step="0.01">
+                        <input type="number" id="joint-upper-limit" placeholder="Upper Limit°" step="0.01">
                     </div>
                     <div class="buttonrow">
                         <button onclick="updateJointProperties()">Update Joint</button>
@@ -397,11 +445,11 @@
                     </div>
                     <div class="inputrow">
                         <label for="visual-origin-xyz">Visual Origin (XYZ):</label>
-                        <input type="text" id="visual-origin-xyz" placeholder="x y z">
+                        <input type="text" id="visual-origin-xyz" placeholder="x° y° z°">
                     </div>
                     <div class="inputrow">
                         <label for="visual-origin-rpy">Visual Rotation (RPY):</label>
-                        <input type="text" id="visual-origin-rpy" placeholder="roll pitch yaw">
+                        <input type="text" id="visual-origin-rpy" placeholder="roll° pitch° yaw°">
                     </div>
                     <div class="buttonrow">
                         <button onclick="updateLinkVisualProperties()">Update Link</button>
@@ -412,17 +460,23 @@
             </div>
             <div class="urdf-editor">
                 <textarea id="urdf-editor"></textarea>
+                <div class="smallbuttons">
+                    <button class="smallbutton" id="apply-urdf-btn" onclick="applyURDF()"><img
+                            src="../example/upload.svg" alt=""></button>
+                    <button class="smallbutton" id="save-urdf-btn" onclick="saveURDF()"><img
+                            src="../example/download.svg" alt=""></button>
+                </div>
             </div>
-            <div class="inputwrap active editrow">
+            <!--   <div class="inputwrap active editrow">
 
                 <div class="buttonrow">
-                    <button id="edit-urdf-btn" onclick="editURDF()">Edit URDF</button>
+                  <button id="edit-urdf-btn" onclick="editURDF()">Edit URDF</button>
                     <button id="apply-urdf-btn" onclick="applyURDF()">Apply URDF</button>
                     <button id="save-urdf-btn" onclick="saveURDF()">Save URDF</button>
 
                 </div>
             </div>
-
+            -->
             <div class="inputrow" onclick="toggleWrap(event, 'sliderSection')">
                 <input type="text" id="generic-selection" placeholder="Sliders">
             </div>
@@ -430,8 +484,11 @@
             <div class="inputwrap" id="sliderSection">
 
                 <div style="display:none;">Drag and drop a set of URDF files! <br /> (Chrome Only)</div>
-                <div id="ignore-joint-limits" class="toggle">Ignore Joint Limits</div>
+              
+                <div class="inputrow">
+                    <div id="ignore-joint-limits" class="toggle">Ignore Joint Limits</div>
                 <div id="do-animate" class="toggle checked">Animate Joints</div>
+                </div>
                 <label>
                     Up Axis
                     <select id="up-select">
@@ -541,19 +598,56 @@
         }
 
         // Function to save the modified URDF content as a local file
+        // Function to save the modified URDF content as a local file
         function saveURDF(event) {
-            event.preventDefault();
-            const updatedContent = document.getElementById('urdf-editor').value;
-            const blob = new Blob([updatedContent], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
+            //event.preventDefault();
 
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'updated-urdf.urdf';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            const updatedURDFText = document.getElementById('urdf-editor').value; // Get URDF string from textarea
+            if (viewer && updatedURDFText) {
+                // Parse the new URDF text to a DOM object
+                const parser = new DOMParser();
+                const urdfDOM = parser.parseFromString(updatedURDFText, "text/xml");
+
+                // Adjust mesh URLs in the URDF DOM
+                const meshElements = urdfDOM.querySelectorAll('[filename]');
+                meshElements.forEach(async element => {
+                    let originalPath = element.getAttribute('filename');
+                    let correctedPath = originalPath;
+                    console.log('Original: ', originalPath);
+
+                    if (originalPath.startsWith('../meshes/')) {
+                        // Adjust the path to point to the correct location
+                        correctedPath = `../urdf/dropbear/meshes/${originalPath.substring(10)}`;
+                        console.log('Corrected: ', correctedPath);
+
+                        // Check if the corrected path exists
+                        const exists = await fileExists(`/${correctedPath}`);
+
+                        // If the file does not exist at the corrected path, revert to original path
+                        if (!exists) {
+                            correctedPath = originalPath;
+                        }
+                    }
+                    element.setAttribute('filename', correctedPath);
+                });
+
+                // Serialize the DOM back to a string
+                const serializer = new XMLSerializer();
+                const modifiedURDFString = serializer.serializeToString(urdfDOM);
+
+                // Convert modified URDF string to a Blob and set it as the new URDF on the viewer
+                const blob = new Blob([modifiedURDFString], { type: 'text/xml' });
+                const url = URL.createObjectURL(blob);
+
+                // Create a download link and trigger the download
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'updated-urdf.urdf';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
         }
 
         function toggleLink() {
