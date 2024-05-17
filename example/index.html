@@ -483,6 +483,14 @@
 
         // Ensure this function is available globally if needed elsewhere
         window.editURDF = editURDF;
+ async function fileExists(url) {
+            try {
+                const response = await fetch(url, { method: 'HEAD' });
+                return response.ok;
+            } catch {
+                return false;
+            }
+        }
 
         function applyURDF() {
             const updatedURDFText = document.getElementById('urdf-editor').value; // Get URDF string from textarea
@@ -493,13 +501,25 @@
 
                 // Adjust mesh URLs in the URDF DOM
                 const meshElements = urdfDOM.querySelectorAll('[filename]');
-                meshElements.forEach(element => {
+                meshElements.forEach(async element => {
                     let originalPath = element.getAttribute('filename');
+                    let correctedPath = originalPath;
+                    console.log('Original: ', originalPath);
+
                     if (originalPath.startsWith('../meshes/')) {
                         // Adjust the path to point to the correct location
-                        let correctedPath = `urdf/dropbear/meshes/${originalPath.substring(10)}`;
-                        element.setAttribute('filename', correctedPath);
+                        correctedPath = `../urdf/dropbear/meshes/${originalPath.substring(10)}`;
+                        console.log('Corrected: ', correctedPath);
+
+                        // Check if the corrected path exists
+                        const exists = await fileExists(`/${correctedPath}`);
+                        
+                        // If the file does not exist at the corrected path, revert to original path
+                        if (!exists) {
+                            correctedPath = originalPath;
+                        }
                     }
+                    element.setAttribute('filename', correctedPath);
                 });
 
                 // Serialize the DOM back to a string
