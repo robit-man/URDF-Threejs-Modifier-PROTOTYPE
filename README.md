@@ -21,8 +21,8 @@ As projects progress, changes are made to robots that will affect RL policies, o
 - Support drop of URDF only and use existing meshes that have been uploaded prior
 - Support for VR input to control appendages
 - Close-Loop kinematics from URDF
-- AmmoJS Physics for accurate display of URDF inertial characteristics
-- Application of linear AND dynamic animations (dynamic form RL policy import)
+- AmmoJS Physics for sim2real
+- https://gpu.rocks/#/ for matrix math speedup in simulation and animation
 - Multi-modal Communication Protocol for interaction with low-level hardware
 - Handling of sensor data (imu, encoders) and appropriate application to joints and links
 - Refined description of the above components, integrations libraries to support mentioned goals
