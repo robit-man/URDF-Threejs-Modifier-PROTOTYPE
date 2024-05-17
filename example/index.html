@@ -466,21 +466,25 @@
 
         // Function to edit the current URDF
         function editURDF(urdfContent) {
-    console.log(uploadedURDFPath);
-    // Check if content is provided, if not, fetch using viewer's current URDF setting
-    if (!urdfContent && viewer.urdf) {
-        fetch(viewer.urdf)
-            .then(response => response.text())
-            .then(data => {
-                document.getElementById('urdf-editor').value = data;
-                urdfDoc = new DOMParser().parseFromString(data, "text/xml");
-            })
-            .catch(error => console.error('Error loading URDF:', error));
-    } else if (urdfContent) {
-        document.getElementById('urdf-editor').value = urdfContent;
-        urdfDoc = new DOMParser().parseFromString(urdfContent, "text/xml");
-    }
-}
+
+            populateJointNames();
+            populateLinkNames();
+
+            console.log(uploadedURDFPath);
+            // Check if content is provided, if not, fetch using viewer's current URDF setting
+            if (!urdfContent && viewer.urdf) {
+                fetch(viewer.urdf)
+                    .then(response => response.text())
+                    .then(data => {
+                        document.getElementById('urdf-editor').value = data;
+                        urdfDoc = new DOMParser().parseFromString(data, "text/xml");
+                    })
+                    .catch(error => console.error('Error loading URDF:', error));
+            } else if (urdfContent) {
+                document.getElementById('urdf-editor').value = urdfContent;
+                urdfDoc = new DOMParser().parseFromString(urdfContent, "text/xml");
+            }
+        }
 
 
         // Ensure this function is available globally if needed elsewhere
@@ -957,11 +961,12 @@
                 console.error("Joint not found or viewer not initialized properly.");
             }
         }
-
         function populateJointNames() {
             const jointSelector = document.getElementById('joint-selector');
             if (viewer && viewer.robot) {
+                // Clear existing options
                 jointSelector.innerHTML = '';
+
                 Object.keys(viewer.robot.joints).forEach(jointName => {
                     const option = document.createElement('option');
                     option.value = jointName;
@@ -974,7 +979,9 @@
         function populateLinkNames() {
             const linkSelector = document.getElementById('link-selector');
             if (viewer && viewer.robot) {
+                // Clear existing options
                 linkSelector.innerHTML = '';
+
                 Object.keys(viewer.robot.links).forEach(linkName => {
                     const option = document.createElement('option');
                     option.value = linkName;
@@ -983,6 +990,18 @@
                 });
             }
         }
+
+        viewer.addEventListener('urdf-change', () => {
+            // Remove existing sliders
+            Object.values(sliders).forEach(sl => sl.remove());
+            sliders = {};
+
+            // Repopulate joint and link names
+            populateJointNames();
+            populateLinkNames();
+            editURDF();
+
+        });
 
         document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
