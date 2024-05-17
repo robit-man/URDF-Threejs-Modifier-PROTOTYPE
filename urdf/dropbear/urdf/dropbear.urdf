@@ -5,7 +5,7 @@
         <visual>
             <origin xyz="5 26 -2.35" rpy="0 0 0"/>
             <geometry>
-                <mesh filename="../meshes/torso.stl" scale="0.01 0.01 0.01"/>
+                <mesh filename="../meshes/torso.stl" scale="0.05 0.05 0.05"/>
             </geometry>
         </visual>
     </link>
@@ -23,7 +23,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
-                <mesh filename="../meshes/hipRollAssembly.stl" scale="0.01 0.01 0.01"/>
+                <mesh filename="../meshes/hipRollAssembly.stl" scale="0.05 0.05 0.05"/>
             </geometry>
         </visual>
     </link>
@@ -33,7 +33,7 @@
         <visual>
             <origin xyz="0 0 1" rpy="-0.17453292519943295 0 0"/>
             <geometry>
-                <mesh filename="../meshes/rightHipRollMotor.stl" scale="0.01 0.01 0.01"/>
+                <mesh filename="../meshes/rightHipRollMotor.stl" scale="0.05 0.05 0.05"/>
             </geometry>
         </visual>
     </link>
@@ -50,7 +50,7 @@
         <visual>
             <origin xyz="0 -2 0.2" rpy="-0.17453292519943295 0 0"/>
             <geometry>
-                <mesh filename="../meshes/hipYawBracket.stl" scale="0.01 0.01 0.01"/>
+                <mesh filename="../meshes/hipYawBracket.stl" scale="0.05 0.05 0.05"/>
             </geometry>
         </visual>
     </link>
@@ -67,7 +67,7 @@
         <visual>
             <origin xyz="-1.6 -2.45 0" rpy="0 0 0"/>
             <geometry>
-                <mesh filename="../meshes/rightHipPitchKneeMotors.stl" scale="0.01 0.01 0.01"/>
+                <mesh filename="../meshes/rightHipPitchKneeMotors.stl" scale="0.05 0.05 0.05"/>
             </geometry>
         </visual>
     </link>
@@ -84,7 +84,7 @@
         <visual>
             <origin xyz="5.8 1.3 -14" rpy="0 0 0"/>
             <geometry>
-                <mesh filename="../meshes/rightHipPitchKneeFrontBracket.stl" scale="0.01 0.01 0.01"/>
+                <mesh filename="../meshes/rightHipPitchKneeFrontBracket.stl" scale="0.05 0.05 0.05"/>
             </geometry>
         </visual>
     </link>
@@ -101,7 +101,7 @@
         <visual>
             <origin xyz="0.6 -6.7 2" rpy="0 0 0"/>
             <geometry>
-                <mesh filename="../meshes/rightHipPitchKneeRearBracket.stl" scale="0.01 0.01 0.01"/>
+                <mesh filename="../meshes/rightHipPitchKneeRearBracket.stl" scale="0.05 0.05 0.05"/>
             </geometry>
         </visual>
     </link>
@@ -118,7 +118,7 @@
         <visual>
             <origin xyz="-1.6 -1.3 0" rpy="0 0 0"/>
             <geometry>
-                <mesh filename="../meshes/kneePrimaryHangar.stl" scale="0.01 0.01 0.01"/>
+                <mesh filename="../meshes/kneePrimaryHangar.stl" scale="0.05 0.05 0.05"/>
             </geometry>
         </visual>
     </link>
@@ -135,7 +135,7 @@
         <visual>
             <origin xyz="1.7 -2.4 0" rpy="0 0 0"/>
             <geometry>
-                <mesh filename="../meshes/kneeSecondaryHangar.stl" scale="0.01 0.01 0.01"/>
+                <mesh filename="../meshes/kneeSecondaryHangar.stl" scale="0.05 0.05 0.05"/>
             </geometry>
         </visual>
     </link>
@@ -152,7 +152,7 @@
         <visual>
             <origin xyz="1.5 -10 0" rpy="0 0 0"/>
             <geometry>
-                <mesh filename="../meshes/rightCalf.stl" scale="0.01 0.01 0.01"/>
+                <mesh filename="../meshes/rightCalf.stl" scale="0.05 0.05 0.05"/>
             </geometry>
         </visual>
     </link>
@@ -169,7 +169,7 @@
         <visual>
             <origin xyz="0 -2 -1" rpy="0 0 0"/>
             <geometry>
-                <mesh filename="../meshes/ankle.stl" scale="0.01 0.01 0.01"/>
+                <mesh filename="../meshes/ankle.stl" scale="0.05 0.05 0.05"/>
             </geometry>
         </visual>
     </link>
@@ -186,7 +186,7 @@
         <visual>
             <origin xyz="0 23.5 -0.5" rpy="0 0 0"/>
             <geometry>
-                <mesh filename="../meshes/foot.stl" scale="0.01 0.01 0.01"/>
+                <mesh filename="../meshes/foot.stl" scale="0.05 0.05 0.05"/>
             </geometry>
         </visual>
     </link>
