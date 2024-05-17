@@ -40,7 +40,7 @@
         }
 
         .active2::placeholder {
-            background-image: url(./up.svg) !important;
+            background-image: url(../example/up.svg) !important;
         }
 
         #linkPropToggle {
@@ -586,14 +586,17 @@
                     let originalPath = element.getAttribute('filename');
                     let correctedPath = originalPath;
                     console.log('Original: ', originalPath);
+                   
+                    const urltest = viewer.urdf; // Assuming 'viewer.urdf' is a property that can be set to change the URDF
+                    console.log(urltest);
 
                     if (originalPath.startsWith('../meshes/')) {
                         // Adjust the path to point to the correct location
-                        correctedPath = `urdf/dropbear/meshes/${originalPath.substring(10)}`;
+                        correctedPath = `${viewer.urdf.substring(5)}/urdf/meshes/${originalPath.substring(10)}`;
                         console.log('Corrected: ', correctedPath);
 
                         // Check if the corrected path exists
-                        const exists = await fileExists(`package:/${correctedPath}`);
+                        const exists = await fileExists(`/${correctedPath}`);
 
                         // If the file does not exist at the corrected path, revert to original path
                         if (!exists) {
@@ -607,9 +610,12 @@
                 const serializer = new XMLSerializer();
                 const modifiedURDFString = serializer.serializeToString(urdfDOM);
 
+                console.log(urdfDOM);
+
                 // Convert modified URDF string to a Blob and set it as the new URDF on the viewer
                 const blob = new Blob([modifiedURDFString], { type: 'text/xml' });
                 const url = URL.createObjectURL(blob);
+
                 viewer.urdf = url; // Assuming 'viewer.urdf' is a property that can be set to change the URDF
 
                 // Increment the URDF change counter
@@ -1108,18 +1114,6 @@
                 });
             }
         }
-
-        viewer.addEventListener('urdf-change', () => {
-            // Remove existing sliders
-            Object.values(sliders).forEach(sl => sl.remove());
-            sliders = {};
-
-            // Repopulate joint and link names
-            populateJointNames();
-            populateLinkNames();
-            editURDF();
-
-        });
 
         document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
