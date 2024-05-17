@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/js/controls/OrbitControls';
 import URDFLoader from './URDFLoader.js';
+import Ammo from 'ammojs3';
 
 // urdf-viewer element
 // Loads and displays a 3D view of a URDF-formatted robot
@@ -135,6 +136,7 @@ class URDFViewer extends HTMLElement {
         this.ambientLight = ambientLight;
 
         this._setUp(this.up);
+        this.initPhysics();
 
         const _renderLoop = () => {
 
@@ -157,7 +159,7 @@ class URDFViewer extends HTMLElement {
                 // update controls after the environment in
                 // case the controls are retargeted
                 this.controls.update();
-
+                this.updatePhysics();
             }
             this._renderLoopId = requestAnimationFrame(_renderLoop);
 
@@ -572,4 +574,91 @@ class URDFViewer extends HTMLElement {
 
     }
 
+
+    // Ammo.js setup and functions
+    initPhysics() {
+        Ammo().then((AmmoLib) => {
+            this.Ammo = AmmoLib;
+    
+            const collisionConfiguration = new AmmoLib.btDefaultCollisionConfiguration();
+            const dispatcher = new AmmoLib.btCollisionDispatcher(collisionConfiguration);
+            const overlappingPairCache = new AmmoLib.btDbvtBroadphase();
+            const solver = new AmmoLib.btSequentialImpulseConstraintSolver();
+            this.physicsWorld = new AmmoLib.btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
+            this.physicsWorld.setGravity(new AmmoLib.btVector3(0, -9.82, 0));
+    
+            this.physicsObjects = [];
+            this.tempTransform = new AmmoLib.btTransform();
+            console.log('physics init');
+            this.initGround();
+        });
+    }
+    initGround() {
+        if (!this.Ammo) return; // Ensure Ammo is loaded
+    
+        const groundShape = new this.Ammo.btBoxShape(new this.Ammo.btVector3(50, 1, 50));
+        const groundTransform = new this.Ammo.btTransform();
+        groundTransform.setIdentity();
+        groundTransform.setOrigin(new this.Ammo.btVector3(0, -1, 0));
+    
+        const mass = 0;
+        const localInertia = new this.Ammo.btVector3(0, 0, 0);
+        const myMotionState = new this.Ammo.btDefaultMotionState(groundTransform);
+        const rbInfo = new this.Ammo.btRigidBodyConstructionInfo(mass, myMotionState, groundShape, localInertia);
+        const body = new this.Ammo.btRigidBody(rbInfo);
+
+        console.log('ground init');
+
+        this.physicsWorld.addRigidBody(body);
+    }
+
+    createPhysicsObject(threeObject, shapeType, mass) {
+        let shape;
+        switch (shapeType) {
+            case 'box':
+                const bbox = new THREE.Box3().setFromObject(threeObject);
+                const size = new THREE.Vector3();
+                bbox.getSize(size);
+                shape = new this.Ammo.btBoxShape(new this.Ammo.btVector3(size.x / 2, size.y / 2, size.z / 2));
+                break;
+            // Add more shape types as needed
+        }
+
+        const transform = new this.Ammo.btTransform();
+        transform.setIdentity();
+        transform.setOrigin(new this.Ammo.btVector3(threeObject.position.x, threeObject.position.y, threeObject.position.z));
+
+        const localInertia = new this.Ammo.btVector3(0, 0, 0);
+        shape.calculateLocalInertia(mass, localInertia);
+
+        const motionState = new this.Ammo.btDefaultMotionState(transform);
+        const rbInfo = new this.Ammo.btRigidBodyConstructionInfo(mass, motionState, shape, localInertia);
+        const body = new this.Ammo.btRigidBody(rbInfo);
+
+        console.log('physics objects created');
+
+        this.physicsWorld.addRigidBody(body);
+        this.physicsObjects.push({ threeObject, body });
+    }
+
+    updatePhysics() {
+        if (!this.physicsWorld) return; // Ensure the physics world is initialized
+    
+        const deltaTime = 1 / 60;
+        this.physicsWorld.stepSimulation(deltaTime, 10);
+    
+        this.physicsObjects.forEach(obj => {
+            const { threeObject, body } = obj;
+            const ms = body.getMotionState();
+            if (ms) {
+                ms.getWorldTransform(this.tempTransform);
+                const p = this.tempTransform.getOrigin();
+                const q = this.tempTransform.getRotation();
+                threeObject.position.set(p.x(), p.y(), p.z());
+                threeObject.quaternion.set(q.x(), q.y(), q.z(), q.w());
+            }
+        });
+        //console.log('update physics');
+
+    }
 };

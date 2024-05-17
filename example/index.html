@@ -9,7 +9,7 @@
 
     <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-bundle.js"></script>
     <script src="../node_modules/three/build/three.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ammo.js/1.0.0/ammo.js"></script>
+    <script src="../node_modules/ammojs3/dist/ammo.js"></script>
     <script src="../node_modules/three/examples/js/controls/OrbitControls.js"></script>
     <script src="../node_modules/three/examples/js/loaders/GLTFLoader.js"></script>
     <script src="../node_modules/three/examples/js/loaders/OBJLoader.js"></script>
@@ -116,7 +116,8 @@
 
         #controls {
             backdrop-filter: blur(10px)brightness(0.5);
-
+            display: flex;
+            flex-flow: row;
             padding: 1rem;
             border-radius: 1rem;
             overflow-y: auto;
@@ -124,7 +125,10 @@
             box-shadow: 0px 0px 20px #0005;
             margin-top: unset !important;
             width: auto;
+            min-width: 32px;
+            min-height: 32px;
             position: relative;
+            gap: 1rem;
         }
 
         #controls::-webkit-scrollbar {
@@ -135,7 +139,9 @@
             display: none;
         }
 
-        #sliderSection {}
+        #sliderSection {
+            margin-bottom: -4px;
+        }
 
         #joint-selection-save,
         #generic-selection,
@@ -226,9 +232,34 @@
             flex-flow: column;
             justify-content: center;
             font-weight: bold;
+            min-height: 32px;
+            min-width: 32px;
             font-size: 2rem;
             text-transform: uppercase;
-            border: unset !important;
+        }
+
+        #buttoncol {
+            display: flex ;
+            flex-flow: column;
+            gap: 8px;
+            margin: unset !important;
+        }
+
+        .debug-stack {
+            width: calc(100% - 0px);;
+            border-radius: 4px;
+            border: 0px dashed orange;
+            margin-top: 0px !important;
+            margin-bottom: 0px !important;
+            display: flex;
+            flex-flow: column;
+            height: auto;padding:0px;
+            background:#0000;
+            gap:4px;
+        }
+        .debug-stack button{
+            background:#555;
+            color:orange;
         }
 
         #toggle-controls::before {
@@ -326,14 +357,19 @@
 
         }
 
+        .main-stack {
+            margin-top: -0px !important;
+            margin-bottom: -0px !important;
+        }
+
         .urdf-editor {
             border-radius: 0.25rem;
             margin: unset;
-            margin-top: unset !important;
+            margin-top: 4px !important;
             overflow: hidden;
             min-height: 200px;
             position: relative;
-            margin-bottom: 10px !important;
+            margin-bottom: 16px !important;
 
         }
 
@@ -388,88 +424,90 @@
 
         <div id="controls" class="hidden">
 
+            <div class="main-stack">
 
-            <div id="joint-controls">
+                <div id="joint-controls">
 
-                <div class="inputrow" onclick="toggleWrap(event, 'jointPropToggle')">
-                    <input type="text" id="joint-selection-save" placeholder="Joint Props">
-                </div>
-                <div class="inputwrap" id="jointPropToggle">
-                    <div class="inputrow">
-                        <label for="joint-selector">Joint:</label>
-                        <select id="joint-selector">
-                        </select>
+                    <div class="inputrow" onclick="toggleWrap(event, 'jointPropToggle')">
+                        <input type="text" id="joint-selection-save" placeholder="Joint Props">
                     </div>
-                    <div class="inputrow">
-                        <label for="joint-position-xyz">Position (XYZ):</label>
-                        <input type="text" id="joint-position-xyz" placeholder="x° y° z°"
-                            oninput="syncInputs('position')">
+                    <div class="inputwrap" id="jointPropToggle">
+                        <div class="inputrow">
+                            <label for="joint-selector">Joint:</label>
+                            <select id="joint-selector">
+                            </select>
+                        </div>
+                        <div class="inputrow">
+                            <label for="joint-position-xyz">Position (XYZ):</label>
+                            <input type="text" id="joint-position-xyz" placeholder="x° y° z°"
+                                oninput="syncInputs('position')">
+                        </div>
+                        <div class="linkbutton">
+                            <input type="checkbox" id="link-toggle" style="display: none;" checked />
+                            <img src="../example/linked.svg" alt="Linked" id="link-img" onclick="toggleLink()"
+                                style="cursor: pointer;">
+                        </div>
+                        <div class="inputrow">
+                            <label for="joint-origin-xyz">Origin (XYZ):</label>
+                            <input type="text" id="joint-origin-xyz" placeholder="x° y° z°"
+                                oninput="syncInputs('origin')">
+                        </div>
+                        <div class="inputrow">
+                            <label for="joint-origin-rpy">Rotation (RPY):</label>
+                            <input type="text" id="joint-origin-rpy" placeholder="roll° pitch° yaw°">
+                        </div>
+                        <div class="inputrow">
+                            <label for="joint-axis-xyz">Axis (XYZ):</label>
+                            <input type="text" id="joint-axis-xyz" placeholder="x° y° z°">
+                        </div>
+                        <div class="inputrow">
+                            <label for="joint-lower-limit">Lower Limit:</label>
+                            <input type="number" id="joint-lower-limit" placeholder="Lower Limit°" step="0.01">
+                        </div>
+                        <div class="inputrow">
+                            <label for="joint-upper-limit">Upper Limit:</label>
+                            <input type="number" id="joint-upper-limit" placeholder="Upper Limit°" step="0.01">
+                        </div>
+                        <div class="buttonrow">
+                            <button onclick="updateJointProperties()">Update Joint</button>
+                            <button id="update-urdf-joint-btn" onclick="updateURDF('joint')">Joint To URDF</button>
+                        </div>
                     </div>
-                    <div class="linkbutton">
-                        <input type="checkbox" id="link-toggle" style="display: none;" checked />
-                        <img src="../example/linked.svg" alt="Linked" id="link-img" onclick="toggleLink()"
-                            style="cursor: pointer;">
-                    </div>
-                    <div class="inputrow">
-                        <label for="joint-origin-xyz">Origin (XYZ):</label>
-                        <input type="text" id="joint-origin-xyz" placeholder="x° y° z°" oninput="syncInputs('origin')">
-                    </div>
-                    <div class="inputrow">
-                        <label for="joint-origin-rpy">Rotation (RPY):</label>
-                        <input type="text" id="joint-origin-rpy" placeholder="roll° pitch° yaw°">
-                    </div>
-                    <div class="inputrow">
-                        <label for="joint-axis-xyz">Axis (XYZ):</label>
-                        <input type="text" id="joint-axis-xyz" placeholder="x° y° z°">
-                    </div>
-                    <div class="inputrow">
-                        <label for="joint-lower-limit">Lower Limit:</label>
-                        <input type="number" id="joint-lower-limit" placeholder="Lower Limit°" step="0.01">
-                    </div>
-                    <div class="inputrow">
-                        <label for="joint-upper-limit">Upper Limit:</label>
-                        <input type="number" id="joint-upper-limit" placeholder="Upper Limit°" step="0.01">
-                    </div>
-                    <div class="buttonrow">
-                        <button onclick="updateJointProperties()">Update Joint</button>
-                        <button id="update-urdf-joint-btn" onclick="updateURDF('joint')">Joint To URDF</button>
-                    </div>
-                </div>
 
-                <div class="inputrow" onclick="toggleWrap(event, 'linkPropToggle')">
-                    <input type="text" id="link-selection-save" placeholder="Link Props">
-                </div>
+                    <div class="inputrow" onclick="toggleWrap(event, 'linkPropToggle')">
+                        <input type="text" id="link-selection-save" placeholder="Link Props">
+                    </div>
 
-                <div class="inputwrap" id="linkPropToggle">
-                    <div class="inputrow">
-                        <label for="link-selector">Link:</label>
-                        <select id="link-selector"></select>
+                    <div class="inputwrap" id="linkPropToggle">
+                        <div class="inputrow">
+                            <label for="link-selector">Link:</label>
+                            <select id="link-selector"></select>
+                        </div>
+                        <div class="inputrow">
+                            <label for="visual-origin-xyz">Visual Origin (XYZ):</label>
+                            <input type="text" id="visual-origin-xyz" placeholder="x° y° z°">
+                        </div>
+                        <div class="inputrow">
+                            <label for="visual-origin-rpy">Visual Rotation (RPY):</label>
+                            <input type="text" id="visual-origin-rpy" placeholder="roll° pitch° yaw°">
+                        </div>
+                        <div class="buttonrow">
+                            <button onclick="updateLinkVisualProperties()">Update Link</button>
+                            <button id="update-urdf-link-btn" onclick="updateURDF('link')">Link To URDF</button>
+                        </div>
                     </div>
-                    <div class="inputrow">
-                        <label for="visual-origin-xyz">Visual Origin (XYZ):</label>
-                        <input type="text" id="visual-origin-xyz" placeholder="x° y° z°">
-                    </div>
-                    <div class="inputrow">
-                        <label for="visual-origin-rpy">Visual Rotation (RPY):</label>
-                        <input type="text" id="visual-origin-rpy" placeholder="roll° pitch° yaw°">
-                    </div>
-                    <div class="buttonrow">
-                        <button onclick="updateLinkVisualProperties()">Update Link</button>
-                        <button id="update-urdf-link-btn" onclick="updateURDF('link')">Link To URDF</button>
-                    </div>
-                </div>
 
-            </div>
-            <div class="urdf-editor">
-                <textarea id="urdf-editor"></textarea>
-                <div class="smallbuttons">
-                    <button class="smallbutton" id="apply-urdf-btn" onclick="applyURDF()"><img
-                            src="../example/upload.svg" alt=""></button>
-                    <button class="smallbutton" id="save-urdf-btn" onclick="saveURDF()"><img
-                            src="../example/download.svg" alt=""></button>
                 </div>
-            </div>
-            <!--   <div class="inputwrap active editrow">
+                <div class="urdf-editor">
+                    <textarea id="urdf-editor"></textarea>
+                    <div class="smallbuttons">
+                        <button class="smallbutton" id="apply-urdf-btn" onclick="applyURDF()"><img
+                                src="../example/upload.svg" alt=""></button>
+                        <button class="smallbutton" id="save-urdf-btn" onclick="saveURDF()"><img
+                                src="../example/download.svg" alt=""></button>
+                    </div>
+                </div>
+                <!--   <div class="inputwrap active editrow">
 
                 <div class="buttonrow">
                   <button id="edit-urdf-btn" onclick="editURDF()">Edit URDF</button>
@@ -479,34 +517,45 @@
                 </div>
             </div>
             -->
-            <div class="inputrow" onclick="toggleWrap(event, 'sliderSection')">
-                <input type="text" id="generic-selection" placeholder="Sliders">
-            </div>
-
-            <div class="inputwrap" id="sliderSection">
-
-                <div style="display:none;">Drag and drop a set of URDF files! <br /> (Chrome Only)</div>
-
-                <div class="inputrow">
-                    <div id="ignore-joint-limits" class="toggle">Ignore Joint Limits</div>
-                    <div id="do-animate" class="toggle checked">Animate Joints</div>
+                <div class="inputrow" onclick="toggleWrap(event, 'sliderSection')">
+                    <input type="text" id="generic-selection" placeholder="Sliders">
                 </div>
-                <label>
-                    Up Axis
-                    <select id="up-select">
-                        <option value="+X">+X</option>
-                        <option value="-X">-X</option>
-                        <option value="+Y" selected>+Y</option>
-                        <option value="-Y">-Y</option>
-                        <option value="+Z">+Z</option>
-                        <option value="-Z">-Z</option>
-                    </select>
-                </label>
-                <ul></ul>
+
+                <div class="inputwrap" id="sliderSection">
+
+                    <div style="display:none;">Drag and drop a set of URDF files! <br /> (Chrome Only)</div>
+
+                    <div class="inputrow">
+                        <div id="ignore-joint-limits" class="toggle">Ignore Joint Limits</div>
+                        <div id="do-animate" class="toggle checked">Animate Joints</div>
+                    </div>
+                    <label>
+                        Up Axis
+                        <select id="up-select">
+                            <option value="+X">+X</option>
+                            <option value="-X">-X</option>
+                            <option value="+Y" selected>+Y</option>
+                            <option value="-Y">-Y</option>
+                            <option value="+Z">+Z</option>
+                            <option value="-Z">-Z</option>
+                        </select>
+                    </label>
+                    <ul></ul>
+                </div>
+
+
             </div>
+            <div id="buttoncol">
+                <div id="toggle-controls"></div>
 
-            <div id="toggle-controls"></div>
-
+                <div class="debug-stack">
+                    <button>Log Bot</button>
+                    <button>Log Mesh</button>
+                    <button>Read Tree</button>
+                    <button>FPS</button>
+                    <button>Phys</button>
+                </div>
+            </div>
         </div>
     </div>
     <urdf-viewer up="+Y" display-shadow tabindex="0"></urdf-viewer>
@@ -586,7 +635,7 @@
                     let originalPath = element.getAttribute('filename');
                     let correctedPath = originalPath;
                     console.log('Original: ', originalPath);
-                   
+
                     const urltest = viewer.urdf; // Assuming 'viewer.urdf' is a property that can be set to change the URDF
                     console.log(urltest);
 

@@ -66,9 +66,12 @@
     "three": "^0.109.0",
     "threejs-model-loader": "0.0.1",
     "wc-loader": "^1.1.12",
-    "webpack": "^3.5.3"
+    "webpack": "^3.5.3",
+    "ammojs3": "^0.0.11"
+
   },
   "dependencies": {
+    "ammojs3": "^0.0.11",
     "codemirror": "^6.0.1",
     "npm": "^10.8.0",
     "run": "^1.5.0",
