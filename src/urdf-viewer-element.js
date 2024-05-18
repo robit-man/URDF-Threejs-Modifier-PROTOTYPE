@@ -661,7 +661,7 @@ export default
             }
         });
     }
-    
+
     stopPhysics() {
         if (!this.physicsWorld) {
             console.log('No active physics world to stop.');

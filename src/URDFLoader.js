@@ -4,7 +4,7 @@ import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
 import { ColladaLoader } from 'three/examples/jsm/loaders/ColladaLoader.js';
 import { URDFRobot, URDFJoint, URDFLink, makeURDFCollider } from './URDFClasses.js';
 import { MeshBVH, acceleratedRaycast } from 'three-mesh-bvh';
-import Ammo from 'ammojs3';
+import Ammo from './ammo.js';
 
 const tempQuaternion = new THREE.Quaternion();
 const tempEuler = new THREE.Euler();
