@@ -126,12 +126,13 @@
             max-height: calc(100vh - 4rem - 8px);
             box-shadow: 0px 0px 20px #0005;
             margin-top: unset !important;
-            width: auto;
+            width: fit-content;
             min-width: 32px;
             min-height: 32px;
             position: relative;
             gap: 1rem;
             transform-origin: center;
+    transition: all 0.2s ease;
         }
 
         #controls::-webkit-scrollbar {
@@ -304,7 +305,8 @@
         }
 
         #menu {
-            width: auto;
+            height:0px;
+            width: 0px;
         }
 
         #controls li {
@@ -468,7 +470,7 @@
             width: 20px;
             height: 20px;
             border-radius: 4px;
-            background: #0008;
+            background: #0002;
             cursor: pointer;
             display: flex;
             flex-flow: column;
@@ -699,7 +701,7 @@
                                 <button onClick="console.log(viewer.robot);">Log Bot</button>
                                 <button onClick="console.log(viewer);">Log Viewer</button>
                                 <button onClick="populateJointNames(), populateLinkNames()">Cycle List</button>
-                                <button>Read Tree</button>
+                                <button onClick="viewer.urdf='../urdf/dropbear/urdf/dropbear.urdf'">Reload</button>
                                 <button>FPS</button>
                                 <button>Phys</button>
                                 <button for="colorPicker" class="color-select">
@@ -1092,6 +1094,7 @@
         document.querySelectorAll('#urdf-options li[urdf]').forEach(el => {
             el.addEventListener('click', e => {
                 const urdf = e.target.getAttribute('urdf');
+                console.log(urdf);
                 viewer.up = '+Y'; // Assuming 'viewer' is your URDF viewer object
                 document.getElementById('up-select').value = viewer.up;
                 viewer.urdf = urdf;
