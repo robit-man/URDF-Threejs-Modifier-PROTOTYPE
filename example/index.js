@@ -35,10 +35,10 @@ limitsToggle.addEventListener('click', () => {
     viewer.ignoreLimits = limitsToggle.classList.contains('checked');
 });
 
-
+debugToggle
 upSelect.addEventListener('change', () => viewer.up = upSelect.value);
 
-controlsToggle.addEventListener('click', () => controlsel.classList.toggle('hidden'), debugToggle.classList.toggle('hidden'));
+controlsToggle.addEventListener('click', () => controlsel.classList.toggle('hidden'));
 
 viewer.addEventListener('urdf-change', () => {
     Object.values(sliders).forEach(sl => sl.remove());

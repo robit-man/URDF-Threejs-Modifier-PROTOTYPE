@@ -519,6 +519,7 @@
             padding: 0.5rem;
             background: #fffb;
         }
+        #dragHandle{position:relative;}
 
         .editrow {
             min-height: 20px;
@@ -662,7 +663,7 @@
                 <div id="buttoncol">
                     <div id="toggle-controls"></div>
                     <button id="toggle-debug"
-                        onclick="toggleWrap(event, 'debugtoggle'), toggleWrap(event, 'controls')"></button>
+                        onclick="toggleWrap2('debugtoggle')"></button>
 
                     <div class="debug-stack" id="debugtoggle">
 
@@ -718,7 +719,7 @@
 
             // Increment the URDF change counter
             urdfChangeCounter++;
-            console.log('URDF has been changed', urdfChangeCounter, 'times');
+            console.log('URDF LOADS:', urdfChangeCounter);
         });
 
         // Function to edit the current URDF
@@ -1324,6 +1325,11 @@
             event.target.firstElementChild.classList.toggle("active2");
         }
 
+        function toggleWrap2(id) {
+            var divId = document.getElementById(id);
+            divId.classList.toggle("active");
+        }
+
     </script>
     <script>
         const consoleDiv = document.getElementById('console');
@@ -1369,8 +1375,8 @@
 
             dragHandle.addEventListener('mousedown', function (e) {
                 drag = true;
-                offsetX = controls.offsetLeft - e.clientX;
-                offsetY = controls.offsetTop - e.clientY;
+                offsetX = dragHandle.offsetLeft - e.clientX;
+                offsetY = dragHandle.offsetTop - e.clientY;
                 this.style.cursor = 'grabbing';
             });
 
@@ -1381,13 +1387,13 @@
 
             document.addEventListener('mousemove', function (e) {
                 if (drag) {
-                    controls.style.left = e.clientX + offsetX + 'px';
-                    controls.style.top = e.clientY + offsetY + 'px';
+                    dragHandle.style.left = e.clientX + offsetX + 'px';
+                    dragHandle.style.top = e.clientY + offsetY + 'px';
                 }
             });
         });
         document.addEventListener('DOMContentLoaded', function () {
-            var consoleElement = document.getElementById('controls');
+            var consoleElement = document.getElementById('dragHandle');
             var scaleIndicator = document.getElementById('window-scale');
             var currentScale = 1; // Start with no scale
 
