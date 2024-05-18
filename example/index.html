@@ -132,7 +132,7 @@
             position: relative;
             gap: 1rem;
             transform-origin: center;
-    transition: all 0.2s ease;
+            transition: all 0.2s ease;
         }
 
         #controls::-webkit-scrollbar {
@@ -305,7 +305,7 @@
         }
 
         #menu {
-            height:0px;
+            height: 0px;
             width: 0px;
         }
 
@@ -429,12 +429,12 @@
         }
 
         .color-wrapper {
-    height: calc(100% - 4px);
-    position: relative;
-    display: flex;
-    margin: 4px 0px;
-    border-radius:2px;
-    overflow:hidden;
+            height: calc(100% - 4px);
+            position: relative;
+            display: flex;
+            margin: 4px 0px;
+            border-radius: 2px;
+            overflow: hidden;
         }
 
         @keyframes fadeDown {
@@ -470,13 +470,15 @@
             width: 20px;
             height: 20px;
             border-radius: 4px;
-            background: #0002;
+            background: #fff2;
             cursor: pointer;
             display: flex;
             flex-flow: column;
             justify-content: center;
             text-align: center;
         }
+
+        #windowplus:hover {}
 
         #console-wrapper::-webkit-scrollbar {
             display: none;
@@ -1411,11 +1413,24 @@
         document.addEventListener('DOMContentLoaded', function () {
             var controls = document.getElementById('controls');
             var dragHandle = document.getElementById('dragHandle');
+            var sliderSection = document.getElementById('sliderSection');
 
             var drag = false;
+            var sliding = false;
             var offsetX, offsetY;
 
+            sliderSection.addEventListener('mousedown', function (e) {
+                sliding = true;
+
+            });
+
+            sliderSection.addEventListener('mouseup', function (e) {
+                sliding = false;
+
+            });
+
             dragHandle.addEventListener('mousedown', function (e) {
+
                 drag = true;
                 offsetX = dragHandle.offsetLeft - e.clientX;
                 offsetY = dragHandle.offsetTop - e.clientY;
@@ -1428,7 +1443,7 @@
             });
 
             document.addEventListener('mousemove', function (e) {
-                if (drag) {
+                if (drag && !sliding) {
                     dragHandle.style.left = e.clientX + offsetX + 'px';
                     dragHandle.style.top = e.clientY + offsetY + 'px';
                 }
