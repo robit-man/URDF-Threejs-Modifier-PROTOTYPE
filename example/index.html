@@ -411,27 +411,51 @@
             top: -1.5rem;
             color: #fffa;
             position: absolute;
-            opacity:0;
+            opacity: 0;
         }
+
         #window-scale.animate-scale::after {
-    animation: fadeDown 0.5s ease-out forwards;
-}@keyframes fadeDown {
-    0% {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    25% {
-        opacity: 1;
-        transform: translateY(0px);
-    }   75% {
-        opacity: 1;
-        transform: translateY(0px);
-    }
-    100% {
-        opacity: 0;
-        transform: translateY(+10px);
-    }
-}
+            animation: fadeDown 0.5s ease-out forwards;
+        }
+
+        #colorPicker {
+            padding: unset;
+            margin: unset;
+            border: unset;
+            width: 100%;
+            transform: scale(2);
+        }
+
+        .color-wrapper {
+    height: calc(100% - 4px);
+    position: relative;
+    display: flex;
+    margin: 4px 0px;
+    border-radius:2px;
+    overflow:hidden;
+        }
+
+        @keyframes fadeDown {
+            0% {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            25% {
+                opacity: 1;
+                transform: translateY(0px);
+            }
+
+            75% {
+                opacity: 1;
+                transform: translateY(0px);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateY(+10px);
+            }
+        }
 
         .debug-buttons {
             display: flex;
@@ -519,7 +543,10 @@
             padding: 0.5rem;
             background: #fffb;
         }
-        #dragHandle{position:relative;}
+
+        #dragHandle {
+            position: relative;
+        }
 
         .editrow {
             min-height: 20px;
@@ -662,8 +689,7 @@
                 </div>
                 <div id="buttoncol">
                     <div id="toggle-controls"></div>
-                    <button id="toggle-debug"
-                        onclick="toggleWrap2('debugtoggle')"></button>
+                    <button id="toggle-debug" onclick="toggleWrap2('debugtoggle')"></button>
 
                     <div class="debug-stack" id="debugtoggle">
 
@@ -676,6 +702,10 @@
                                 <button>Read Tree</button>
                                 <button>FPS</button>
                                 <button>Phys</button>
+                                <button for="colorPicker" class="color-select">
+                                    <div class="color-wrapper"><input type="color" id="colorPicker" name="color"
+                                            value="#3e4952"></div>
+                                </button>
                             </div>
                             <div class="debug-graph"></div>
                         </div>
@@ -1062,15 +1092,17 @@
         document.querySelectorAll('#urdf-options li[urdf]').forEach(el => {
             el.addEventListener('click', e => {
                 const urdf = e.target.getAttribute('urdf');
-                const color = e.target.getAttribute('color');
-
-                viewer.up = '+Y';
+                viewer.up = '+Y'; // Assuming 'viewer' is your URDF viewer object
                 document.getElementById('up-select').value = viewer.up;
                 viewer.urdf = urdf;
-                animToggle.classList.add('checked');
-                setColor(color);
+                animToggle.classList.add('checked'); // Assuming 'animToggle' is a control element
+
+                // Use the color from the color picker
+                const color = document.getElementById('colorPicker').value;
+                setColor(color); // Apply the color
             });
         });
+
 
         document.addEventListener('WebComponentsReady', () => {
             animToggle.addEventListener('click', () => animToggle.classList.toggle('checked'));
@@ -1363,9 +1395,16 @@
             // Ensure the latest message is visible by scrolling the wrapper
             consoleWrapper.scrollTop = consoleWrapper.scrollHeight;
         };
+
+
     </script>
 
     <script>
+        // Optionally, listen for changes on the color picker to update colors in real time
+        document.getElementById('colorPicker').addEventListener('change', (e) => {
+            setColor(e.target.value);
+        });
+
         document.addEventListener('DOMContentLoaded', function () {
             var controls = document.getElementById('controls');
             var dragHandle = document.getElementById('dragHandle');
@@ -1414,14 +1453,14 @@
                 consoleElement.style.transform = `scale(${currentScale})`;
                 scaleIndicator.setAttribute('data-scale', `${(currentScale * 100).toFixed(2)}%`);
             }
-            
-    function triggerAnimation() {
-        scaleIndicator.classList.add('animate-scale');
-        // Remove the class after the animation completes
-        setTimeout(() => {
-            scaleIndicator.classList.remove('animate-scale');
-        }, 500); // Match the animation duration
-    }
+
+            function triggerAnimation() {
+                scaleIndicator.classList.add('animate-scale');
+                // Remove the class after the animation completes
+                setTimeout(() => {
+                    scaleIndicator.classList.remove('animate-scale');
+                }, 500); // Match the animation duration
+            }
         });
 
     </script>
