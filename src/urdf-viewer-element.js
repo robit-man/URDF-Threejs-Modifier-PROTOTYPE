@@ -13,11 +13,11 @@ import Ammo from 'ammojs3';
 // ignore-limits-change: Fires when the 'ignore-limits' attribute changes
 // angle-change: Fires when an angle changes
 export default
-class URDFViewer extends HTMLElement {
+    class URDFViewer extends HTMLElement {
 
     static get observedAttributes() {
 
-        return ['package', 'urdf', 'up', 'display-shadow', 'ambient-color', 'ignore-limits'];
+        return ['package', 'urdf', 'up', 'display-shadow', 'ambient-color', 'ignore-limits', 'physics'];
 
     }
 
@@ -176,9 +176,9 @@ class URDFViewer extends HTMLElement {
 
             const styletag = document.createElement('style');
             styletag.innerHTML =
-            `
-                ${ this.tagName } { display: block; }
-                ${ this.tagName } canvas {
+                `
+                ${this.tagName} { display: block; }
+                ${this.tagName} canvas {
                     width: 100%;
                     height: 100%;
                 }
@@ -207,44 +207,37 @@ class URDFViewer extends HTMLElement {
     }
 
     attributeChangedCallback(attr, oldval, newval) {
-
         this.recenter();
 
         switch (attr) {
-
             case 'package':
-            case 'urdf': {
-
+            case 'urdf':
                 this._scheduleLoad();
                 break;
-
-            }
-
-            case 'up': {
-
+            case 'up':
                 this._setUp(this.up);
                 break;
-
-            }
-
-            case 'ambient-color': {
-
+            case 'ambient-color':
                 this.ambientLight.color.set(this.ambientColor);
                 this.ambientLight.groundColor.set('#000').lerp(this.ambientLight.color, 0.5);
                 break;
-
-            }
-
-            case 'ignore-limits': {
-
+            case 'ignore-limits':
                 this._setIgnoreLimits(this.ignoreLimits, true);
                 break;
-
-            }
-
+            case 'physics':
+                this.togglePhysics(newval === 'true');
+                break;
         }
-
     }
+
+    togglePhysics(enabled) {
+        if (enabled && !this.physicsWorld) {
+            this.initPhysics();  // Initialize physics if not already done
+        } else if (!enabled && this.physicsWorld) {
+            this.stopPhysics();  // Define a method to stop physics if needed
+        }
+    }
+
 
     /* Public API */
     updateSize() {
@@ -371,8 +364,8 @@ class URDFViewer extends HTMLElement {
 
         // if our current model is already what's being requested
         // or has been loaded then early out
-        if (this._prevload === `${ this.package }|${ this.urdf }`) return;
-        this._prevload = `${ this.package }|${ this.urdf }`;
+        if (this._prevload === `${this.package}|${this.urdf}`) return;
+        this._prevload = `${this.package}|${this.urdf}`;
 
         // if we're already waiting on a load then early out
         if (this._loadScheduled) return;
@@ -511,7 +504,7 @@ class URDFViewer extends HTMLElement {
 
                 // onProgress
                 (url, loaded, total) => {
-                    console.log(`${ url }; ${ loaded }/${ total }`);
+                    console.log(`${url}; ${loaded}/${total}`);
                 },
 
                 // onError
@@ -589,18 +582,23 @@ class URDFViewer extends HTMLElement {
     
             this.physicsObjects = [];
             this.tempTransform = new AmmoLib.btTransform();
-            console.log('physics init');
+    
+            console.log('Ammo.js physics initialized with gravity:', this.physicsWorld.getGravity().y());
             this.initGround();
+        }).catch(error => {
+            console.error('Failed to load Ammo.js:', error);
         });
     }
+    
+
     initGround() {
         if (!this.Ammo) return; // Ensure Ammo is loaded
-    
+
         const groundShape = new this.Ammo.btBoxShape(new this.Ammo.btVector3(50, 1, 50));
         const groundTransform = new this.Ammo.btTransform();
         groundTransform.setIdentity();
         groundTransform.setOrigin(new this.Ammo.btVector3(0, -1, 0));
-    
+
         const mass = 0;
         const localInertia = new this.Ammo.btVector3(0, 0, 0);
         const myMotionState = new this.Ammo.btDefaultMotionState(groundTransform);
@@ -642,7 +640,10 @@ class URDFViewer extends HTMLElement {
     }
 
     updatePhysics() {
-        if (!this.physicsWorld) return; // Ensure the physics world is initialized
+        if (!this.physicsWorld) {
+            console.log('Physics world is not initialized.');
+            return;
+        }
     
         const deltaTime = 1 / 60;
         this.physicsWorld.stepSimulation(deltaTime, 10);
@@ -656,9 +657,24 @@ class URDFViewer extends HTMLElement {
                 const q = this.tempTransform.getRotation();
                 threeObject.position.set(p.x(), p.y(), p.z());
                 threeObject.quaternion.set(q.x(), q.y(), q.z(), q.w());
+                console.log(`Updated position of ${threeObject.name}:`, p.x().toFixed(2), p.y().toFixed(2), p.z().toFixed(2));
             }
         });
-        //console.log('update physics');
-
     }
+    
+    stopPhysics() {
+        if (!this.physicsWorld) {
+            console.log('No active physics world to stop.');
+            return;
+        }
+        // Loop through all physics objects and remove them from the physics world
+        this.physicsObjects.forEach(obj => {
+            this.physicsWorld.removeRigidBody(obj.body);
+            console.log(`Removed physics body for ${obj.threeObject.name}`);
+        });
+        // Clear the array of physics objects
+        this.physicsObjects = [];
+        console.log('Physics stopped and all bodies cleared.');
+    }
+    
 };

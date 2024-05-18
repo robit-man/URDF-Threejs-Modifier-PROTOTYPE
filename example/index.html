@@ -68,6 +68,7 @@
 
         .inputrow label {
             margin-right: 4px;
+            width: max-content;
         }
 
         .buttonrow {
@@ -705,7 +706,7 @@
                                 <button onClick="populateJointNames(), populateLinkNames()">Cycle List</button>
                                 <button onClick="viewer.urdf='../urdf/dropbear/urdf/dropbear.urdf'">Reload</button>
                                 <button>FPS</button>
-                                <button>Phys</button>
+                                <button id="togglePhysicsButton" onClick="togglePhysics()">Phys</button>
                                 <button for="colorPicker" class="color-select">
                                     <div class="color-wrapper"><input type="color" id="colorPicker" name="color"
                                             value="#3e4952"></div>
@@ -725,7 +726,7 @@
             </div>
         </div>
     </div>
-    <urdf-viewer up="+Y" display-shadow tabindex="0"></urdf-viewer>
+    <urdf-viewer up="+Y" physics="false" display-shadow tabindex="0"></urdf-viewer>
 
     <script src="../example/index.js"></script>
     <script src="../example/dragAndDrop.js"></script>
@@ -1480,6 +1481,14 @@
                 }, 500); // Match the animation duration
             }
         });
+
+    </script>
+    <script>
+        function togglePhysics() {
+            const viewerElement = document.querySelector('urdf-viewer');
+            const currentPhysicsState = viewerElement.getAttribute('physics') === 'true';
+            viewerElement.setAttribute('physics', !currentPhysicsState);
+        }
 
     </script>
 
