@@ -36,11 +36,13 @@
             padding-bottom: 4px;
             padding-top: 4px;
             min-height: 200px;
+            width: 100% !important;
 
         }
 
         .active2::placeholder {
             background-image: url(../example/up.svg) !important;
+            background-position-x: (calc(100% - 32px));
         }
 
         #linkPropToggle {
@@ -129,6 +131,7 @@
             min-height: 32px;
             position: relative;
             gap: 1rem;
+            transform-origin: center;
         }
 
         #controls::-webkit-scrollbar {
@@ -169,7 +172,7 @@
             height: auto;
             background-size: 24px;
             background-repeat: no-repeat;
-            background-position: right center;
+            background-position: calc(100% - 8px) center;
             background-image: url(../example/down.svg);
 
         }
@@ -184,7 +187,7 @@
             height: auto;
             background-size: 24px;
             background-repeat: no-repeat;
-            background-position: right center;
+            background-position: calc(100% - 8px) center;
             background-image: url(../example/down.svg);
         }
 
@@ -198,7 +201,7 @@
             height: auto;
             background-size: 24px;
             background-repeat: no-repeat;
-            background-position: right center;
+            background-position: calc(100% - 8px) center;
             background-image: url(../example/down.svg);
         }
 
@@ -232,33 +235,55 @@
             flex-flow: column;
             justify-content: center;
             font-weight: bold;
-            min-height: 32px;
-            min-width: 32px;
+            min-height: 24px;
+            min-width: 24px;
             font-size: 2rem;
             text-transform: uppercase;
         }
 
         #buttoncol {
-            display: flex ;
+            display: flex;
             flex-flow: column;
-            gap: 8px;
+            gap: 14px;
             margin: unset !important;
         }
 
         .debug-stack {
-            width: calc(100% - 0px);;
+            width: 0px;
+            overflow: hidden;
             border-radius: 4px;
             border: 0px dashed orange;
             margin-bottom: 0px !important;
             display: flex;
             flex-flow: column;
-            height: auto;padding:0px;
-            background:#0000;
-            gap:4px;margin-top:7px;
+            height: 0px;
+            padding: 0px;
+            background: #0000;
+            gap: 4px;
+            margin-top: 4px;
         }
-        .debug-stack button{
-            background:#555;
-            color:orange;
+
+        .debug-stack button {
+            background: #555;
+            color: orange;
+            text-align: left;
+        }
+
+        #toggle-debug {
+            margin-bottom: unset !important;
+            margin-top: 0 !important;
+            /* margin-bottom: 10px; */
+            text-align: center;
+            display: flex;
+            flex-flow: column;
+            justify-content: center;
+            font-weight: bold;
+            min-height: 24px;
+            min-width: 24px;
+            font-size: 2rem;
+            text-transform: uppercase;
+
+
         }
 
         #toggle-controls::before {
@@ -356,6 +381,95 @@
 
         }
 
+        #console {
+            height: auto;
+            width: auto;
+            white-space: nowrap;
+            font-size: 0.75rem;
+            line-height: 0.85rem;
+            font-weight: 100;
+            color: #fffa;
+
+        }
+
+        #window-scale {
+            display: flex;
+            flex-flow: row;
+            justify-content: center;
+            gap: 4px;
+            margin-top: auto;
+            margin-left: auto;
+            position: relative;
+            color: #fffa;
+        }
+
+        #window-scale::after {
+            content: attr(data-scale);
+            display: block;
+            margin-top: 5px;
+            font-size: 0.8em;
+            top: -1.5rem;
+            color: #fffa;
+            position: absolute;
+            opacity:0;
+        }
+        #window-scale.animate-scale::after {
+    animation: fadeDown 0.5s ease-out forwards;
+}@keyframes fadeDown {
+    0% {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    25% {
+        opacity: 1;
+        transform: translateY(0px);
+    }   75% {
+        opacity: 1;
+        transform: translateY(0px);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(+10px);
+    }
+}
+
+        .debug-buttons {
+            display: flex;
+            flex-flow: column;
+            gap: 4px;
+        }
+
+        #windowplus,
+        #windowminus {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            background: #0008;
+            cursor: pointer;
+            display: flex;
+            flex-flow: column;
+            justify-content: center;
+            text-align: center;
+        }
+
+        #console-wrapper::-webkit-scrollbar {
+            display: none;
+        }
+
+        #console-wrapper {
+            border-radius: 4px;
+            box-shadow: inset 0px 0px 10px #fff1;
+            background: #000a;
+            padding: 8px;
+            overflow: auto;
+            display: block;
+            max-width: 400px;
+            width: calc(100% - 1rem);
+            height: calc(100% - 1rem);
+            max-height: 300px;
+            scrollbar-width: none;
+        }
+
         .main-stack {
             margin-top: -0px !important;
             margin-bottom: -0px !important;
@@ -378,6 +492,7 @@
             overflow: auto;
             margin: 0px !important;
             margin-bottom: -8px !important;
+            scrollbar-width: none;
         }
 
         #urdf-editor::-webkit-scrollbar {
@@ -420,93 +535,93 @@
             <li urdf="../urdf/TriATHLETE_Climbing/urdf/TriATHLETE_flipped.URDF" color="#3e4952">TriATHLETE Climbing</li>
         </ul>
 
+        <div id="dragHandle">
+            <div id="controls" class="hidden">
 
-        <div id="controls" class="hidden">
+                <div class="main-stack">
 
-            <div class="main-stack">
+                    <div id="joint-controls">
 
-                <div id="joint-controls">
+                        <div class="inputrow" onclick="toggleWrap(event, 'jointPropToggle')">
+                            <input type="text" id="joint-selection-save" placeholder="Joint Props">
+                        </div>
+                        <div class="inputwrap" id="jointPropToggle">
+                            <div class="inputrow">
+                                <label for="joint-selector">Joint:</label>
+                                <select id="joint-selector">
+                                </select>
+                            </div>
+                            <div class="inputrow">
+                                <label for="joint-position-xyz">Position (XYZ):</label>
+                                <input type="text" id="joint-position-xyz" placeholder="x° y° z°"
+                                    oninput="syncInputs('position')">
+                            </div>
+                            <div class="linkbutton">
+                                <input type="checkbox" id="link-toggle" style="display: none;" checked />
+                                <img src="../example/linked.svg" alt="Linked" id="link-img" onclick="toggleLink()"
+                                    style="cursor: pointer;">
+                            </div>
+                            <div class="inputrow">
+                                <label for="joint-origin-xyz">Origin (XYZ):</label>
+                                <input type="text" id="joint-origin-xyz" placeholder="x° y° z°"
+                                    oninput="syncInputs('origin')">
+                            </div>
+                            <div class="inputrow">
+                                <label for="joint-origin-rpy">Rotation (RPY):</label>
+                                <input type="text" id="joint-origin-rpy" placeholder="roll° pitch° yaw°">
+                            </div>
+                            <div class="inputrow">
+                                <label for="joint-axis-xyz">Axis (XYZ):</label>
+                                <input type="text" id="joint-axis-xyz" placeholder="x° y° z°">
+                            </div>
+                            <div class="inputrow">
+                                <label for="joint-lower-limit">Lower Limit:</label>
+                                <input type="number" id="joint-lower-limit" placeholder="Lower Limit°" step="0.01">
+                            </div>
+                            <div class="inputrow">
+                                <label for="joint-upper-limit">Upper Limit:</label>
+                                <input type="number" id="joint-upper-limit" placeholder="Upper Limit°" step="0.01">
+                            </div>
+                            <div class="buttonrow">
+                                <button onclick="updateJointProperties()">Update Joint</button>
+                                <button id="update-urdf-joint-btn" onclick="updateURDF('joint')">Joint To URDF</button>
+                            </div>
+                        </div>
 
-                    <div class="inputrow" onclick="toggleWrap(event, 'jointPropToggle')">
-                        <input type="text" id="joint-selection-save" placeholder="Joint Props">
+                        <div class="inputrow" onclick="toggleWrap(event, 'linkPropToggle')">
+                            <input type="text" id="link-selection-save" placeholder="Link Props">
+                        </div>
+
+                        <div class="inputwrap" id="linkPropToggle">
+                            <div class="inputrow">
+                                <label for="link-selector">Link:</label>
+                                <select id="link-selector"></select>
+                            </div>
+                            <div class="inputrow">
+                                <label for="visual-origin-xyz">Visual Origin (XYZ):</label>
+                                <input type="text" id="visual-origin-xyz" placeholder="x° y° z°">
+                            </div>
+                            <div class="inputrow">
+                                <label for="visual-origin-rpy">Visual Rotation (RPY):</label>
+                                <input type="text" id="visual-origin-rpy" placeholder="roll° pitch° yaw°">
+                            </div>
+                            <div class="buttonrow">
+                                <button onclick="updateLinkVisualProperties()">Update Link</button>
+                                <button id="update-urdf-link-btn" onclick="updateURDF('link')">Link To URDF</button>
+                            </div>
+                        </div>
+
                     </div>
-                    <div class="inputwrap" id="jointPropToggle">
-                        <div class="inputrow">
-                            <label for="joint-selector">Joint:</label>
-                            <select id="joint-selector">
-                            </select>
-                        </div>
-                        <div class="inputrow">
-                            <label for="joint-position-xyz">Position (XYZ):</label>
-                            <input type="text" id="joint-position-xyz" placeholder="x° y° z°"
-                                oninput="syncInputs('position')">
-                        </div>
-                        <div class="linkbutton">
-                            <input type="checkbox" id="link-toggle" style="display: none;" checked />
-                            <img src="../example/linked.svg" alt="Linked" id="link-img" onclick="toggleLink()"
-                                style="cursor: pointer;">
-                        </div>
-                        <div class="inputrow">
-                            <label for="joint-origin-xyz">Origin (XYZ):</label>
-                            <input type="text" id="joint-origin-xyz" placeholder="x° y° z°"
-                                oninput="syncInputs('origin')">
-                        </div>
-                        <div class="inputrow">
-                            <label for="joint-origin-rpy">Rotation (RPY):</label>
-                            <input type="text" id="joint-origin-rpy" placeholder="roll° pitch° yaw°">
-                        </div>
-                        <div class="inputrow">
-                            <label for="joint-axis-xyz">Axis (XYZ):</label>
-                            <input type="text" id="joint-axis-xyz" placeholder="x° y° z°">
-                        </div>
-                        <div class="inputrow">
-                            <label for="joint-lower-limit">Lower Limit:</label>
-                            <input type="number" id="joint-lower-limit" placeholder="Lower Limit°" step="0.01">
-                        </div>
-                        <div class="inputrow">
-                            <label for="joint-upper-limit">Upper Limit:</label>
-                            <input type="number" id="joint-upper-limit" placeholder="Upper Limit°" step="0.01">
-                        </div>
-                        <div class="buttonrow">
-                            <button onclick="updateJointProperties()">Update Joint</button>
-                            <button id="update-urdf-joint-btn" onclick="updateURDF('joint')">Joint To URDF</button>
+                    <div class="urdf-editor">
+                        <textarea id="urdf-editor"></textarea>
+                        <div class="smallbuttons">
+                            <button class="smallbutton" id="apply-urdf-btn" onclick="applyURDF()"><img
+                                    src="../example/upload.svg" alt=""></button>
+                            <button class="smallbutton" id="save-urdf-btn" onclick="saveURDF()"><img
+                                    src="../example/download.svg" alt=""></button>
                         </div>
                     </div>
-
-                    <div class="inputrow" onclick="toggleWrap(event, 'linkPropToggle')">
-                        <input type="text" id="link-selection-save" placeholder="Link Props">
-                    </div>
-
-                    <div class="inputwrap" id="linkPropToggle">
-                        <div class="inputrow">
-                            <label for="link-selector">Link:</label>
-                            <select id="link-selector"></select>
-                        </div>
-                        <div class="inputrow">
-                            <label for="visual-origin-xyz">Visual Origin (XYZ):</label>
-                            <input type="text" id="visual-origin-xyz" placeholder="x° y° z°">
-                        </div>
-                        <div class="inputrow">
-                            <label for="visual-origin-rpy">Visual Rotation (RPY):</label>
-                            <input type="text" id="visual-origin-rpy" placeholder="roll° pitch° yaw°">
-                        </div>
-                        <div class="buttonrow">
-                            <button onclick="updateLinkVisualProperties()">Update Link</button>
-                            <button id="update-urdf-link-btn" onclick="updateURDF('link')">Link To URDF</button>
-                        </div>
-                    </div>
-
-                </div>
-                <div class="urdf-editor">
-                    <textarea id="urdf-editor"></textarea>
-                    <div class="smallbuttons">
-                        <button class="smallbutton" id="apply-urdf-btn" onclick="applyURDF()"><img
-                                src="../example/upload.svg" alt=""></button>
-                        <button class="smallbutton" id="save-urdf-btn" onclick="saveURDF()"><img
-                                src="../example/download.svg" alt=""></button>
-                    </div>
-                </div>
-                <!--   <div class="inputwrap active editrow">
+                    <!--   <div class="inputwrap active editrow">
 
                 <div class="buttonrow">
                   <button id="edit-urdf-btn" onclick="editURDF()">Edit URDF</button>
@@ -516,43 +631,61 @@
                 </div>
             </div>
             -->
-                <div class="inputrow" onclick="toggleWrap(event, 'sliderSection')">
-                    <input type="text" id="generic-selection" placeholder="Sliders">
-                </div>
-
-                <div class="inputwrap" id="sliderSection">
-
-                    <div style="display:none;">Drag and drop a set of URDF files! <br /> (Chrome Only)</div>
-
-                    <div class="inputrow">
-                        <div id="ignore-joint-limits" class="toggle">Ignore Joint Limits</div>
-                        <div id="do-animate" class="toggle checked">Animate Joints</div>
+                    <div class="inputrow" onclick="toggleWrap(event, 'sliderSection')">
+                        <input type="text" id="generic-selection" placeholder="Sliders">
                     </div>
-                    <label>
-                        Up Axis
-                        <select id="up-select">
-                            <option value="+X">+X</option>
-                            <option value="-X">-X</option>
-                            <option value="+Y" selected>+Y</option>
-                            <option value="-Y">-Y</option>
-                            <option value="+Z">+Z</option>
-                            <option value="-Z">-Z</option>
-                        </select>
-                    </label>
-                    <ul></ul>
+
+                    <div class="inputwrap" id="sliderSection">
+
+                        <div style="display:none;">Drag and drop a set of URDF files! <br /> (Chrome Only)</div>
+
+                        <div class="inputrow">
+                            <div id="ignore-joint-limits" class="toggle">Ignore Joint Limits</div>
+                            <div id="do-animate" class="toggle checked">Animate Joints</div>
+                        </div>
+                        <label>
+                            Up Axis
+                            <select id="up-select">
+                                <option value="+X">+X</option>
+                                <option value="-X">-X</option>
+                                <option value="+Y" selected>+Y</option>
+                                <option value="-Y">-Y</option>
+                                <option value="+Z">+Z</option>
+                                <option value="-Z">-Z</option>
+                            </select>
+                        </label>
+                        <ul></ul>
+                    </div>
+
+
                 </div>
+                <div id="buttoncol">
+                    <div id="toggle-controls"></div>
+                    <button id="toggle-debug"
+                        onclick="toggleWrap(event, 'debugtoggle'), toggleWrap(event, 'controls')"></button>
 
+                    <div class="debug-stack" id="debugtoggle">
 
-            </div>
-            <div id="buttoncol">
-                <div id="toggle-controls"></div>
+                        <div class="row">
+                            <div class="debug-buttons">
 
-                <div class="debug-stack">
-                    <button>Log Bot</button>
-                    <button>Log Mesh</button>
-                    <button>Read Tree</button>
-                    <button>FPS</button>
-                    <button>Phys</button>
+                                <button onClick="console.log(viewer.robot);">Log Bot</button>
+                                <button onClick="console.log(viewer);">Log Viewer</button>
+                                <button onClick="populateJointNames(), populateLinkNames()">Cycle List</button>
+                                <button>Read Tree</button>
+                                <button>FPS</button>
+                                <button>Phys</button>
+                            </div>
+                            <div class="debug-graph"></div>
+                        </div>
+                        <div id="console-wrapper">
+                            <div id="console"></div>
+                        </div>
+                    </div>
+                    <div id="window-scale">
+                        <div id="windowplus">+</div>
+                        <div id="windowminus">-</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1192,7 +1325,100 @@
         }
 
     </script>
+    <script>
+        const consoleDiv = document.getElementById('console');
+        const consoleWrapper = document.getElementById('console-wrapper');
+        const maxLines = 100; // Maximum lines to display in the console
+        const logLines = []; // Array to store the lines of logs
 
+        // Save the original console.log function
+        const originalConsoleLog = console.log;
+
+        // Override console.log
+        console.log = function (...messages) {
+            // Call the original console.log function
+            originalConsoleLog.apply(console, messages);
+
+            // Create a new log entry
+            const message = messages.join(' '); // Combine all arguments into a single string
+            const newLine = document.createElement('div');
+            newLine.textContent = message;
+
+            // Add the new line to the logLines array
+            logLines.push(newLine);
+            if (logLines.length > maxLines) {
+                const oldLine = logLines.shift(); // Remove the oldest line if exceeding max lines
+                consoleDiv.removeChild(oldLine); // Remove old line from the DOM
+            }
+
+            // Append the new line to the console div
+            consoleDiv.appendChild(newLine);
+
+            // Ensure the latest message is visible by scrolling the wrapper
+            consoleWrapper.scrollTop = consoleWrapper.scrollHeight;
+        };
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var controls = document.getElementById('controls');
+            var dragHandle = document.getElementById('dragHandle');
+
+            var drag = false;
+            var offsetX, offsetY;
+
+            dragHandle.addEventListener('mousedown', function (e) {
+                drag = true;
+                offsetX = controls.offsetLeft - e.clientX;
+                offsetY = controls.offsetTop - e.clientY;
+                this.style.cursor = 'grabbing';
+            });
+
+            document.addEventListener('mouseup', function () {
+                drag = false;
+                dragHandle.style.cursor = 'grab';
+            });
+
+            document.addEventListener('mousemove', function (e) {
+                if (drag) {
+                    controls.style.left = e.clientX + offsetX + 'px';
+                    controls.style.top = e.clientY + offsetY + 'px';
+                }
+            });
+        });
+        document.addEventListener('DOMContentLoaded', function () {
+            var consoleElement = document.getElementById('controls');
+            var scaleIndicator = document.getElementById('window-scale');
+            var currentScale = 1; // Start with no scale
+
+            document.getElementById('windowplus').addEventListener('mousedown', function () {
+                currentScale *= 1.02; // Increase scale by 2%
+                applyScale();
+                triggerAnimation();
+            });
+
+
+            document.getElementById('windowminus').addEventListener('mousedown', function () {
+                currentScale *= 0.98; // Decrease scale by 2%
+                applyScale();
+                triggerAnimation();
+            });
+
+            function applyScale() {
+                consoleElement.style.transform = `scale(${currentScale})`;
+                scaleIndicator.setAttribute('data-scale', `${(currentScale * 100).toFixed(2)}%`);
+            }
+            
+    function triggerAnimation() {
+        scaleIndicator.classList.add('animate-scale');
+        // Remove the class after the animation completes
+        setTimeout(() => {
+            scaleIndicator.classList.remove('animate-scale');
+        }, 500); // Match the animation duration
+    }
+        });
+
+    </script>
 
 
 </body>

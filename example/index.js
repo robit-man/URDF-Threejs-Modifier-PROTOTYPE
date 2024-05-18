@@ -8,6 +8,7 @@ const upSelect = document.getElementById('up-select');
 const sliderList = document.querySelector('#controls ul');
 const controlsel = document.getElementById('controls');
 const controlsToggle = document.getElementById('toggle-controls');
+const debugToggle = document.getElementById('toggle-debug');
 const applyURDFBtn = document.getElementById('apply-urdf-btn'); // Button to apply URDF updates
 var DEG2RAD = Math.PI / 180;
 const RAD2DEG = 1 / DEG2RAD;
@@ -34,9 +35,10 @@ limitsToggle.addEventListener('click', () => {
     viewer.ignoreLimits = limitsToggle.classList.contains('checked');
 });
 
+
 upSelect.addEventListener('change', () => viewer.up = upSelect.value);
 
-controlsToggle.addEventListener('click', () => controlsel.classList.toggle('hidden'));
+controlsToggle.addEventListener('click', () => controlsel.classList.toggle('hidden'), debugToggle.classList.toggle('hidden'));
 
 viewer.addEventListener('urdf-change', () => {
     Object.values(sliders).forEach(sl => sl.remove());

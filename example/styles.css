@@ -167,7 +167,12 @@ input:focus {
 }
 
 #controls>* {
-    margin: 4px 0;
+    scrollbar-width: none!important;
+    transition:all 0.2s ease;
+}
+
+#toggle-controls, #toggle-debug{
+    padding:8px!important;
 }
 
 #controls #toggle-controls {
@@ -190,19 +195,36 @@ input:focus {
 
 #toggle-controls {
     border-radius: 4px;
-    width: 100%;
-    background-color:#333;height:41px;
+    width: calc(100% - 1rem);
+    background-color:#333;height:24px;
     background-image: radial-gradient(#0002, transparent, transparent);
 }
 
 #controls #buttoncol>#toggle-controls:before {
     transition: all 0.2s ease;
     content: '';
-    background-image: url(close.svg);
+    background-image: url(left.svg);
     filter: invert(1);
     background-size: 32px;
     height: 100%;
-    min-height: 32px;
+    min-height: 24px;
+    font-size: 12px;
+    margin: auto;
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 100% !important;
+    font-weight: normal;
+
+}
+
+#controls #buttoncol>#toggle-debug:before {
+    transition: all 0.2s ease;
+    content: '';
+    background-image: url(alert.svg);
+    filter: invert(0);
+    background-size: 24px;
+    height: 100%;
+    min-height: 24px;
     font-size: 12px;
     margin: auto;
     background-repeat: no-repeat;
@@ -218,9 +240,9 @@ input:focus {
     content: '';
     background-image: url(settings.svg);
     filter: invert(1);
-    background-size: 32px;
-    height: 32px;
-    width: 32px;
+    background-size: 24px;
+    height: 24px;
+    width: 24px;
     height: auto !important;
     border: 0px solid #0004;
 }
@@ -229,7 +251,7 @@ input:focus {
 /* hidden state */
 #controls.hidden #buttoncol>#toggle-controls {
   background-color:unset;
-  height:unset;
+  height:unset;top:-2px;left:-2px;
 }
 
 #controls.hidden:hover #buttoncol>#toggle-controls:before {
@@ -239,6 +261,8 @@ input:focus {
 #controls:hover #buttoncol>#toggle-controls:before {
     transform: scale(0.9);
 }
+#toggle-controls:hover {
+background:#fff5;}
 
 #controls.hidden>*:not(#buttoncol) {
     display: none;
@@ -247,15 +271,27 @@ input:focus {
 #controls.hidden>*:not() {
     display: none;
 }
-
+#controls.hidden>#dragHandle
+{
+    display: flex;
+}
 #controls.hidden>#buttoncol>.debug-stack {
+    display: none;
+}
+
+
+#controls.hidden>#buttoncol>#toggle-debug {
     display: none;
 }
 
 #controls.hidden #buttoncol>#toggle-controls {
     opacity: 1;
-    width: 32px;
+    width: 28px;
     background-image: unset;
+
+}
+#controls.hidden #buttoncol>#toggle-controls:hover {
+    background-color:#fff5;
 }
 
 
@@ -284,7 +320,7 @@ input:focus {
 #controls li span {
 
     padding: 0 5px;
-    max-width: 125px;
+    max-width: 124px;
     text-overflow: ellipsis;
     overflow: hidden;
 
@@ -297,7 +333,7 @@ input:focus {
 
 /* toggle controls */
 .toggle {
-    padding-left: 25px;
+    padding-left: 24px;
     position: relative;
 
     cursor: pointer;

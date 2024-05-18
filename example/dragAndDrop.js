@@ -124,6 +124,6 @@ document.addEventListener('drop', e => {
             }
         });
 
-    setColor('#263238');
+    setColor('#3e4952');
     window.animToggle.classList.remove('checked');
 });

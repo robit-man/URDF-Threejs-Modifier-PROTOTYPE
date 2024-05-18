@@ -9,15 +9,12 @@ import Ammo from 'ammojs3';
 const tempQuaternion = new THREE.Quaternion();
 const tempEuler = new THREE.Euler();
 
-// take a vector "x y z" and process it into an array [x, y, z]
 function processTuple(val) {
     if (!val) return [0, 0, 0];
     return val.trim().split(/\s+/g).map(num => parseFloat(num));
 }
 
-// applies a rotation a threejs object in URDF order
 function applyRotation(obj, rpy, additive = false) {
-    // if additive is true the rotation is applied in addition to the existing rotation
     if (!additive) obj.rotation.set(0, 0, 0);
 
     tempEuler.set(rpy[0], rpy[1], rpy[2], 'ZYX');
@@ -26,9 +23,7 @@ function applyRotation(obj, rpy, additive = false) {
     obj.quaternion.copy(tempQuaternion);
 }
 
-/* URDFLoader Class */
-// Loads and reads a URDF file into a THREEjs Object3D format
-export default class URDFLoader {
+class URDFLoader {
     constructor(manager, allowMeshBVH = false) {
         this.manager = manager || THREE.DefaultLoadingManager;
         this.allowMeshBVH = allowMeshBVH;
@@ -39,11 +34,7 @@ export default class URDFLoader {
         this.Ammo = null;
     }
 
-    /* Public API */
-    // urdf: The path to the URDF within the package OR absolute
-    // onComplete: Callback that is passed the model once loaded
     load(urdf, onComplete, onProgress, onError, options) {
-        // Check if a full URI is specified before prepending the package info
         const manager = this.manager;
         const workingPath = THREE.LoaderUtils.extractUrlBase(urdf);
         const urdfPath = this.manager.resolveURL(urdf);
@@ -122,25 +113,19 @@ export default class URDFLoader {
         const jointMap = {};
         const materialMap = {};
 
-        // Resolves the path of mesh files
         function resolvePath(path) {
             if (!/^package:\/\//.test(path)) {
                 return workingPath ? workingPath + path : path;
             }
 
-            // Remove "package://" keyword and split meshPath at the first slash
             const [targetPkg, relPath] = path.replace(/^package:\/\//, '').split(/\/(.+)/);
             if (typeof packages === 'string') {
-                // "pkg" is one single package
                 if (packages.endsWith(targetPkg)) {
-                    // "pkg" is the target package
                     return packages + '/' + relPath;
                 } else {
-                    // Assume "pkg" is the target package's parent directory
                     return packages + '/' + targetPkg + '/' + relPath;
                 }
             } else if (typeof packages === 'object') {
-                // "pkg" is a map of packages
                 if (targetPkg in packages) {
                     return packages[targetPkg] + '/' + relPath;
                 } else {
@@ -150,7 +135,6 @@ export default class URDFLoader {
             }
         }
 
-        // Process the URDF text format
         const processUrdf = data => {
             const parser = new DOMParser();
             const urdf = parser.parseFromString(data, 'text/xml');
@@ -159,7 +143,6 @@ export default class URDFLoader {
             return processRobot.call(this, robotNode);
         };
 
-        // Process the <robot> node
         function processRobot(robot) {
             const robotNodes = [...robot.children];
             const links = robotNodes.filter(c => c.nodeName.toLowerCase() === 'link');
@@ -170,20 +153,17 @@ export default class URDFLoader {
             obj.robotName = robot.getAttribute('name');
             obj.urdfRobotNode = robot;
 
-            // Create the <material> map
             materials.forEach(m => {
                 const name = m.getAttribute('name');
                 materialMap[name] = processMaterial.call(this, m);
             });
 
-            // Create the <link> map
             links.forEach(l => {
                 const name = l.getAttribute('name');
                 const isRoot = robot.querySelector(`child[link="${name}"]`) === null;
                 linkMap[name] = processLink.call(this, l, isRoot ? obj : null);
             });
 
-            // Create the <joint> map
             joints.forEach(j => {
                 const name = j.getAttribute('name');
                 jointMap[name] = processJoint.call(this, j);
@@ -195,7 +175,6 @@ export default class URDFLoader {
             return obj;
         }
 
-        // Process joint nodes and parent them
         function processJoint(joint) {
             const children = [...joint.children];
             const jointType = joint.getAttribute('type');
@@ -209,7 +188,6 @@ export default class URDFLoader {
             let xyz = [0, 0, 0];
             let rpy = [0, 0, 0];
 
-            // Extract the attributes
             children.forEach(n => {
                 const type = n.nodeName.toLowerCase();
                 if (type === 'origin') {
@@ -225,7 +203,6 @@ export default class URDFLoader {
                 }
             });
 
-            // Join the links
             if (parent && parent instanceof THREE.Object3D) {
                 parent.add(obj);
             }
@@ -235,11 +212,9 @@ export default class URDFLoader {
             applyRotation(obj, rpy);
             obj.position.set(xyz[0], xyz[1], xyz[2]);
 
-            // Add AxesHelper
-            const jointAxesHelper = new AxesHelper(0.5); // Customize size as needed
+            const jointAxesHelper = new AxesHelper(0.5);
             obj.add(jointAxesHelper);
 
-            // Set up the rotate function
             const axisNode = children.filter(n => n.nodeName.toLowerCase() === 'axis')[0];
             if (axisNode) {
                 const axisXYZ = axisNode.getAttribute('xyz').split(/\s+/g).map(num => parseFloat(num));
@@ -250,7 +225,6 @@ export default class URDFLoader {
             return obj;
         }
 
-        // Process the <link> nodes
         function processLink(link, target = null) {
             if (target === null) {
                 target = new URDFLink();
@@ -269,11 +243,9 @@ export default class URDFLoader {
                 collisionNodes.forEach(vn => processLinkElement.call(this, vn, target));
             }
 
-            // Add AxesHelper
-            const linkAxesHelper = new AxesHelper(0.5); // Customize size as needed
+            const linkAxesHelper = new AxesHelper(0.5);
             target.add(linkAxesHelper);
 
-            // Add physical properties
             this.addPhysicsToLink(target);
 
             return target;
@@ -305,7 +277,6 @@ export default class URDFLoader {
             return material;
         }
 
-        // Process the visual and collision nodes into meshes
         function processLinkElement(vn, linkObj, materialMap = {}) {
             const isCollisionNode = vn.nodeName.toLowerCase() === 'collision';
             let xyz = [0, 0, 0];
@@ -316,7 +287,6 @@ export default class URDFLoader {
             let material = null;
             let primitiveModel = null;
 
-            // get the material first
             const materialNode = children.filter(n => n.nodeName.toLowerCase() === 'material')[0];
             if (materialNode) {
                 const name = materialNode.getAttribute('name');
@@ -337,7 +307,6 @@ export default class URDFLoader {
                         const filename = n.children[0].getAttribute('filename');
                         const filePath = resolvePath(filename);
 
-                        // file path is null if a package directory is not provided.
                         if (filePath !== null) {
                             const scaleAttr = n.children[0].getAttribute('scale');
                             if (scaleAttr) scale = processTuple(scaleAttr);
@@ -359,10 +328,6 @@ export default class URDFLoader {
                                     obj.position.set(xyz[0], xyz[1], xyz[2]);
                                     obj.rotation.set(0, 0, 0);
 
-                                    // multiply the existing scale by the scale components because
-                                    // the loaded model could have important scale values already applied
-                                    // to the root. Collada files, for example, can load in with a scale
-                                    // to convert the model units to meters.
                                     obj.scale.x *= scale[0];
                                     obj.scale.y *= scale[1];
                                     obj.scale.z *= scale[2];
@@ -436,9 +401,6 @@ export default class URDFLoader {
                 }
             });
 
-            // apply the position and rotation to the primitive geometry after
-            // the fact because it's guaranteed to have been scraped from the child
-            // nodes by this point
             if (primitiveModel) {
                 applyRotation(primitiveModel, rpy, true);
                 primitiveModel.position.set(xyz[0], xyz[1], xyz[2]);
@@ -448,7 +410,6 @@ export default class URDFLoader {
         return processUrdf(content);
     }
 
-    // Default mesh loading function
     defaultMeshLoader(path, manager, done) {
         if (/\.stl(?:\?|$)/i.test(path)) {
             const loader = new STLLoader(manager);
@@ -465,14 +426,14 @@ export default class URDFLoader {
     }
 
     addPhysicsToLink(link) {
-        if (!this.Ammo) return; // Ensure Ammo is loaded
+        if (!this.Ammo) return;
 
-        const shape = new this.Ammo.btBoxShape(new this.Ammo.btVector3(0.5, 0.5, 0.5)); // Adjust size as needed
+        const shape = new this.Ammo.btBoxShape(new this.Ammo.btVector3(0.5, 0.5, 0.5));
         const transform = new this.Ammo.btTransform();
         transform.setIdentity();
         transform.setOrigin(new this.Ammo.btVector3(link.position.x, link.position.y, link.position.z));
 
-        const mass = 1; // Adjust mass as needed
+        const mass = 1;
         const localInertia = new this.Ammo.btVector3(0, 0, 0);
         shape.calculateLocalInertia(mass, localInertia);
 
@@ -484,7 +445,6 @@ export default class URDFLoader {
         this.physicsObjects.push({ threeObject: link, body });
     }
 
-    // Initialize Ammo.js and the Physics World
     initPhysics() {
         Ammo().then((AmmoLib) => {
             this.Ammo = AmmoLib;
@@ -504,7 +464,7 @@ export default class URDFLoader {
     }
 
     initGround() {
-        if (!this.Ammo) return; // Ensure Ammo is loaded
+        if (!this.Ammo) return;
 
         const groundShape = new this.Ammo.btBoxShape(new this.Ammo.btVector3(50, 1, 50));
         const groundTransform = new this.Ammo.btTransform();
@@ -520,9 +480,8 @@ export default class URDFLoader {
         this.physicsWorld.addRigidBody(body);
     }
 
-    // Update the Physics Simulation
     updatePhysics() {
-        if (!this.physicsWorld) return; // Ensure the physics world is initialized
+        if (!this.physicsWorld) return;
 
         const deltaTime = 1 / 60;
         this.physicsWorld.stepSimulation(deltaTime, 10);
@@ -545,11 +504,9 @@ URDFLoader.prototype.parseFromString = function(urdfString, options) {
     try {
         const parser = new DOMParser();
         const urdfDom = parser.parseFromString(urdfString, "text/xml");
-        
-        // Directly use the existing parse method if it can handle a DOM object
-        // Alternatively, convert the DOM to a string or another format as required by your parse method
+
         const model = this.parse(urdfDom, options);
-        
+
         if (options.onComplete) {
             options.onComplete(model);
         }
@@ -562,7 +519,6 @@ URDFLoader.prototype.parseFromString = function(urdfString, options) {
 
 URDFLoader.prototype.loadFromString = function(urdfString, onComplete) {
     try {
-        // Assuming the existing parse method can handle XML DOM, convert the string to DOM first
         const parser = new DOMParser();
         const urdfDOM = parser.parseFromString(urdfString, "text/xml");
         const model = this.parse(urdfDOM, {});
@@ -574,10 +530,65 @@ URDFLoader.prototype.loadFromString = function(urdfString, onComplete) {
     }
 };
 
-// Extend URDFLoader to handle scene updates
 URDFLoader.prototype.applyUpdates = function () {
-    // This could be a method to apply pending updates or simply refresh parts of the model
     if (window.model) {
         window.model.refreshScene();
     }
 };
+
+function animate(loader, renderer, scene, camera) {
+    requestAnimationFrame(() => animate(loader, renderer, scene, camera));
+
+    loader.updatePhysics();
+    renderer.render(scene, camera);
+}
+
+const loader = new URDFLoader();
+loader.initPhysics();
+
+const urdfPath = '/urdf/dropbear/urdf/dropbear.urdf';  // Update this with the actual path to your URDF file
+loader.load(urdfPath, (robot) => {
+    if (!robot) {
+        console.error('Failed to load URDF model.');
+        return;
+    }
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    scene.add(robot);
+    robot.traverse(link => {
+        if (link.isURDFLink) {
+            loader.addPhysicsToLink(link);
+        }
+    });
+
+    camera.position.z = 5;
+
+    const ballGeometry = new THREE.SphereGeometry(0.5, 32, 32);
+    const ballMaterial = new THREE.MeshPhongMaterial({ color: 0xff0000 });
+    const ballMesh = new THREE.Mesh(ballGeometry, ballMaterial);
+    ballMesh.position.set(0, 5, 0);
+    scene.add(ballMesh);
+
+    const ballShape = new loader.Ammo.btSphereShape(0.5);
+    const ballTransform = new loader.Ammo.btTransform();
+    ballTransform.setIdentity();
+    ballTransform.setOrigin(new loader.Ammo.btVector3(ballMesh.position.x, ballMesh.position.y, ballMesh.position.z));
+
+    const ballMass = 1;
+    const ballLocalInertia = new loader.Ammo.btVector3(0, 0, 0);
+    ballShape.calculateLocalInertia(ballMass, ballLocalInertia);
+
+    const ballMotionState = new loader.Ammo.btDefaultMotionState(ballTransform);
+    const ballRbInfo = new loader.Ammo.btRigidBodyConstructionInfo(ballMass, ballMotionState, ballShape, ballLocalInertia);
+    const ballBody = new loader.Ammo.btRigidBody(ballRbInfo);
+
+    loader.physicsWorld.addRigidBody(ballBody);
+    loader.physicsObjects.push({ threeObject: ballMesh, body: ballBody });
+
+    animate(loader, renderer, scene, camera);
+});

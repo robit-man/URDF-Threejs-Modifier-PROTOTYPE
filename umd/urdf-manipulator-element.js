@@ -1,31 +1,8 @@
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('three'), require('three/examples/js/controls/OrbitControls'), require('three/examples/jsm/loaders/STLLoader.js'), require('three/examples/jsm/loaders/ColladaLoader.js'), require('three-mesh-bvh'), require('ammojs3')) :
-  typeof define === 'function' && define.amd ? define(['three', 'three/examples/js/controls/OrbitControls', 'three/examples/jsm/loaders/STLLoader.js', 'three/examples/jsm/loaders/ColladaLoader.js', 'three-mesh-bvh', 'ammojs3'], factory) :
-  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.URDFManipulator = factory(global.THREE, global.THREE, global.THREE, global.THREE, global.THREE, global.Ammo));
-})(this, (function (THREE, OrbitControls, STLLoader_js, ColladaLoader_js, threeMeshBvh, Ammo) { 'use strict';
-
-  function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
-
-  function _interopNamespace(e) {
-    if (e && e.__esModule) return e;
-    var n = Object.create(null);
-    if (e) {
-      Object.keys(e).forEach(function (k) {
-        if (k !== 'default') {
-          var d = Object.getOwnPropertyDescriptor(e, k);
-          Object.defineProperty(n, k, d.get ? d : {
-            enumerable: true,
-            get: function () { return e[k]; }
-          });
-        }
-      });
-    }
-    n["default"] = e;
-    return Object.freeze(n);
-  }
-
-  var THREE__namespace = /*#__PURE__*/_interopNamespace(THREE);
-  var Ammo__default = /*#__PURE__*/_interopDefaultLegacy(Ammo);
+  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('three'), require('three/examples/js/controls/OrbitControls'), require('three/examples/jsm/loaders/STLLoader.js'), require('three/examples/jsm/loaders/ColladaLoader.js'), require('three-mesh-bvh')) :
+  typeof define === 'function' && define.amd ? define(['three', 'three/examples/js/controls/OrbitControls', 'three/examples/jsm/loaders/STLLoader.js', 'three/examples/jsm/loaders/ColladaLoader.js', 'three-mesh-bvh'], factory) :
+  (global = global || self, global.URDFManipulator = factory(global.THREE, global.THREE, global.THREE, global.THREE, global.THREE));
+}(this, (function (THREE, OrbitControls, STLLoader_js, ColladaLoader_js, threeMeshBvh) { 'use strict';
 
   function _AsyncGenerator(e) {
     var r, t;
@@ -3109,10 +3086,33 @@
     }]);
   }(URDFLink);
 
-  var tempQuaternion = new THREE__namespace.Quaternion();
-  var tempEuler = new THREE__namespace.Euler();
+  /*
+  Reference coordinate frames for THREE.js and ROS.
+  Both coordinate systems are right handed so the URDF is instantiated without
+  frame transforms. The resulting model can be rotated to rectify the proper up,
+  right, and forward directions
 
-  // take a vector "x y z" and process it into an array [x, y, z]
+  THREE.js
+     Y
+     |
+     |
+     .-----X
+   ／
+  Z
+
+  ROS URDf
+         Z
+         |   X
+         | ／
+   Y-----.
+
+  */
+
+  var tempQuaternion = new THREE.Quaternion();
+  var tempEuler = new THREE.Euler();
+
+  // take a vector "x y z" and process it into
+  // an array [x, y, z]
   function processTuple(val) {
     if (!val) return [0, 0, 0];
     return val.trim().split(/\s+/g).map(function (num) {
@@ -3123,7 +3123,8 @@
   // applies a rotation a threejs object in URDF order
   function applyRotation(obj, rpy) {
     var additive = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-    // if additive is true the rotation is applied in addition to the existing rotation
+    // if additive is true the rotation is applied in
+    // addition to the existing rotation
     if (!additive) obj.rotation.set(0, 0, 0);
     tempEuler.set(rpy[0], rpy[1], rpy[2], 'ZYX');
     tempQuaternion.setFromEuler(tempEuler);
@@ -3137,25 +3138,22 @@
     function URDFLoader(manager) {
       var allowMeshBVH = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
       _classCallCheck(this, URDFLoader);
-      this.manager = manager || THREE__namespace.DefaultLoadingManager;
+      this.manager = manager || THREE.DefaultLoadingManager;
       this.allowMeshBVH = allowMeshBVH;
       this.retryMap = {};
-      this.physicsWorld = null;
-      this.physicsObjects = [];
-      this.tempTransform = null;
-      this.Ammo = null;
     }
 
     /* Public API */
-    // urdf: The path to the URDF within the package OR absolute
-    // onComplete: Callback that is passed the model once loaded
+    // urdf:    The path to the URDF within the package OR absolute
+    // onComplete:      Callback that is passed the model once loaded
     return _createClass(URDFLoader, [{
       key: "load",
       value: function load(urdf, onComplete, onProgress, onError, options) {
         var _this = this;
-        // Check if a full URI is specified before prepending the package info
+        // Check if a full URI is specified before
+        // prepending the package info
         var manager = this.manager;
-        var workingPath = THREE__namespace.LoaderUtils.extractUrlBase(urdf);
+        var workingPath = THREE.LoaderUtils.extractUrlBase(urdf);
         var urdfPath = this.manager.resolveURL(urdf);
         var errors = {};
         var managerOnErrorDefault = function managerOnErrorDefault() {};
@@ -3338,12 +3336,8 @@
           });
 
           // Join the links
-          if (parent && parent instanceof THREE__namespace.Object3D) {
-            parent.add(obj);
-          }
-          if (child && child instanceof THREE__namespace.Object3D) {
-            obj.add(child);
-          }
+          parent.add(obj);
+          obj.add(child);
           applyRotation(obj, rpy);
           obj.position.set(xyz[0], xyz[1], xyz[2]);
 
@@ -3359,7 +3353,7 @@
             var axisXYZ = axisNode.getAttribute('xyz').split(/\s+/g).map(function (num) {
               return parseFloat(num);
             });
-            obj.axis = new THREE__namespace.Vector3(axisXYZ[0], axisXYZ[1], axisXYZ[2]);
+            obj.axis = new THREE.Vector3(axisXYZ[0], axisXYZ[1], axisXYZ[2]);
             obj.axis.normalize();
           }
           return obj;
@@ -3391,19 +3385,15 @@
               return processLinkElement.call(_this4, vn, target);
             });
           }
-
           // Add AxesHelper
           var linkAxesHelper = new THREE.AxesHelper(0.5); // Customize size as needed
           target.add(linkAxesHelper);
-
-          // Add physical properties
-          this.addPhysicsToLink(target);
           return target;
         }
         function processMaterial(node) {
           var _this5 = this;
           var matNodes = _toConsumableArray(node.children);
-          var material = new THREE__namespace.MeshPhongMaterial();
+          var material = new THREE.MeshPhongMaterial();
           material.name = node.getAttribute('name') || '';
           matNodes.forEach(function (n) {
             var type = n.nodeName.toLowerCase();
@@ -3415,7 +3405,7 @@
               material.opacity = rgba[3];
               material.transparent = rgba[3] < 1;
             } else if (type === 'texture') {
-              var loader = new THREE__namespace.TextureLoader(manager);
+              var loader = new THREE.TextureLoader(manager);
               var filename = n.getAttribute('filename');
               var filePath = resolvePath(filename);
               var onError = function onError() {
@@ -3461,7 +3451,7 @@
               material = processMaterial.call(this, materialNode);
             }
           } else {
-            material = new THREE__namespace.MeshPhongMaterial();
+            material = new THREE.MeshPhongMaterial();
           }
           children.forEach(function (n) {
             var type = n.nodeName.toLowerCase();
@@ -3482,7 +3472,7 @@
                         return loadMeshCb(filePath, manager, cb);
                       };
                     } else if (obj) {
-                      if (obj instanceof THREE__namespace.Mesh) {
+                      if (obj instanceof THREE.Mesh) {
                         obj.material = material;
                         if (_this6.allowMeshBVH) {
                           obj.raycast = threeMeshBvh.acceleratedRaycast;
@@ -3509,8 +3499,8 @@
                   loadMeshCb(filePath, manager, cb);
                 }
               } else if (geoType === 'box') {
-                primitiveModel = new THREE__namespace.Mesh();
-                primitiveModel.geometry = new THREE__namespace.BoxBufferGeometry(1, 1, 1);
+                primitiveModel = new THREE.Mesh();
+                primitiveModel.geometry = new THREE.BoxBufferGeometry(1, 1, 1);
                 primitiveModel.material = material;
                 if (_this6.allowMeshBVH) {
                   primitiveModel.raycast = threeMeshBvh.acceleratedRaycast;
@@ -3523,8 +3513,8 @@
                   makeURDFCollider(primitiveModel);
                 }
               } else if (geoType === 'sphere') {
-                primitiveModel = new THREE__namespace.Mesh();
-                primitiveModel.geometry = new THREE__namespace.SphereBufferGeometry(1, 30, 30);
+                primitiveModel = new THREE.Mesh();
+                primitiveModel.geometry = new THREE.SphereBufferGeometry(1, 30, 30);
                 primitiveModel.material = material;
                 if (_this6.allowMeshBVH) {
                   primitiveModel.raycast = threeMeshBvh.acceleratedRaycast;
@@ -3537,8 +3527,8 @@
                   makeURDFCollider(primitiveModel);
                 }
               } else if (geoType === 'cylinder') {
-                primitiveModel = new THREE__namespace.Mesh();
-                primitiveModel.geometry = new THREE__namespace.CylinderBufferGeometry(1, 1, 1, 30);
+                primitiveModel = new THREE.Mesh();
+                primitiveModel.geometry = new THREE.CylinderBufferGeometry(1, 1, 1, 30);
                 primitiveModel.material = material;
                 if (_this6.allowMeshBVH) {
                   primitiveModel.raycast = threeMeshBvh.acceleratedRaycast;
@@ -3577,7 +3567,7 @@
         if (/\.stl(?:\?|$)/i.test(path)) {
           var loader = new STLLoader_js.STLLoader(manager);
           loader.load(path, function (geom) {
-            var mesh = new THREE__namespace.Mesh(geom, new THREE__namespace.MeshPhongMaterial());
+            var mesh = new THREE.Mesh(geom, new THREE.MeshPhongMaterial());
             done(mesh);
           });
         } else if (/\.dae(?:\?|$)/i.test(path)) {
@@ -3589,87 +3579,9 @@
           console.warn("URDFLoader: Could not load model at ".concat(path, ".\nNo loader available"));
         }
       }
-    }, {
-      key: "addPhysicsToLink",
-      value: function addPhysicsToLink(link) {
-        if (!this.Ammo) return; // Ensure Ammo is loaded
-
-        var shape = new this.Ammo.btBoxShape(new this.Ammo.btVector3(0.5, 0.5, 0.5)); // Adjust size as needed
-        var transform = new this.Ammo.btTransform();
-        transform.setIdentity();
-        transform.setOrigin(new this.Ammo.btVector3(link.position.x, link.position.y, link.position.z));
-        var mass = 1; // Adjust mass as needed
-        var localInertia = new this.Ammo.btVector3(0, 0, 0);
-        shape.calculateLocalInertia(mass, localInertia);
-        var motionState = new this.Ammo.btDefaultMotionState(transform);
-        var rbInfo = new this.Ammo.btRigidBodyConstructionInfo(mass, motionState, shape, localInertia);
-        var body = new this.Ammo.btRigidBody(rbInfo);
-        this.physicsWorld.addRigidBody(body);
-        this.physicsObjects.push({
-          threeObject: link,
-          body: body
-        });
-      }
-
-      // Initialize Ammo.js and the Physics World
-    }, {
-      key: "initPhysics",
-      value: function initPhysics() {
-        var _this7 = this;
-        Ammo__default["default"]().then(function (AmmoLib) {
-          _this7.Ammo = AmmoLib;
-          var collisionConfiguration = new AmmoLib.btDefaultCollisionConfiguration();
-          var dispatcher = new AmmoLib.btCollisionDispatcher(collisionConfiguration);
-          var overlappingPairCache = new AmmoLib.btDbvtBroadphase();
-          var solver = new AmmoLib.btSequentialImpulseConstraintSolver();
-          _this7.physicsWorld = new AmmoLib.btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
-          _this7.physicsWorld.setGravity(new AmmoLib.btVector3(0, -9.82, 0));
-          _this7.physicsObjects = [];
-          _this7.tempTransform = new AmmoLib.btTransform();
-          _this7.initGround();
-        });
-      }
-    }, {
-      key: "initGround",
-      value: function initGround() {
-        if (!this.Ammo) return; // Ensure Ammo is loaded
-
-        var groundShape = new this.Ammo.btBoxShape(new this.Ammo.btVector3(50, 1, 50));
-        var groundTransform = new this.Ammo.btTransform();
-        groundTransform.setIdentity();
-        groundTransform.setOrigin(new this.Ammo.btVector3(0, -1, 0));
-        var mass = 0;
-        var localInertia = new this.Ammo.btVector3(0, 0, 0);
-        var myMotionState = new this.Ammo.btDefaultMotionState(groundTransform);
-        var rbInfo = new this.Ammo.btRigidBodyConstructionInfo(mass, myMotionState, groundShape, localInertia);
-        var body = new this.Ammo.btRigidBody(rbInfo);
-        this.physicsWorld.addRigidBody(body);
-      }
-
-      // Update the Physics Simulation
-    }, {
-      key: "updatePhysics",
-      value: function updatePhysics() {
-        var _this8 = this;
-        if (!this.physicsWorld) return; // Ensure the physics world is initialized
-
-        var deltaTime = 1 / 60;
-        this.physicsWorld.stepSimulation(deltaTime, 10);
-        this.physicsObjects.forEach(function (obj) {
-          var threeObject = obj.threeObject,
-            body = obj.body;
-          var ms = body.getMotionState();
-          if (ms) {
-            ms.getWorldTransform(_this8.tempTransform);
-            var p = _this8.tempTransform.getOrigin();
-            var q = _this8.tempTransform.getRotation();
-            threeObject.position.set(p.x(), p.y(), p.z());
-            threeObject.quaternion.set(q.x(), q.y(), q.z(), q.w());
-          }
-        });
-      }
     }]);
   }();
+  ;
   URDFLoader.prototype.parseFromString = function (urdfString, options) {
     try {
       var parser = new DOMParser();
@@ -3687,6 +3599,8 @@
       }
     }
   };
+
+  // In URDFLoader.js
   URDFLoader.prototype.loadFromString = function (urdfString, onComplete) {
     try {
       // Assuming the existing parse method can handle XML DOM, convert the string to DOM first
@@ -3701,6 +3615,87 @@
     }
   };
 
+  // Add or modify URDFJoint to handle updates more dynamically
+  URDFJoint.prototype.updateProperties = function (params) {
+    if (params.origin) {
+      var _this$origin;
+      (_this$origin = this.origin).set.apply(_this$origin, _toConsumableArray(params.origin.xyz));
+      var euler = _construct(THREE.Euler, _toConsumableArray(params.origin.rpy).concat(['XYZ']));
+      this.origQuaternion.setFromEuler(euler);
+    }
+    if (params.axis) {
+      var _this$axis;
+      (_this$axis = this.axis).set.apply(_this$axis, _toConsumableArray(params.axis));
+    }
+    if (params.limit) {
+      this.limit.lower = params.limit.lower;
+      this.limit.upper = params.limit.upper;
+    }
+
+    // After updating properties, you might need to recalculate the joint's position in the world
+    this.updateTransform();
+  };
+  URDFJoint.prototype.updateTransform = function () {
+    var _this$position;
+    // Apply new position and rotation
+    (_this$position = this.position).set.apply(_this$position, _toConsumableArray(this.origin.toArray()));
+    this.quaternion.copy(this.origQuaternion);
+
+    // Ensure updates affect the visual representation
+    this.updateMatrix();
+    this.updateMatrixWorld(true);
+
+    // If part of a larger kinematic chain, inform parent or children to update as well
+    if (this.parent) {
+      this.parent.updateMatrixWorld(true);
+    }
+  };
+
+  // Call this method after changing joint parameters
+  function refreshScene() {
+    if (viewer && viewer.robot) {
+      Object.values(viewer.robot.joints).forEach(function (joint) {
+        return joint.updateTransform();
+      });
+      viewer.updateScene(); // Assuming this triggers a re-render
+    }
+  }
+
+  // Assuming URDFLoader, URDFRobot, and URDFJoint are already defined elsewhere in your script
+
+  /* Add update joint functionality to URDFRobot */
+  URDFRobot.prototype.updateJoint = function (jointName, params) {
+    var joint = this.joints[jointName];
+    if (joint) {
+      // Update joint parameters like origin, axis, limits, etc.
+      if (params.origin) {
+        joint.origin = params.origin;
+      }
+      if (params.axis) {
+        var _joint$axis;
+        (_joint$axis = joint.axis).set.apply(_joint$axis, _toConsumableArray(params.axis));
+      }
+      if (params.limit) {
+        joint.limit.lower = params.limit.lower;
+        joint.limit.upper = params.limit.upper;
+      }
+      // Trigger a scene update or similar if needed
+      this.refreshScene(); // This method would need to be implemented based on your application's structure
+    }
+  };
+
+  /* Method to refresh the visual scene, to be defined based on how you're managing your THREE.js scene */
+  URDFRobot.prototype.refreshScene = function () {
+    // Implementation depends on how the scene is managed, but you would typically mark the scene or object for update
+    // For example:
+    if (this.mesh) {
+      this.mesh.geometry.computeBoundingSphere();
+      this.mesh.geometry.computeVertexNormals();
+    }
+    // You might need to re-render the scene
+    render(); // This function would need to be defined in your global scope or passed in
+  };
+
   // Extend URDFLoader to handle scene updates
   URDFLoader.prototype.applyUpdates = function () {
     // This could be a method to apply pending updates or simply refresh parts of the model
@@ -3708,6 +3703,10 @@
       window.model.refreshScene();
     }
   };
+  function render() {
+    renderer.render(scene, camera);
+    requestAnimationFrame(render);
+  }
 
   // urdf-viewer element
   // Loads and displays a 3D view of a URDF-formatted robot
@@ -3732,15 +3731,15 @@
       _this.urlModifierFunc = null;
 
       // Scene setup
-      var scene = new THREE__namespace.Scene();
-      var ambientLight = new THREE__namespace.HemisphereLight(_this.ambientColor, '#000');
+      var scene = new THREE.Scene();
+      var ambientLight = new THREE.HemisphereLight(_this.ambientColor, '#000');
       ambientLight.groundColor.lerp(ambientLight.color, 0.5);
       ambientLight.intensity = 0.5;
       ambientLight.position.set(0, 1, 0);
       scene.add(ambientLight);
 
       // Light setup
-      var dirLight = new THREE__namespace.DirectionalLight(0xffffff);
+      var dirLight = new THREE.DirectionalLight(0xffffff);
       dirLight.position.set(4, 10, 1);
       dirLight.shadow.mapSize.width = 2048;
       dirLight.shadow.mapSize.height = 2048;
@@ -3749,25 +3748,25 @@
       scene.add(dirLight.target);
 
       // Renderer setup
-      var renderer = new THREE__namespace.WebGLRenderer({
+      var renderer = new THREE.WebGLRenderer({
         antialias: true,
         alpha: true
       });
       renderer.setClearColor(0xffffff);
       renderer.setClearAlpha(0);
       renderer.shadowMap.enabled = true;
-      renderer.shadowMap.type = THREE__namespace.PCFSoftShadowMap;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       renderer.gammaOutput = true;
 
       // Camera setup
-      var camera = new THREE__namespace.PerspectiveCamera(75, 1, 0.1, 2000);
+      var camera = new THREE.PerspectiveCamera(75, 1, 0.1, 2000);
       camera.position.z = -10;
 
       // World setup
-      var world = new THREE__namespace.Object3D();
+      var world = new THREE.Object3D();
       scene.add(world);
-      var plane = new THREE__namespace.Mesh(new THREE__namespace.PlaneBufferGeometry(40, 40), new THREE__namespace.ShadowMaterial({
-        side: THREE__namespace.DoubleSide,
+      var plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(40, 40), new THREE.ShadowMaterial({
+        side: THREE.DoubleSide,
         transparent: true,
         opacity: 0.5
       }));
@@ -3798,7 +3797,6 @@
       _this.directionalLight = dirLight;
       _this.ambientLight = ambientLight;
       _this._setUp(_this.up);
-      _this.initPhysics();
       var _renderLoop = function _renderLoop() {
         if (_this.parentNode) {
           _this.updateSize();
@@ -3813,7 +3811,6 @@
           // update controls after the environment in
           // case the controls are retargeted
           _this.controls.update();
-          _this.updatePhysics();
         }
         _this._renderLoopId = requestAnimationFrame(_renderLoop);
       };
@@ -3961,7 +3958,7 @@
         var r = this.renderer;
         var w = this.clientWidth;
         var h = this.clientHeight;
-        var currsize = new THREE__namespace.Vector2();
+        var currsize = new THREE.Vector2();
         r.getSize(currsize);
         if (currsize.width !== w || currsize.height !== h) {
           this.recenter();
@@ -4016,8 +4013,8 @@
       value: function _updateEnvironment() {
         if (!this.robot) return;
         this.world.updateMatrixWorld();
-        var bbox = new THREE__namespace.Box3();
-        var temp = new THREE__namespace.Box3();
+        var bbox = new THREE.Box3();
+        var temp = new THREE.Box3();
         this.robot.traverse(function (c) {
           var geometry = c.geometry;
           if (geometry) {
@@ -4029,7 +4026,7 @@
             bbox.union(temp);
           }
         });
-        var center = bbox.getCenter(new THREE__namespace.Vector3());
+        var center = bbox.getCenter(new THREE.Vector3());
         this.controls.target.y = center.y;
         this.plane.position.y = bbox.min.y - 1e-3;
         var dirLight = this.directionalLight;
@@ -4038,7 +4035,7 @@
           // Update the shadow camera rendering bounds to encapsulate the
           // model. We use the bounding sphere of the bounding box for
           // simplicity -- this could be a tighter fit.
-          var sphere = bbox.getBoundingSphere(new THREE__namespace.Sphere());
+          var sphere = bbox.getBoundingSphere(new THREE.Sphere());
           var minmax = sphere.radius;
           var cam = dirLight.shadow.camera;
           cam.left = cam.bottom = -minmax;
@@ -4102,11 +4099,11 @@
                 c.receiveShadow = true;
                 if (c.material) {
                   var mats = (Array.isArray(c.material) ? c.material : [c.material]).map(function (m) {
-                    if (m instanceof THREE__namespace.MeshBasicMaterial) {
-                      m = new THREE__namespace.MeshPhongMaterial();
+                    if (m instanceof THREE.MeshBasicMaterial) {
+                      m = new THREE.MeshPhongMaterial();
                     }
                     if (m.map) {
-                      m.map.encoding = THREE__namespace.GammaEncoding;
+                      m.map.encoding = THREE.GammaEncoding;
                     }
                     return m;
                   });
@@ -4133,7 +4130,7 @@
             }, {});
           }
           var robot = null;
-          var manager = new THREE__namespace.LoadingManager();
+          var manager = new THREE.LoadingManager();
           manager.onLoad = function () {
             // If another request has come in to load a new
             // robot, then ignore this one
@@ -4223,93 +4220,6 @@
           }));
         }
       }
-
-      // Ammo.js setup and functions
-    }, {
-      key: "initPhysics",
-      value: function initPhysics() {
-        var _this5 = this;
-        Ammo__default["default"]().then(function (AmmoLib) {
-          _this5.Ammo = AmmoLib;
-          var collisionConfiguration = new AmmoLib.btDefaultCollisionConfiguration();
-          var dispatcher = new AmmoLib.btCollisionDispatcher(collisionConfiguration);
-          var overlappingPairCache = new AmmoLib.btDbvtBroadphase();
-          var solver = new AmmoLib.btSequentialImpulseConstraintSolver();
-          _this5.physicsWorld = new AmmoLib.btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
-          _this5.physicsWorld.setGravity(new AmmoLib.btVector3(0, -9.82, 0));
-          _this5.physicsObjects = [];
-          _this5.tempTransform = new AmmoLib.btTransform();
-          console.log('physics init');
-          _this5.initGround();
-        });
-      }
-    }, {
-      key: "initGround",
-      value: function initGround() {
-        if (!this.Ammo) return; // Ensure Ammo is loaded
-
-        var groundShape = new this.Ammo.btBoxShape(new this.Ammo.btVector3(50, 1, 50));
-        var groundTransform = new this.Ammo.btTransform();
-        groundTransform.setIdentity();
-        groundTransform.setOrigin(new this.Ammo.btVector3(0, -1, 0));
-        var mass = 0;
-        var localInertia = new this.Ammo.btVector3(0, 0, 0);
-        var myMotionState = new this.Ammo.btDefaultMotionState(groundTransform);
-        var rbInfo = new this.Ammo.btRigidBodyConstructionInfo(mass, myMotionState, groundShape, localInertia);
-        var body = new this.Ammo.btRigidBody(rbInfo);
-        console.log('ground init');
-        this.physicsWorld.addRigidBody(body);
-      }
-    }, {
-      key: "createPhysicsObject",
-      value: function createPhysicsObject(threeObject, shapeType, mass) {
-        var shape;
-        switch (shapeType) {
-          case 'box':
-            var bbox = new THREE__namespace.Box3().setFromObject(threeObject);
-            var size = new THREE__namespace.Vector3();
-            bbox.getSize(size);
-            shape = new this.Ammo.btBoxShape(new this.Ammo.btVector3(size.x / 2, size.y / 2, size.z / 2));
-            break;
-          // Add more shape types as needed
-        }
-        var transform = new this.Ammo.btTransform();
-        transform.setIdentity();
-        transform.setOrigin(new this.Ammo.btVector3(threeObject.position.x, threeObject.position.y, threeObject.position.z));
-        var localInertia = new this.Ammo.btVector3(0, 0, 0);
-        shape.calculateLocalInertia(mass, localInertia);
-        var motionState = new this.Ammo.btDefaultMotionState(transform);
-        var rbInfo = new this.Ammo.btRigidBodyConstructionInfo(mass, motionState, shape, localInertia);
-        var body = new this.Ammo.btRigidBody(rbInfo);
-        console.log('physics objects created');
-        this.physicsWorld.addRigidBody(body);
-        this.physicsObjects.push({
-          threeObject: threeObject,
-          body: body
-        });
-      }
-    }, {
-      key: "updatePhysics",
-      value: function updatePhysics() {
-        var _this6 = this;
-        if (!this.physicsWorld) return; // Ensure the physics world is initialized
-
-        var deltaTime = 1 / 60;
-        this.physicsWorld.stepSimulation(deltaTime, 10);
-        this.physicsObjects.forEach(function (obj) {
-          var threeObject = obj.threeObject,
-            body = obj.body;
-          var ms = body.getMotionState();
-          if (ms) {
-            ms.getWorldTransform(_this6.tempTransform);
-            var p = _this6.tempTransform.getOrigin();
-            var q = _this6.tempTransform.getRotation();
-            threeObject.position.set(p.x(), p.y(), p.z());
-            threeObject.quaternion.set(q.x(), q.y(), q.z(), q.w());
-          }
-        });
-        //console.log('update physics');
-      }
     }], [{
       key: "observedAttributes",
       get: function get() {
@@ -4337,7 +4247,7 @@
       _this = _callSuper(this, URDFManipulator, [].concat(args));
 
       // The highlight material
-      _this.highlightMaterial = new THREE__namespace.MeshPhongMaterial({
+      _this.highlightMaterial = new THREE.MeshPhongMaterial({
         shininess: 10,
         color: _this.highlightColor,
         emissive: _this.highlightColor,
@@ -4347,15 +4257,15 @@
 
       // Saved mouse data between frames and initial
       // click point in space
-      var mouse = new THREE__namespace.Vector2();
-      var lastMouse = new THREE__namespace.Vector2();
-      var clickPoint = new THREE__namespace.Vector3();
+      var mouse = new THREE.Vector2();
+      var lastMouse = new THREE.Vector2();
+      var clickPoint = new THREE.Vector3();
 
       // Reuseable variables
-      var raycaster = new THREE__namespace.Raycaster();
-      var delta = new THREE__namespace.Vector2();
-      var plane = new THREE__namespace.Plane();
-      var line = new THREE__namespace.Line3();
+      var raycaster = new THREE.Raycaster();
+      var delta = new THREE.Vector2();
+      var plane = new THREE.Plane();
+      var line = new THREE.Line3();
 
       // The joint being manipulated
       var dragging = null;
@@ -4414,9 +4324,9 @@
         };
         traverse(m);
       };
-      var temp = new THREE__namespace.Vector3();
-      var intersect1 = new THREE__namespace.Vector3();
-      var intersect2 = new THREE__namespace.Vector3();
+      var temp = new THREE.Vector3();
+      var intersect1 = new THREE.Vector3();
+      var intersect2 = new THREE.Vector3();
 
       // Get the changed angle between mouse position 1 and 2
       // when manipulating target
@@ -4630,5 +4540,5 @@
 
   return URDFManipulator;
 
-}));
+})));
 //# sourceMappingURL=urdf-manipulator-element.js.map

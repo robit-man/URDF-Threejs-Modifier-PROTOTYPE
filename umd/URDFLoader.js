@@ -1,7 +1,7 @@
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('three'), require('three/examples/jsm/loaders/STLLoader.js'), require('three/examples/jsm/loaders/ColladaLoader.js'), require('three-mesh-bvh'), require('ammojs3')) :
+  typeof exports === 'object' && typeof module !== 'undefined' ? factory(require('three'), require('three/examples/jsm/loaders/STLLoader.js'), require('three/examples/jsm/loaders/ColladaLoader.js'), require('three-mesh-bvh'), require('ammojs3')) :
   typeof define === 'function' && define.amd ? define(['three', 'three/examples/jsm/loaders/STLLoader.js', 'three/examples/jsm/loaders/ColladaLoader.js', 'three-mesh-bvh', 'ammojs3'], factory) :
-  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.URDFLoader = factory(global.THREE, global.THREE, global.THREE, global.THREE, global.Ammo));
+  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.THREE, global.THREE, global.THREE, global.THREE, global.Ammo));
 })(this, (function (THREE, STLLoader_js, ColladaLoader_js, threeMeshBvh, Ammo) { 'use strict';
 
   function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
@@ -3111,28 +3111,20 @@
 
   var tempQuaternion = new THREE__namespace.Quaternion();
   var tempEuler = new THREE__namespace.Euler();
-
-  // take a vector "x y z" and process it into an array [x, y, z]
   function processTuple(val) {
     if (!val) return [0, 0, 0];
     return val.trim().split(/\s+/g).map(function (num) {
       return parseFloat(num);
     });
   }
-
-  // applies a rotation a threejs object in URDF order
   function applyRotation(obj, rpy) {
     var additive = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-    // if additive is true the rotation is applied in addition to the existing rotation
     if (!additive) obj.rotation.set(0, 0, 0);
     tempEuler.set(rpy[0], rpy[1], rpy[2], 'ZYX');
     tempQuaternion.setFromEuler(tempEuler);
     tempQuaternion.multiply(obj.quaternion);
     obj.quaternion.copy(tempQuaternion);
   }
-
-  /* URDFLoader Class */
-  // Loads and reads a URDF file into a THREEjs Object3D format
   var URDFLoader = /*#__PURE__*/function () {
     function URDFLoader(manager) {
       var allowMeshBVH = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
@@ -3145,15 +3137,10 @@
       this.tempTransform = null;
       this.Ammo = null;
     }
-
-    /* Public API */
-    // urdf: The path to the URDF within the package OR absolute
-    // onComplete: Callback that is passed the model once loaded
     return _createClass(URDFLoader, [{
       key: "load",
       value: function load(urdf, onComplete, onProgress, onError, options) {
         var _this = this;
-        // Check if a full URI is specified before prepending the package info
         var manager = this.manager;
         var workingPath = THREE__namespace.LoaderUtils.extractUrlBase(urdf);
         var urdfPath = this.manager.resolveURL(urdf);
@@ -3225,29 +3212,21 @@
         var linkMap = {};
         var jointMap = {};
         var materialMap = {};
-
-        // Resolves the path of mesh files
         function resolvePath(path) {
           if (!/^package:\/\//.test(path)) {
             return workingPath ? workingPath + path : path;
           }
-
-          // Remove "package://" keyword and split meshPath at the first slash
           var _path$replace$split = path.replace(/^package:\/\//, '').split(/\/(.+)/),
             _path$replace$split2 = _slicedToArray(_path$replace$split, 2),
             targetPkg = _path$replace$split2[0],
             relPath = _path$replace$split2[1];
           if (typeof packages === 'string') {
-            // "pkg" is one single package
             if (packages.endsWith(targetPkg)) {
-              // "pkg" is the target package
               return packages + '/' + relPath;
             } else {
-              // Assume "pkg" is the target package's parent directory
               return packages + '/' + targetPkg + '/' + relPath;
             }
           } else if (_typeof(packages) === 'object') {
-            // "pkg" is a map of packages
             if (targetPkg in packages) {
               return packages[targetPkg] + '/' + relPath;
             } else {
@@ -3256,8 +3235,6 @@
             }
           }
         }
-
-        // Process the URDF text format
         var processUrdf = function processUrdf(data) {
           var parser = new DOMParser();
           var urdf = parser.parseFromString(data, 'text/xml');
@@ -3267,8 +3244,6 @@
           }).pop();
           return processRobot.call(_this2, robotNode);
         };
-
-        // Process the <robot> node
         function processRobot(robot) {
           var _this3 = this;
           var robotNodes = _toConsumableArray(robot.children);
@@ -3284,21 +3259,15 @@
           var obj = new URDFRobot();
           obj.robotName = robot.getAttribute('name');
           obj.urdfRobotNode = robot;
-
-          // Create the <material> map
           materials.forEach(function (m) {
             var name = m.getAttribute('name');
             materialMap[name] = processMaterial.call(_this3, m);
           });
-
-          // Create the <link> map
           links.forEach(function (l) {
             var name = l.getAttribute('name');
             var isRoot = robot.querySelector("child[link=\"".concat(name, "\"]")) === null;
             linkMap[name] = processLink.call(_this3, l, isRoot ? obj : null);
           });
-
-          // Create the <joint> map
           joints.forEach(function (j) {
             var name = j.getAttribute('name');
             jointMap[name] = processJoint.call(_this3, j);
@@ -3307,8 +3276,6 @@
           obj.links = linkMap;
           return obj;
         }
-
-        // Process joint nodes and parent them
         function processJoint(joint) {
           var children = _toConsumableArray(joint.children);
           var jointType = joint.getAttribute('type');
@@ -3320,8 +3287,6 @@
           var child = null;
           var xyz = [0, 0, 0];
           var rpy = [0, 0, 0];
-
-          // Extract the attributes
           children.forEach(function (n) {
             var type = n.nodeName.toLowerCase();
             if (type === 'origin') {
@@ -3336,8 +3301,6 @@
               obj.limit.upper = parseFloat(n.getAttribute('upper') || obj.limit.upper);
             }
           });
-
-          // Join the links
           if (parent && parent instanceof THREE__namespace.Object3D) {
             parent.add(obj);
           }
@@ -3346,12 +3309,8 @@
           }
           applyRotation(obj, rpy);
           obj.position.set(xyz[0], xyz[1], xyz[2]);
-
-          // Add AxesHelper
-          var jointAxesHelper = new THREE.AxesHelper(0.5); // Customize size as needed
+          var jointAxesHelper = new THREE.AxesHelper(0.5);
           obj.add(jointAxesHelper);
-
-          // Set up the rotate function
           var axisNode = children.filter(function (n) {
             return n.nodeName.toLowerCase() === 'axis';
           })[0];
@@ -3364,8 +3323,6 @@
           }
           return obj;
         }
-
-        // Process the <link> nodes
         function processLink(link) {
           var _this4 = this;
           var target = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
@@ -3391,12 +3348,8 @@
               return processLinkElement.call(_this4, vn, target);
             });
           }
-
-          // Add AxesHelper
-          var linkAxesHelper = new THREE.AxesHelper(0.5); // Customize size as needed
+          var linkAxesHelper = new THREE.AxesHelper(0.5);
           target.add(linkAxesHelper);
-
-          // Add physical properties
           this.addPhysicsToLink(target);
           return target;
         }
@@ -3415,19 +3368,19 @@
               material.opacity = rgba[3];
               material.transparent = rgba[3] < 1;
             } else if (type === 'texture') {
-              var loader = new THREE__namespace.TextureLoader(manager);
+              var _loader = new THREE__namespace.TextureLoader(manager);
               var filename = n.getAttribute('filename');
               var filePath = resolvePath(filename);
               var onError = function onError() {
                 _this5.retryMap[filePath] = function () {
-                  return loader.load(filePath, function () {
+                  return _loader.load(filePath, function () {
                     return null;
                   }, function () {
                     return null;
                   }, onError);
                 };
               };
-              material.map = loader.load(filePath, function () {
+              material.map = _loader.load(filePath, function () {
                 return null;
               }, function () {
                 return null;
@@ -3436,8 +3389,6 @@
           });
           return material;
         }
-
-        // Process the visual and collision nodes into meshes
         function processLinkElement(vn, linkObj) {
           var _this6 = this;
           var materialMap = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
@@ -3448,8 +3399,6 @@
           var children = _toConsumableArray(vn.children);
           var material = null;
           var primitiveModel = null;
-
-          // get the material first
           var materialNode = children.filter(function (n) {
             return n.nodeName.toLowerCase() === 'material';
           })[0];
@@ -3470,8 +3419,6 @@
               if (geoType === 'mesh') {
                 var filename = n.children[0].getAttribute('filename');
                 var filePath = resolvePath(filename);
-
-                // file path is null if a package directory is not provided.
                 if (filePath !== null) {
                   var scaleAttr = n.children[0].getAttribute('scale');
                   if (scaleAttr) scale = processTuple(scaleAttr);
@@ -3492,11 +3439,6 @@
                       linkObj.add(obj);
                       obj.position.set(xyz[0], xyz[1], xyz[2]);
                       obj.rotation.set(0, 0, 0);
-
-                      // multiply the existing scale by the scale components because
-                      // the loaded model could have important scale values already applied
-                      // to the root. Collada files, for example, can load in with a scale
-                      // to convert the model units to meters.
                       obj.scale.x *= scale[0];
                       obj.scale.y *= scale[1];
                       obj.scale.z *= scale[2];
@@ -3558,10 +3500,6 @@
               rpy = processTuple(n.getAttribute('rpy'));
             }
           });
-
-          // apply the position and rotation to the primitive geometry after
-          // the fact because it's guaranteed to have been scraped from the child
-          // nodes by this point
           if (primitiveModel) {
             applyRotation(primitiveModel, rpy, true);
             primitiveModel.position.set(xyz[0], xyz[1], xyz[2]);
@@ -3569,20 +3507,18 @@
         }
         return processUrdf(content);
       }
-
-      // Default mesh loading function
     }, {
       key: "defaultMeshLoader",
       value: function defaultMeshLoader(path, manager, done) {
         if (/\.stl(?:\?|$)/i.test(path)) {
-          var loader = new STLLoader_js.STLLoader(manager);
-          loader.load(path, function (geom) {
+          var _loader2 = new STLLoader_js.STLLoader(manager);
+          _loader2.load(path, function (geom) {
             var mesh = new THREE__namespace.Mesh(geom, new THREE__namespace.MeshPhongMaterial());
             done(mesh);
           });
         } else if (/\.dae(?:\?|$)/i.test(path)) {
-          var _loader = new ColladaLoader_js.ColladaLoader(manager);
-          _loader.load(path, function (dae) {
+          var _loader3 = new ColladaLoader_js.ColladaLoader(manager);
+          _loader3.load(path, function (dae) {
             return done(dae.scene);
           });
         } else {
@@ -3592,13 +3528,12 @@
     }, {
       key: "addPhysicsToLink",
       value: function addPhysicsToLink(link) {
-        if (!this.Ammo) return; // Ensure Ammo is loaded
-
-        var shape = new this.Ammo.btBoxShape(new this.Ammo.btVector3(0.5, 0.5, 0.5)); // Adjust size as needed
+        if (!this.Ammo) return;
+        var shape = new this.Ammo.btBoxShape(new this.Ammo.btVector3(0.5, 0.5, 0.5));
         var transform = new this.Ammo.btTransform();
         transform.setIdentity();
         transform.setOrigin(new this.Ammo.btVector3(link.position.x, link.position.y, link.position.z));
-        var mass = 1; // Adjust mass as needed
+        var mass = 1;
         var localInertia = new this.Ammo.btVector3(0, 0, 0);
         shape.calculateLocalInertia(mass, localInertia);
         var motionState = new this.Ammo.btDefaultMotionState(transform);
@@ -3610,8 +3545,6 @@
           body: body
         });
       }
-
-      // Initialize Ammo.js and the Physics World
     }, {
       key: "initPhysics",
       value: function initPhysics() {
@@ -3632,8 +3565,7 @@
     }, {
       key: "initGround",
       value: function initGround() {
-        if (!this.Ammo) return; // Ensure Ammo is loaded
-
+        if (!this.Ammo) return;
         var groundShape = new this.Ammo.btBoxShape(new this.Ammo.btVector3(50, 1, 50));
         var groundTransform = new this.Ammo.btTransform();
         groundTransform.setIdentity();
@@ -3645,14 +3577,11 @@
         var body = new this.Ammo.btRigidBody(rbInfo);
         this.physicsWorld.addRigidBody(body);
       }
-
-      // Update the Physics Simulation
     }, {
       key: "updatePhysics",
       value: function updatePhysics() {
         var _this8 = this;
-        if (!this.physicsWorld) return; // Ensure the physics world is initialized
-
+        if (!this.physicsWorld) return;
         var deltaTime = 1 / 60;
         this.physicsWorld.stepSimulation(deltaTime, 10);
         this.physicsObjects.forEach(function (obj) {
@@ -3674,9 +3603,6 @@
     try {
       var parser = new DOMParser();
       var urdfDom = parser.parseFromString(urdfString, "text/xml");
-
-      // Directly use the existing parse method if it can handle a DOM object
-      // Alternatively, convert the DOM to a string or another format as required by your parse method
       var model = this.parse(urdfDom, options);
       if (options.onComplete) {
         options.onComplete(model);
@@ -3689,7 +3615,6 @@
   };
   URDFLoader.prototype.loadFromString = function (urdfString, onComplete) {
     try {
-      // Assuming the existing parse method can handle XML DOM, convert the string to DOM first
       var parser = new DOMParser();
       var urdfDOM = parser.parseFromString(urdfString, "text/xml");
       var model = this.parse(urdfDOM, {});
@@ -3700,16 +3625,62 @@
       console.error('Failed to parse URDF string:', error);
     }
   };
-
-  // Extend URDFLoader to handle scene updates
   URDFLoader.prototype.applyUpdates = function () {
-    // This could be a method to apply pending updates or simply refresh parts of the model
     if (window.model) {
       window.model.refreshScene();
     }
   };
-
-  return URDFLoader;
+  function animate(loader, renderer, scene, camera) {
+    requestAnimationFrame(function () {
+      return animate(loader, renderer, scene, camera);
+    });
+    loader.updatePhysics();
+    renderer.render(scene, camera);
+  }
+  var loader = new URDFLoader();
+  loader.initPhysics();
+  var urdfPath = '/urdf/dropbear/urdf/dropbear.urdf'; // Update this with the actual path to your URDF file
+  loader.load(urdfPath, function (robot) {
+    if (!robot) {
+      console.error('Failed to load URDF model.');
+      return;
+    }
+    var scene = new THREE__namespace.Scene();
+    var camera = new THREE__namespace.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    var renderer = new THREE__namespace.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+    scene.add(robot);
+    robot.traverse(function (link) {
+      if (link.isURDFLink) {
+        loader.addPhysicsToLink(link);
+      }
+    });
+    camera.position.z = 5;
+    var ballGeometry = new THREE__namespace.SphereGeometry(0.5, 32, 32);
+    var ballMaterial = new THREE__namespace.MeshPhongMaterial({
+      color: 0xff0000
+    });
+    var ballMesh = new THREE__namespace.Mesh(ballGeometry, ballMaterial);
+    ballMesh.position.set(0, 5, 0);
+    scene.add(ballMesh);
+    var ballShape = new loader.Ammo.btSphereShape(0.5);
+    var ballTransform = new loader.Ammo.btTransform();
+    ballTransform.setIdentity();
+    ballTransform.setOrigin(new loader.Ammo.btVector3(ballMesh.position.x, ballMesh.position.y, ballMesh.position.z));
+    var ballMass = 1;
+    var ballLocalInertia = new loader.Ammo.btVector3(0, 0, 0);
+    ballShape.calculateLocalInertia(ballMass, ballLocalInertia);
+    var ballMotionState = new loader.Ammo.btDefaultMotionState(ballTransform);
+    var ballRbInfo = new loader.Ammo.btRigidBodyConstructionInfo(ballMass, ballMotionState, ballShape, ballLocalInertia);
+    var ballBody = new loader.Ammo.btRigidBody(ballRbInfo);
+    loader.physicsWorld.addRigidBody(ballBody);
+    loader.physicsObjects.push({
+      threeObject: ballMesh,
+      body: ballBody
+    });
+    animate(loader, renderer, scene, camera);
+  });
 
 }));
 //# sourceMappingURL=URDFLoader.js.map
