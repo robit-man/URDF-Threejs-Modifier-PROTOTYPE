@@ -5,7 +5,7 @@
 
 Fork of [gkjohnson/urdf-loaders](https://github.com/gkjohnson/urdf-loaders) with only the JS component, and (soon) incorporating deeper sim2real control of systems connected over serial / websockets.
 
-![image](https://github.com/robit-man/URDF-Threejs-Modifier/assets/36677806/61b17971-c016-4d28-8c37-afa0b9664d7e)
+![image](https://github.com/robit-man/URDF-Threejs-Modifier/assets/36677806/f26ac20a-fab6-4d0f-8840-089bfbd0b067)
 
 # Project Overview
 
@@ -33,23 +33,105 @@ As projects progress, changes are made to robots that will affect RL policies, o
 2. `npm run start -s`
 3. visit `localhost:9080/example`
 
-# Use
+#### Basic Use
+
+Loading a URDF file from a server.
+
 ```js
 import { LoadingManager } from 'three';
 import URDFLoader from 'urdf-loader';
 
+// ...init three.js scene...
+
 const manager = new LoadingManager();
-const loader = new URDFLoader(manager);
+const loader = new URDFLoader( manager );
+loader.packages = {
+    packageName : './package/dir/'            // The equivalent of a (list of) ROS package(s):// directory
+};
 loader.load(
   'T12/urdf/T12.URDF',                    // The path to the URDF within the package OR absolute
-  robot => { },                           // The robot is loaded!
-  {
-    packages:     {
-      packageName : '.../package/dir/'            // The equivalent of a (list of) ROS package(s):// directory
-    },
-    loadMeshCb: (path, manager, done) => { },       // Callback for each mesh for custom mesh processing and loading code
+  robot => {
+
+    // The robot is loaded!
+    scene.add( robot );
+
   }
 );
+```
+
+#### Custom Mesh Loader & Error Handling
+
+Implementing custom error handling and / or adding a custom loader for meshes can be done using the [loadMeshCb](#loadMeshCb) callback.
+
+```js
+import { GLTFLoader } from 'three/examples/loaders/GLTFLoader.js';
+import URDFLoader from 'urdf-loader';
+
+// ...init three.js scene...
+
+const loader = new URDFLoader();
+loader.loadMeshCb = function( path, manager, onComplete ) {
+
+    const gltfLoader = new GLTFLoader( manager );
+    gltfLoader.load(
+        path,
+        result => {
+
+            onComplete( result.scene );
+
+        },
+        undefined,
+        err => {
+        
+            // try to load again, notify user, etc
+        
+            onComplete( null, err );
+        
+        }
+    );
+
+};
+loader.load( 'T12/urdf/T12.URDF', robot => {
+
+    // The robot is loaded!
+    scene.add( robot );
+
+} );
+
+```
+
+#### From Xacro
+
+Using [XacroParser](https://github.com/gkjohnson/xacro-parser) to process a Xacro URDF file and then parse it.
+
+```js
+import { LoaderUtils } from 'three';
+import { XacroLoader } from 'xacro-parser';
+import URDFLoader from 'urdf-loader';
+
+// ...init three.js scene...
+
+const url = './path/to/file.xacro';
+const xacroLoader = new XacroLoader();
+xacroLoader.load( url, xml => {
+
+    const urdfLoader = new URDFLoader();
+    urdfLoader.workingPath = LoaderUtils.extractUrlBase( url );
+
+    const robot = urdfLoader.parse( xml );
+    scene.add( robot );
+
+} );
+```
+
+### Adjusting Joint Angles
+
+```js
+robot.setJointValue( jointName, jointAngle );
+
+// or
+
+robot.joints[ jointName ].setJointValue( jointAngle );
 ```
 
 ## Limitations
@@ -59,10 +141,12 @@ loader.load(
 
 ## URDFOptions
 
+List of options available on the URDFLoader class.
+
 ### .packages
 
 ```js
-packages = '' : String | Object
+packages = '' : String | Object | ( pkg : String ) => String
 ```
 
 The path representing the `package://` directory(s) to load `package://` relative files.
@@ -72,11 +156,13 @@ If the argument is a string, then it is used to replace the `package://` prefix 
 To specify multiple packages an object syntax is used defining the package name to the package path:
 ```js
 {
-  "package1": ".../path/to/package1",
-  "package2": ".../path/to/package2",
+  "package1": "./path/to/package1",
+  "package2": "./path/to/package2",
   ...
 }
 ```
+
+If the setting is set to a function then it takes the package name and is expected to return the package path.
 
 ### .loadMeshCb
 
@@ -85,8 +171,8 @@ loadMeshCb = null :
     (
         pathToModel : string,
         manager : LoadingManager,
-        onComplete : ( obj : Object3D ) => void
-     ) => void
+        onComplete : ( obj : Object3D, err ?: Error ) => void
+    ) => void
 ```
 
 An optional function that can be used to override the default mesh loading functionality. The default loader is specified at `URDFLoader.defaultMeshLoader`.
@@ -100,7 +186,7 @@ An optional function that can be used to override the default mesh loading funct
 ### .fetchOptions
 
 ```js
-fetchOptions : Object
+fetchOptions = null : Object
 ```
 
 An optional object with the set of options to pass to the `fetch` function call used to load the URDF file.
@@ -108,7 +194,7 @@ An optional object with the set of options to pass to the `fetch` function call 
 ### .workingPath
 
 ```js
-workingPath : string
+workingPath = '' : string
 ```
 
 The path to load geometry relative to.
@@ -118,7 +204,7 @@ Defaults to the path relative to the loaded URDF file.
 ### .parseVisual
 
 ```js
-parseVisual : boolean
+parseVisual = true : boolean
 ```
 
 An optional value that can be used to enable / disable loading meshes for links from the `visual` nodes. Defaults to true.
@@ -126,7 +212,7 @@ An optional value that can be used to enable / disable loading meshes for links 
 ### .parseCollision
 
 ```js
-parseCollision : boolean
+parseCollision = false : boolean
 ```
 
 An optional value that can be used to enable / disable loading meshes for links from the `collision` nodes. Defaults to false.
@@ -146,8 +232,9 @@ Constructor. Manager is used for transforming load URLs and tracking downloads.
 ```js
 load(
     urdfpath : string,
-    onComplete : (robot: URDFRobot) => void,
-    options = null : URDFOptions
+    onComplete : (robot : URDFRobot) => void,
+    onProgress? : () => void,
+    onError? : (error : Error) => void
 ) : void
 ```
 
@@ -155,13 +242,23 @@ Loads and builds the specified URDF robot in THREE.js.
 
 Takes a path to load the urdf file from, a func to call when the robot has loaded, and a set of options.
 
+### .loadAsync
+
+```js
+loadAsync( urdfpath : string ) : Promise<URDFRobot>
+```
+
+Promise-wrapped version of `load`.
+
 ### .parse
 
 ```js
-parse( urdfContent : string,  options = null : URDFOptions) : URDFRobot
+parse( urdfContent : string | Document | Element ) : URDFRobot
 ```
 
 Parses URDF content and returns the robot model. Takes an XML string to parse and a set of options.
+
+If the XML document has already been parsed using `DOMParser` then either the returned `Document` or root `Element` can be passed into this function in place of the string, as well.
 
 Note that geometry will not necessarily be loaded when the robot is returned.
 
@@ -221,14 +318,53 @@ ignoreLimits : boolean
 
 Whether or not to ignore the joint limits when setting a the joint position.
 
-### .setAngle, .setOffset
+### .mimicJoints
 
 ```js
-setAngle( angle : number ) : void
-setOffset( position : number ) : void
+mimicJoints : URDFMimicJoints[]
 ```
 
-Takes the position off of the starting position to rotate or move the joint to.
+A list of joints which mimic this joint. These joints are updated whenever this joint is.
+
+### .setJointValue
+
+```js
+setJointValue( ...jointValues : (number | null)[] ) : Boolean
+```
+
+Sets the joint value(s) for the given joint. The interpretation of the value depends on the joint type. If the joint value specifies an angle it must be in radians. If the value specifies a distance, it must be in meters. Passing null for any component of the value will skip updating that particular component.
+
+Returns true if the joint or any of its mimicking joints changed.
+
+## URDFMimicJoint
+
+_extends URDFJoint_
+
+An object representing a robot joint which mimics another existing joint. The value of this joint can be computed as `value = multiplier * other_joint_value + offset`.
+
+### .mimicJoint
+
+```js
+mimicJoint : String
+```
+
+The name of the joint which this joint mimics.
+
+### .offset
+
+```js
+offset : Number
+```
+
+Specifies the offset to add in the formula above. Defaults to 0 (radians for revolute joints, meters for prismatic joints).
+
+### .multiplier
+
+```js
+multiplier : Number
+```
+
+Specifies the multiplicative factor in the formula above. Defaults to 1.0.
 
 ## URDFLink
 
@@ -272,10 +408,50 @@ joints : { [key] : URDFJoint }
 
 A dictionary of `jointName : URDFJoint` with all joints in the robot.
 
+### .colliders
+
+```js
+colliders : { [key] : Object3D }
+```
+
+A dictionary of `colliderName : Object3D` with all collision nodes in the robot.
+
+### .visual
+
+```js
+visual : { [key] : Object3D }
+```
+
+A dictionary of `visualName : Object3D` with all visual nodes in the robot.
+
+### .frames
+
+```js
+joints : { [key] : URDFJoint }
+```
+
+A dictionary of all the named frames in the robot including links, joints, colliders, and visual.
+
+### .setJointValue
+
+```js
+setJointValue( name : String, value : Number ) : Boolean
+```
+
+Sets the joint value of the joint with the given name. Returns true if the joint changed.
+
+### .setJointValues
+
+```js
+setJointValues( jointValueDictionary : Object ) : Boolean
+```
+
+Sets the joint values for all the joints in the dictionary indexed by joint name. Returns true if a joint changed.
+
 ## urdf-viewer Element
 ```html
 <!-- Register the Element -->
-<script href=".../urdf-viewer-element.js" />
+<script href=".../urdf-viewer-element.js"></script>
 <script>customElements.define('urdf-viewer', URDFViewer)</script>
 
 <body>
@@ -348,28 +524,28 @@ Recenter the camera only after loading the model.
 
 All of the above attributes have corresponding camel case properties.
 
-#### .angles
+#### .jointValues
 
 ```js
-angles : Object
+jointValues : Object
 ```
 
-Sets or gets the angles of the robot as a dictionary of `joint-name` to `radian` pairs.
+Sets or gets the jointValues of the robot as a dictionary of `joint-name` to `radian` pairs.
 
 ### Functions
 
-#### setAngle
+#### .setJointValue
 
 ```js
-setAngle( jointName : string, angle : Number ) : void
+setJointValue( jointName : String, ...jointValues : (number | null)[] ) : void
 ```
 
-Sets the given joint to the provided angle in radians.
+Sets the given joint to the provided value(s). See URDFJoint.setJointValue.
 
-#### .setAngles
+#### .setJointValues
 
 ```js
-setAngles( jointDictionary : Object ) : void
+setJointValues( jointValueDictionary : Object ) : void
 ```
 
 Sets all joint names specified as keys to radian angle value.
@@ -408,18 +584,16 @@ Fires when the URDF has finished loading and getting processed.
 
 Fires when all the geometry has been fully loaded.
 
+# Running the Example
+
+Install Node.js and NPM.
+
+Run `npm install`.
+
+Run `npm start`.
+
+Visit `localhost:9080/javascript/example/dev-bundle/` to view the page.
+
 # LICENSE
 
-The software is available under the [Apache V2.0 license](../LICENSE.txt).
-
-Copyright © 2019 California Institute of Technology. ALL RIGHTS
-RESERVED. United States Government Sponsorship Acknowledged. This software may
-be subject to U.S. export control laws. By accepting this software,
-the user agrees to comply with all applicable U.S. export laws and
-regulations. User has the responsibility to obtain export licenses,
-or other export authority as may be required before exporting such
-information to foreign countries or providing access to foreign
-persons. Neither the name of Caltech nor its operating division, the
-Jet Propulsion Laboratory, nor the names of its contributors may be
-used to endorse or promote products derived from this software
-without specific prior written permission.
+The software is available under the [Apache V2.0 license](../LICENSE).
