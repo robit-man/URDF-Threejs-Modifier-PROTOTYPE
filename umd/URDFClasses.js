@@ -2835,89 +2835,101 @@
     throw new TypeError("Cannot set property of null or undefined.");
   }
 
-  function URDFColliderClone() {
-    var _proto$clone;
-    var proto = Object.getPrototypeOf(this);
-    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
-    }
-    var result = (_proto$clone = proto.clone).call.apply(_proto$clone, [this].concat(args));
-    result.isURDFCollider = true;
-    return result;
-  }
-  ;
-  function makeURDFCollider(object) {
-    object.isURDFCollider = true;
-    object.clone = URDFColliderClone;
-  }
-  var URDFLink = /*#__PURE__*/function (_Object3D) {
-    function URDFLink() {
+  var _tempAxis = new three.Vector3();
+  var URDFBase = /*#__PURE__*/function (_Object3D) {
+    function URDFBase() {
       var _this;
-      _classCallCheck(this, URDFLink);
-      for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-        args[_key2] = arguments[_key2];
+      _classCallCheck(this, URDFBase);
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
       }
-      _this = _callSuper(this, URDFLink, [].concat(args));
-      _this.isURDFLink = true;
-      _this.type = 'URDFLink';
+      _this = _callSuper(this, URDFBase, [].concat(args));
       _this.urdfNode = null;
+      _this.urdfName = '';
       return _this;
     }
-    _inherits(URDFLink, _Object3D);
-    return _createClass(URDFLink, [{
-      key: "show",
-      value: function show() {
-        this.visible = true;
-      }
-    }, {
-      key: "hide",
-      value: function hide() {
-        this.visible = false;
-      }
-    }, {
-      key: "delete",
-      value: function _delete() {
-        var _this2 = this;
-        this.parent.remove(this);
-        this.children.map(function (child) {
-          _this2.remove(child);
-        });
-      }
-    }, {
+    _inherits(URDFBase, _Object3D);
+    return _createClass(URDFBase, [{
       key: "copy",
       value: function copy(source, recursive) {
-        _get(_getPrototypeOf(URDFLink.prototype), "copy", this).call(this, source, recursive);
+        _get(_getPrototypeOf(URDFBase.prototype), "copy", this).call(this, source, recursive);
         this.urdfNode = source.urdfNode;
+        this.urdfName = source.urdfName;
         return this;
       }
     }]);
   }(three.Object3D);
-  var URDFJoint = /*#__PURE__*/function (_Object3D2) {
-    function URDFJoint() {
+  var URDFCollider = /*#__PURE__*/function (_URDFBase) {
+    function URDFCollider() {
+      var _this2;
+      _classCallCheck(this, URDFCollider);
+      for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+        args[_key2] = arguments[_key2];
+      }
+      _this2 = _callSuper(this, URDFCollider, [].concat(args));
+      _this2.isURDFCollider = true;
+      _this2.type = 'URDFCollider';
+      return _this2;
+    }
+    _inherits(URDFCollider, _URDFBase);
+    return _createClass(URDFCollider);
+  }(URDFBase);
+  var URDFVisual = /*#__PURE__*/function (_URDFBase2) {
+    function URDFVisual() {
       var _this3;
-      _classCallCheck(this, URDFJoint);
+      _classCallCheck(this, URDFVisual);
       for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
         args[_key3] = arguments[_key3];
       }
-      _this3 = _callSuper(this, URDFJoint, [].concat(args));
-      _this3.isURDFJoint = true;
-      _this3.type = 'URDFJoint';
-      _this3.urdfNode = null;
-      _this3.jointValue = null;
-      _this3.jointType = 'fixed';
-      _this3.axis = null;
-      _this3.limit = {
+      _this3 = _callSuper(this, URDFVisual, [].concat(args));
+      _this3.isURDFVisual = true;
+      _this3.type = 'URDFVisual';
+      return _this3;
+    }
+    _inherits(URDFVisual, _URDFBase2);
+    return _createClass(URDFVisual);
+  }(URDFBase);
+  var URDFLink = /*#__PURE__*/function (_URDFBase3) {
+    function URDFLink() {
+      var _this4;
+      _classCallCheck(this, URDFLink);
+      for (var _len4 = arguments.length, args = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+        args[_key4] = arguments[_key4];
+      }
+      _this4 = _callSuper(this, URDFLink, [].concat(args));
+      _this4.isURDFLink = true;
+      _this4.type = 'URDFLink';
+      return _this4;
+    }
+    _inherits(URDFLink, _URDFBase3);
+    return _createClass(URDFLink);
+  }(URDFBase);
+  var URDFJoint = /*#__PURE__*/function (_URDFBase4) {
+    function URDFJoint() {
+      var _this5;
+      _classCallCheck(this, URDFJoint);
+      for (var _len5 = arguments.length, args = new Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
+        args[_key5] = arguments[_key5];
+      }
+      _this5 = _callSuper(this, URDFJoint, [].concat(args));
+      _this5.isURDFJoint = true;
+      _this5.type = 'URDFJoint';
+      _this5.jointValue = null;
+      _this5.jointType = 'fixed';
+      _this5.axis = new three.Vector3(1, 0, 0);
+      _this5.limit = {
         lower: 0,
         upper: 0
       };
-      _this3.ignoreLimits = false;
-      _this3.origPosition = null;
-      _this3.origQuaternion = null;
-      return _this3;
+      _this5.ignoreLimits = false;
+      _this5.origPosition = null;
+      _this5.origQuaternion = null;
+      _this5.mimicJoints = [];
+      return _this5;
     }
 
     /* Overrides */
-    _inherits(URDFJoint, _Object3D2);
+    _inherits(URDFJoint, _URDFBase4);
     return _createClass(URDFJoint, [{
       key: "jointType",
       get: function get() {
@@ -2926,12 +2938,15 @@
       set: function set(v) {
         if (this.jointType === v) return;
         this._jointType = v;
+        this.matrixWorldNeedsUpdate = true;
         switch (v) {
           case 'fixed':
+            this.jointValue = [];
+            break;
           case 'continuous':
           case 'revolute':
           case 'prismatic':
-            this.jointValue = 0;
+            this.jointValue = new Array(1).fill(0);
             break;
           case 'planar':
             this.jointValue = new Array(2).fill(0);
@@ -2944,152 +2959,236 @@
     }, {
       key: "angle",
       get: function get() {
-        return this.jointValue;
+        return this.jointValue[0];
       }
     }, {
       key: "copy",
       value: function copy(source, recursive) {
         _get(_getPrototypeOf(URDFJoint.prototype), "copy", this).call(this, source, recursive);
-        this.urdfNode = source.urdfNode;
         this.jointType = source.jointType;
-        this.axis = source.axis ? source.axis.clone() : null;
+        this.axis = source.axis.clone();
         this.limit.lower = source.limit.lower;
         this.limit.upper = source.limit.upper;
         this.ignoreLimits = false;
-        this.jointValue = Array.isArray(source.jointValue) ? _toConsumableArray(source.jointValue) : source.jointValue;
+        this.jointValue = _toConsumableArray(source.jointValue);
         this.origPosition = source.origPosition ? source.origPosition.clone() : null;
         this.origQuaternion = source.origQuaternion ? source.origQuaternion.clone() : null;
+        this.mimicJoints = _toConsumableArray(source.mimicJoints);
         return this;
       }
 
       /* Public Functions */
+      /**
+       * @param {...number|null} values The joint value components to set, optionally null for no-op
+       * @returns {boolean} Whether the invocation of this function resulted in an actual change to the joint value
+       */
     }, {
-      key: "setAngle",
-      value: function setAngle() {
-        return this.setOffset.apply(this, arguments);
-      }
-    }, {
-      key: "setOffset",
-      value: function setOffset() {
-        for (var _len4 = arguments.length, values = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
-          values[_key4] = arguments[_key4];
+      key: "setJointValue",
+      value: function setJointValue() {
+        for (var _len6 = arguments.length, values = new Array(_len6), _key6 = 0; _key6 < _len6; _key6++) {
+          values[_key6] = arguments[_key6];
         }
+        // Parse all incoming values into numbers except null, which we treat as a no-op for that value component.
         values = values.map(function (v) {
-          return parseFloat(v);
+          return v === null ? null : parseFloat(v);
         });
         if (!this.origPosition || !this.origQuaternion) {
           this.origPosition = this.position.clone();
           this.origQuaternion = this.quaternion.clone();
         }
+        var didUpdate = false;
+        this.mimicJoints.forEach(function (joint) {
+          didUpdate = joint.updateFromMimickedJoint.apply(joint, _toConsumableArray(values)) || didUpdate;
+        });
         switch (this.jointType) {
           case 'fixed':
             {
-              break;
+              return didUpdate;
             }
           case 'continuous':
           case 'revolute':
             {
               var angle = values[0];
-              if (angle == null) break;
-              if (angle === this.jointValue) break;
+              if (angle == null) return didUpdate;
+              if (angle === this.jointValue[0]) return didUpdate;
               if (!this.ignoreLimits && this.jointType === 'revolute') {
                 angle = Math.min(this.limit.upper, angle);
                 angle = Math.max(this.limit.lower, angle);
               }
-
-              // FromAxisAngle seems to rotate the opposite of the
-              // expected angle for URDF, so negate it here
-              var delta = new three.Quaternion().setFromAxisAngle(this.axis, angle);
-              this.quaternion.multiplyQuaternions(this.origQuaternion, delta);
-              this.jointValue = angle;
-              this.matrixWorldNeedsUpdate = true;
-              break;
+              this.quaternion.setFromAxisAngle(this.axis, angle).premultiply(this.origQuaternion);
+              if (this.jointValue[0] !== angle) {
+                this.jointValue[0] = angle;
+                this.matrixWorldNeedsUpdate = true;
+                return true;
+              } else {
+                return didUpdate;
+              }
             }
           case 'prismatic':
             {
-              var _angle = values[0];
-              if (_angle == null) break;
-              if (_angle === this.jointValue) break;
+              var pos = values[0];
+              if (pos == null) return didUpdate;
+              if (pos === this.jointValue[0]) return didUpdate;
               if (!this.ignoreLimits) {
-                _angle = Math.min(this.limit.upper, _angle);
-                _angle = Math.max(this.limit.lower, _angle);
+                pos = Math.min(this.limit.upper, pos);
+                pos = Math.max(this.limit.lower, pos);
               }
               this.position.copy(this.origPosition);
-              this.position.addScaledVector(this.axis, _angle);
-              this.jointValue = _angle;
-              this.worldMatrixNeedsUpdate = true;
-              break;
+              _tempAxis.copy(this.axis).applyEuler(this.rotation);
+              this.position.addScaledVector(_tempAxis, pos);
+              if (this.jointValue[0] !== pos) {
+                this.jointValue[0] = pos;
+                this.matrixWorldNeedsUpdate = true;
+                return true;
+              } else {
+                return didUpdate;
+              }
             }
           case 'floating':
           case 'planar':
             // TODO: Support these joint types
             console.warn("'".concat(this.jointType, "' joint not yet supported"));
         }
-        return this.jointValue;
+        return didUpdate;
       }
     }]);
-  }(three.Object3D);
+  }(URDFBase);
+  var URDFMimicJoint = /*#__PURE__*/function (_URDFJoint) {
+    function URDFMimicJoint() {
+      var _this6;
+      _classCallCheck(this, URDFMimicJoint);
+      for (var _len7 = arguments.length, args = new Array(_len7), _key7 = 0; _key7 < _len7; _key7++) {
+        args[_key7] = arguments[_key7];
+      }
+      _this6 = _callSuper(this, URDFMimicJoint, [].concat(args));
+      _this6.type = 'URDFMimicJoint';
+      _this6.mimicJoint = null;
+      _this6.offset = 0;
+      _this6.multiplier = 1;
+      return _this6;
+    }
+    _inherits(URDFMimicJoint, _URDFJoint);
+    return _createClass(URDFMimicJoint, [{
+      key: "updateFromMimickedJoint",
+      value: function updateFromMimickedJoint() {
+        var _this7 = this,
+          _get2;
+        for (var _len8 = arguments.length, values = new Array(_len8), _key8 = 0; _key8 < _len8; _key8++) {
+          values[_key8] = arguments[_key8];
+        }
+        var modifiedValues = values.map(function (x) {
+          return x * _this7.multiplier + _this7.offset;
+        });
+        return (_get2 = _get(_getPrototypeOf(URDFMimicJoint.prototype), "setJointValue", this)).call.apply(_get2, [this].concat(_toConsumableArray(modifiedValues)));
+      }
+
+      /* Overrides */
+    }, {
+      key: "copy",
+      value: function copy(source, recursive) {
+        _get(_getPrototypeOf(URDFMimicJoint.prototype), "copy", this).call(this, source, recursive);
+        this.mimicJoint = source.mimicJoint;
+        this.offset = source.offset;
+        this.multiplier = source.multiplier;
+        return this;
+      }
+    }]);
+  }(URDFJoint);
   var URDFRobot = /*#__PURE__*/function (_URDFLink) {
     function URDFRobot() {
-      var _this4;
+      var _this8;
       _classCallCheck(this, URDFRobot);
-      for (var _len5 = arguments.length, args = new Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
-        args[_key5] = arguments[_key5];
+      for (var _len9 = arguments.length, args = new Array(_len9), _key9 = 0; _key9 < _len9; _key9++) {
+        args[_key9] = arguments[_key9];
       }
-      _this4 = _callSuper(this, URDFRobot, [].concat(args));
-      _this4.isURDFRobot = true;
-      _this4.urdfNode = null;
-      _this4.urdfRobotNode = null;
-      _this4.robotName = null;
-      _this4.links = null;
-      _this4.joints = null;
-      return _this4;
+      _this8 = _callSuper(this, URDFRobot, [].concat(args));
+      _this8.isURDFRobot = true;
+      _this8.urdfNode = null;
+      _this8.urdfRobotNode = null;
+      _this8.robotName = null;
+      _this8.links = null;
+      _this8.joints = null;
+      _this8.colliders = null;
+      _this8.visual = null;
+      _this8.frames = null;
+      return _this8;
     }
     _inherits(URDFRobot, _URDFLink);
     return _createClass(URDFRobot, [{
       key: "copy",
       value: function copy(source, recursive) {
-        var _this5 = this;
+        var _this9 = this;
         _get(_getPrototypeOf(URDFRobot.prototype), "copy", this).call(this, source, recursive);
         this.urdfRobotNode = source.urdfRobotNode;
         this.robotName = source.robotName;
         this.links = {};
         this.joints = {};
+        this.colliders = {};
+        this.visual = {};
         this.traverse(function (c) {
-          if (c.isURDFJoint && c.name in source.joints) {
-            _this5.joints[c.name] = c;
+          if (c.isURDFJoint && c.urdfName in source.joints) {
+            _this9.joints[c.urdfName] = c;
           }
-          if (c.isURDFLink && c.name in source.links) {
-            _this5.links[c.name] = c;
+          if (c.isURDFLink && c.urdfName in source.links) {
+            _this9.links[c.urdfName] = c;
+          }
+          if (c.isURDFCollider && c.urdfName in source.colliders) {
+            _this9.colliders[c.urdfName] = c;
+          }
+          if (c.isURDFVisual && c.urdfName in source.visual) {
+            _this9.visual[c.urdfName] = c;
           }
         });
+
+        // Repair mimic joint references once we've re-accumulated all our joint data
+        for (var joint in this.joints) {
+          this.joints[joint].mimicJoints = this.joints[joint].mimicJoints.map(function (mimicJoint) {
+            return _this9.joints[mimicJoint.name];
+          });
+        }
+        this.frames = _objectSpread2(_objectSpread2(_objectSpread2(_objectSpread2({}, this.colliders), this.visual), this.links), this.joints);
         return this;
       }
     }, {
-      key: "setAngle",
-      value: function setAngle(jointName) {
-        var joint = this.joints[jointName];
-        if (joint) {
-          for (var _len6 = arguments.length, angle = new Array(_len6 > 1 ? _len6 - 1 : 0), _key6 = 1; _key6 < _len6; _key6++) {
-            angle[_key6 - 1] = arguments[_key6];
-          }
-          return joint.setAngle.apply(joint, angle);
-        }
-        return null;
+      key: "getFrame",
+      value: function getFrame(name) {
+        return this.frames[name];
       }
     }, {
-      key: "setAngles",
-      value: function setAngles(angles) {
-        // TODO: How to handle other, multi-dimensional joint types?
-        for (var name in angles) this.setAngle(name, angles[name]);
+      key: "setJointValue",
+      value: function setJointValue(jointName) {
+        var joint = this.joints[jointName];
+        if (joint) {
+          for (var _len10 = arguments.length, angle = new Array(_len10 > 1 ? _len10 - 1 : 0), _key10 = 1; _key10 < _len10; _key10++) {
+            angle[_key10 - 1] = arguments[_key10];
+          }
+          return joint.setJointValue.apply(joint, angle);
+        }
+        return false;
+      }
+    }, {
+      key: "setJointValues",
+      value: function setJointValues(values) {
+        var didChange = false;
+        for (var name in values) {
+          var value = values[name];
+          if (Array.isArray(value)) {
+            didChange = this.setJointValue.apply(this, [name].concat(_toConsumableArray(value))) || didChange;
+          } else {
+            didChange = this.setJointValue(name, value) || didChange;
+          }
+        }
+        return didChange;
       }
     }]);
   }(URDFLink);
 
+  exports.URDFCollider = URDFCollider;
   exports.URDFJoint = URDFJoint;
   exports.URDFLink = URDFLink;
+  exports.URDFMimicJoint = URDFMimicJoint;
   exports.URDFRobot = URDFRobot;
-  exports.makeURDFCollider = makeURDFCollider;
+  exports.URDFVisual = URDFVisual;
 
   Object.defineProperty(exports, '__esModule', { value: true });
 

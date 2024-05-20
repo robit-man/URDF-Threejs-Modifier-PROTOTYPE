@@ -1,10 +1,8 @@
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('three'), require('three/examples/js/controls/OrbitControls'), require('three/examples/jsm/loaders/STLLoader.js'), require('three/examples/jsm/loaders/ColladaLoader.js'), require('three-mesh-bvh'), require('ammojs3')) :
-  typeof define === 'function' && define.amd ? define(['three', 'three/examples/js/controls/OrbitControls', 'three/examples/jsm/loaders/STLLoader.js', 'three/examples/jsm/loaders/ColladaLoader.js', 'three-mesh-bvh', 'ammojs3'], factory) :
-  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.URDFViewer = factory(global.THREE, global.THREE, global.THREE, global.THREE, global.THREE, global.Ammo));
-})(this, (function (THREE, OrbitControls, STLLoader_js, ColladaLoader_js, threeMeshBvh, Ammo) { 'use strict';
-
-  function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
+  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('three'), require('three/examples/jsm/controls/OrbitControls.js'), require('three/examples/jsm/loaders/STLLoader.js'), require('three/examples/jsm/loaders/ColladaLoader.js')) :
+  typeof define === 'function' && define.amd ? define(['three', 'three/examples/jsm/controls/OrbitControls.js', 'three/examples/jsm/loaders/STLLoader.js', 'three/examples/jsm/loaders/ColladaLoader.js'], factory) :
+  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.URDFViewer = factory(global.THREE, global.THREE, global.THREE, global.THREE));
+})(this, (function (THREE, OrbitControls_js, STLLoader_js, ColladaLoader_js) { 'use strict';
 
   function _interopNamespace(e) {
     if (e && e.__esModule) return e;
@@ -25,7 +23,6 @@
   }
 
   var THREE__namespace = /*#__PURE__*/_interopNamespace(THREE);
-  var Ammo__default = /*#__PURE__*/_interopDefaultLegacy(Ammo);
 
   function _AsyncGenerator(e) {
     var r, t;
@@ -2858,89 +2855,101 @@
     throw new TypeError("Cannot set property of null or undefined.");
   }
 
-  function URDFColliderClone() {
-    var _proto$clone;
-    var proto = Object.getPrototypeOf(this);
-    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
-    }
-    var result = (_proto$clone = proto.clone).call.apply(_proto$clone, [this].concat(args));
-    result.isURDFCollider = true;
-    return result;
-  }
-  ;
-  function makeURDFCollider(object) {
-    object.isURDFCollider = true;
-    object.clone = URDFColliderClone;
-  }
-  var URDFLink = /*#__PURE__*/function (_Object3D) {
-    function URDFLink() {
+  var _tempAxis = new THREE.Vector3();
+  var URDFBase = /*#__PURE__*/function (_Object3D) {
+    function URDFBase() {
       var _this;
-      _classCallCheck(this, URDFLink);
-      for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-        args[_key2] = arguments[_key2];
+      _classCallCheck(this, URDFBase);
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
       }
-      _this = _callSuper(this, URDFLink, [].concat(args));
-      _this.isURDFLink = true;
-      _this.type = 'URDFLink';
+      _this = _callSuper(this, URDFBase, [].concat(args));
       _this.urdfNode = null;
+      _this.urdfName = '';
       return _this;
     }
-    _inherits(URDFLink, _Object3D);
-    return _createClass(URDFLink, [{
-      key: "show",
-      value: function show() {
-        this.visible = true;
-      }
-    }, {
-      key: "hide",
-      value: function hide() {
-        this.visible = false;
-      }
-    }, {
-      key: "delete",
-      value: function _delete() {
-        var _this2 = this;
-        this.parent.remove(this);
-        this.children.map(function (child) {
-          _this2.remove(child);
-        });
-      }
-    }, {
+    _inherits(URDFBase, _Object3D);
+    return _createClass(URDFBase, [{
       key: "copy",
       value: function copy(source, recursive) {
-        _get(_getPrototypeOf(URDFLink.prototype), "copy", this).call(this, source, recursive);
+        _get(_getPrototypeOf(URDFBase.prototype), "copy", this).call(this, source, recursive);
         this.urdfNode = source.urdfNode;
+        this.urdfName = source.urdfName;
         return this;
       }
     }]);
   }(THREE.Object3D);
-  var URDFJoint = /*#__PURE__*/function (_Object3D2) {
-    function URDFJoint() {
+  var URDFCollider = /*#__PURE__*/function (_URDFBase) {
+    function URDFCollider() {
+      var _this2;
+      _classCallCheck(this, URDFCollider);
+      for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+        args[_key2] = arguments[_key2];
+      }
+      _this2 = _callSuper(this, URDFCollider, [].concat(args));
+      _this2.isURDFCollider = true;
+      _this2.type = 'URDFCollider';
+      return _this2;
+    }
+    _inherits(URDFCollider, _URDFBase);
+    return _createClass(URDFCollider);
+  }(URDFBase);
+  var URDFVisual = /*#__PURE__*/function (_URDFBase2) {
+    function URDFVisual() {
       var _this3;
-      _classCallCheck(this, URDFJoint);
+      _classCallCheck(this, URDFVisual);
       for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
         args[_key3] = arguments[_key3];
       }
-      _this3 = _callSuper(this, URDFJoint, [].concat(args));
-      _this3.isURDFJoint = true;
-      _this3.type = 'URDFJoint';
-      _this3.urdfNode = null;
-      _this3.jointValue = null;
-      _this3.jointType = 'fixed';
-      _this3.axis = null;
-      _this3.limit = {
+      _this3 = _callSuper(this, URDFVisual, [].concat(args));
+      _this3.isURDFVisual = true;
+      _this3.type = 'URDFVisual';
+      return _this3;
+    }
+    _inherits(URDFVisual, _URDFBase2);
+    return _createClass(URDFVisual);
+  }(URDFBase);
+  var URDFLink = /*#__PURE__*/function (_URDFBase3) {
+    function URDFLink() {
+      var _this4;
+      _classCallCheck(this, URDFLink);
+      for (var _len4 = arguments.length, args = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+        args[_key4] = arguments[_key4];
+      }
+      _this4 = _callSuper(this, URDFLink, [].concat(args));
+      _this4.isURDFLink = true;
+      _this4.type = 'URDFLink';
+      return _this4;
+    }
+    _inherits(URDFLink, _URDFBase3);
+    return _createClass(URDFLink);
+  }(URDFBase);
+  var URDFJoint = /*#__PURE__*/function (_URDFBase4) {
+    function URDFJoint() {
+      var _this5;
+      _classCallCheck(this, URDFJoint);
+      for (var _len5 = arguments.length, args = new Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
+        args[_key5] = arguments[_key5];
+      }
+      _this5 = _callSuper(this, URDFJoint, [].concat(args));
+      _this5.isURDFJoint = true;
+      _this5.type = 'URDFJoint';
+      _this5.jointValue = null;
+      _this5.jointType = 'fixed';
+      _this5.axis = new THREE.Vector3(1, 0, 0);
+      _this5.limit = {
         lower: 0,
         upper: 0
       };
-      _this3.ignoreLimits = false;
-      _this3.origPosition = null;
-      _this3.origQuaternion = null;
-      return _this3;
+      _this5.ignoreLimits = false;
+      _this5.origPosition = null;
+      _this5.origQuaternion = null;
+      _this5.mimicJoints = [];
+      return _this5;
     }
 
     /* Overrides */
-    _inherits(URDFJoint, _Object3D2);
+    _inherits(URDFJoint, _URDFBase4);
     return _createClass(URDFJoint, [{
       key: "jointType",
       get: function get() {
@@ -2949,12 +2958,15 @@
       set: function set(v) {
         if (this.jointType === v) return;
         this._jointType = v;
+        this.matrixWorldNeedsUpdate = true;
         switch (v) {
           case 'fixed':
+            this.jointValue = [];
+            break;
           case 'continuous':
           case 'revolute':
           case 'prismatic':
-            this.jointValue = 0;
+            this.jointValue = new Array(1).fill(0);
             break;
           case 'planar':
             this.jointValue = new Array(2).fill(0);
@@ -2967,233 +2979,334 @@
     }, {
       key: "angle",
       get: function get() {
-        return this.jointValue;
+        return this.jointValue[0];
       }
     }, {
       key: "copy",
       value: function copy(source, recursive) {
         _get(_getPrototypeOf(URDFJoint.prototype), "copy", this).call(this, source, recursive);
-        this.urdfNode = source.urdfNode;
         this.jointType = source.jointType;
-        this.axis = source.axis ? source.axis.clone() : null;
+        this.axis = source.axis.clone();
         this.limit.lower = source.limit.lower;
         this.limit.upper = source.limit.upper;
         this.ignoreLimits = false;
-        this.jointValue = Array.isArray(source.jointValue) ? _toConsumableArray(source.jointValue) : source.jointValue;
+        this.jointValue = _toConsumableArray(source.jointValue);
         this.origPosition = source.origPosition ? source.origPosition.clone() : null;
         this.origQuaternion = source.origQuaternion ? source.origQuaternion.clone() : null;
+        this.mimicJoints = _toConsumableArray(source.mimicJoints);
         return this;
       }
 
       /* Public Functions */
+      /**
+       * @param {...number|null} values The joint value components to set, optionally null for no-op
+       * @returns {boolean} Whether the invocation of this function resulted in an actual change to the joint value
+       */
     }, {
-      key: "setAngle",
-      value: function setAngle() {
-        return this.setOffset.apply(this, arguments);
-      }
-    }, {
-      key: "setOffset",
-      value: function setOffset() {
-        for (var _len4 = arguments.length, values = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
-          values[_key4] = arguments[_key4];
+      key: "setJointValue",
+      value: function setJointValue() {
+        for (var _len6 = arguments.length, values = new Array(_len6), _key6 = 0; _key6 < _len6; _key6++) {
+          values[_key6] = arguments[_key6];
         }
+        // Parse all incoming values into numbers except null, which we treat as a no-op for that value component.
         values = values.map(function (v) {
-          return parseFloat(v);
+          return v === null ? null : parseFloat(v);
         });
         if (!this.origPosition || !this.origQuaternion) {
           this.origPosition = this.position.clone();
           this.origQuaternion = this.quaternion.clone();
         }
+        var didUpdate = false;
+        this.mimicJoints.forEach(function (joint) {
+          didUpdate = joint.updateFromMimickedJoint.apply(joint, _toConsumableArray(values)) || didUpdate;
+        });
         switch (this.jointType) {
           case 'fixed':
             {
-              break;
+              return didUpdate;
             }
           case 'continuous':
           case 'revolute':
             {
               var angle = values[0];
-              if (angle == null) break;
-              if (angle === this.jointValue) break;
+              if (angle == null) return didUpdate;
+              if (angle === this.jointValue[0]) return didUpdate;
               if (!this.ignoreLimits && this.jointType === 'revolute') {
                 angle = Math.min(this.limit.upper, angle);
                 angle = Math.max(this.limit.lower, angle);
               }
-
-              // FromAxisAngle seems to rotate the opposite of the
-              // expected angle for URDF, so negate it here
-              var delta = new THREE.Quaternion().setFromAxisAngle(this.axis, angle);
-              this.quaternion.multiplyQuaternions(this.origQuaternion, delta);
-              this.jointValue = angle;
-              this.matrixWorldNeedsUpdate = true;
-              break;
+              this.quaternion.setFromAxisAngle(this.axis, angle).premultiply(this.origQuaternion);
+              if (this.jointValue[0] !== angle) {
+                this.jointValue[0] = angle;
+                this.matrixWorldNeedsUpdate = true;
+                return true;
+              } else {
+                return didUpdate;
+              }
             }
           case 'prismatic':
             {
-              var _angle = values[0];
-              if (_angle == null) break;
-              if (_angle === this.jointValue) break;
+              var pos = values[0];
+              if (pos == null) return didUpdate;
+              if (pos === this.jointValue[0]) return didUpdate;
               if (!this.ignoreLimits) {
-                _angle = Math.min(this.limit.upper, _angle);
-                _angle = Math.max(this.limit.lower, _angle);
+                pos = Math.min(this.limit.upper, pos);
+                pos = Math.max(this.limit.lower, pos);
               }
               this.position.copy(this.origPosition);
-              this.position.addScaledVector(this.axis, _angle);
-              this.jointValue = _angle;
-              this.worldMatrixNeedsUpdate = true;
-              break;
+              _tempAxis.copy(this.axis).applyEuler(this.rotation);
+              this.position.addScaledVector(_tempAxis, pos);
+              if (this.jointValue[0] !== pos) {
+                this.jointValue[0] = pos;
+                this.matrixWorldNeedsUpdate = true;
+                return true;
+              } else {
+                return didUpdate;
+              }
             }
           case 'floating':
           case 'planar':
             // TODO: Support these joint types
             console.warn("'".concat(this.jointType, "' joint not yet supported"));
         }
-        return this.jointValue;
+        return didUpdate;
       }
     }]);
-  }(THREE.Object3D);
+  }(URDFBase);
+  var URDFMimicJoint = /*#__PURE__*/function (_URDFJoint) {
+    function URDFMimicJoint() {
+      var _this6;
+      _classCallCheck(this, URDFMimicJoint);
+      for (var _len7 = arguments.length, args = new Array(_len7), _key7 = 0; _key7 < _len7; _key7++) {
+        args[_key7] = arguments[_key7];
+      }
+      _this6 = _callSuper(this, URDFMimicJoint, [].concat(args));
+      _this6.type = 'URDFMimicJoint';
+      _this6.mimicJoint = null;
+      _this6.offset = 0;
+      _this6.multiplier = 1;
+      return _this6;
+    }
+    _inherits(URDFMimicJoint, _URDFJoint);
+    return _createClass(URDFMimicJoint, [{
+      key: "updateFromMimickedJoint",
+      value: function updateFromMimickedJoint() {
+        var _this7 = this,
+          _get2;
+        for (var _len8 = arguments.length, values = new Array(_len8), _key8 = 0; _key8 < _len8; _key8++) {
+          values[_key8] = arguments[_key8];
+        }
+        var modifiedValues = values.map(function (x) {
+          return x * _this7.multiplier + _this7.offset;
+        });
+        return (_get2 = _get(_getPrototypeOf(URDFMimicJoint.prototype), "setJointValue", this)).call.apply(_get2, [this].concat(_toConsumableArray(modifiedValues)));
+      }
+
+      /* Overrides */
+    }, {
+      key: "copy",
+      value: function copy(source, recursive) {
+        _get(_getPrototypeOf(URDFMimicJoint.prototype), "copy", this).call(this, source, recursive);
+        this.mimicJoint = source.mimicJoint;
+        this.offset = source.offset;
+        this.multiplier = source.multiplier;
+        return this;
+      }
+    }]);
+  }(URDFJoint);
   var URDFRobot = /*#__PURE__*/function (_URDFLink) {
     function URDFRobot() {
-      var _this4;
+      var _this8;
       _classCallCheck(this, URDFRobot);
-      for (var _len5 = arguments.length, args = new Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
-        args[_key5] = arguments[_key5];
+      for (var _len9 = arguments.length, args = new Array(_len9), _key9 = 0; _key9 < _len9; _key9++) {
+        args[_key9] = arguments[_key9];
       }
-      _this4 = _callSuper(this, URDFRobot, [].concat(args));
-      _this4.isURDFRobot = true;
-      _this4.urdfNode = null;
-      _this4.urdfRobotNode = null;
-      _this4.robotName = null;
-      _this4.links = null;
-      _this4.joints = null;
-      return _this4;
+      _this8 = _callSuper(this, URDFRobot, [].concat(args));
+      _this8.isURDFRobot = true;
+      _this8.urdfNode = null;
+      _this8.urdfRobotNode = null;
+      _this8.robotName = null;
+      _this8.links = null;
+      _this8.joints = null;
+      _this8.colliders = null;
+      _this8.visual = null;
+      _this8.frames = null;
+      return _this8;
     }
     _inherits(URDFRobot, _URDFLink);
     return _createClass(URDFRobot, [{
       key: "copy",
       value: function copy(source, recursive) {
-        var _this5 = this;
+        var _this9 = this;
         _get(_getPrototypeOf(URDFRobot.prototype), "copy", this).call(this, source, recursive);
         this.urdfRobotNode = source.urdfRobotNode;
         this.robotName = source.robotName;
         this.links = {};
         this.joints = {};
+        this.colliders = {};
+        this.visual = {};
         this.traverse(function (c) {
-          if (c.isURDFJoint && c.name in source.joints) {
-            _this5.joints[c.name] = c;
+          if (c.isURDFJoint && c.urdfName in source.joints) {
+            _this9.joints[c.urdfName] = c;
           }
-          if (c.isURDFLink && c.name in source.links) {
-            _this5.links[c.name] = c;
+          if (c.isURDFLink && c.urdfName in source.links) {
+            _this9.links[c.urdfName] = c;
+          }
+          if (c.isURDFCollider && c.urdfName in source.colliders) {
+            _this9.colliders[c.urdfName] = c;
+          }
+          if (c.isURDFVisual && c.urdfName in source.visual) {
+            _this9.visual[c.urdfName] = c;
           }
         });
+
+        // Repair mimic joint references once we've re-accumulated all our joint data
+        for (var joint in this.joints) {
+          this.joints[joint].mimicJoints = this.joints[joint].mimicJoints.map(function (mimicJoint) {
+            return _this9.joints[mimicJoint.name];
+          });
+        }
+        this.frames = _objectSpread2(_objectSpread2(_objectSpread2(_objectSpread2({}, this.colliders), this.visual), this.links), this.joints);
         return this;
       }
     }, {
-      key: "setAngle",
-      value: function setAngle(jointName) {
-        var joint = this.joints[jointName];
-        if (joint) {
-          for (var _len6 = arguments.length, angle = new Array(_len6 > 1 ? _len6 - 1 : 0), _key6 = 1; _key6 < _len6; _key6++) {
-            angle[_key6 - 1] = arguments[_key6];
-          }
-          return joint.setAngle.apply(joint, angle);
-        }
-        return null;
+      key: "getFrame",
+      value: function getFrame(name) {
+        return this.frames[name];
       }
     }, {
-      key: "setAngles",
-      value: function setAngles(angles) {
-        // TODO: How to handle other, multi-dimensional joint types?
-        for (var name in angles) this.setAngle(name, angles[name]);
+      key: "setJointValue",
+      value: function setJointValue(jointName) {
+        var joint = this.joints[jointName];
+        if (joint) {
+          for (var _len10 = arguments.length, angle = new Array(_len10 > 1 ? _len10 - 1 : 0), _key10 = 1; _key10 < _len10; _key10++) {
+            angle[_key10 - 1] = arguments[_key10];
+          }
+          return joint.setJointValue.apply(joint, angle);
+        }
+        return false;
+      }
+    }, {
+      key: "setJointValues",
+      value: function setJointValues(values) {
+        var didChange = false;
+        for (var name in values) {
+          var value = values[name];
+          if (Array.isArray(value)) {
+            didChange = this.setJointValue.apply(this, [name].concat(_toConsumableArray(value))) || didChange;
+          } else {
+            didChange = this.setJointValue(name, value) || didChange;
+          }
+        }
+        return didChange;
       }
     }]);
   }(URDFLink);
 
+  /*
+  Reference coordinate frames for THREE.js and ROS.
+  Both coordinate systems are right handed so the URDF is instantiated without
+  frame transforms. The resulting model can be rotated to rectify the proper up,
+  right, and forward directions
+
+  THREE.js
+     Y
+     |
+     |
+     .-----X
+   ／
+  Z
+
+  ROS URDf
+         Z
+         |   X
+         | ／
+   Y-----.
+
+  */
+
   var tempQuaternion = new THREE__namespace.Quaternion();
   var tempEuler = new THREE__namespace.Euler();
+
+  // take a vector "x y z" and process it into
+  // an array [x, y, z]
   function processTuple(val) {
     if (!val) return [0, 0, 0];
     return val.trim().split(/\s+/g).map(function (num) {
       return parseFloat(num);
     });
   }
+
+  // applies a rotation a threejs object in URDF order
   function applyRotation(obj, rpy) {
     var additive = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+    // if additive is true the rotation is applied in
+    // addition to the existing rotation
     if (!additive) obj.rotation.set(0, 0, 0);
     tempEuler.set(rpy[0], rpy[1], rpy[2], 'ZYX');
     tempQuaternion.setFromEuler(tempEuler);
     tempQuaternion.multiply(obj.quaternion);
     obj.quaternion.copy(tempQuaternion);
   }
+
+  /* URDFLoader Class */
+  // Loads and reads a URDF file into a THREEjs Object3D format
   var URDFLoader = /*#__PURE__*/function () {
     function URDFLoader(manager) {
-      var allowMeshBVH = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
       _classCallCheck(this, URDFLoader);
       this.manager = manager || THREE__namespace.DefaultLoadingManager;
-      this.allowMeshBVH = allowMeshBVH;
-      this.retryMap = {};
-      this.physicsWorld = null;
-      this.physicsObjects = [];
-      this.tempTransform = null;
-      this.Ammo = null;
+      this.loadMeshCb = this.defaultMeshLoader.bind(this);
+      this.parseVisual = true;
+      this.parseCollision = false;
+      this.packages = '';
+      this.workingPath = '';
+      this.fetchOptions = {};
     }
+
+    /* Public API */
     return _createClass(URDFLoader, [{
-      key: "load",
-      value: function load(urdf, onComplete, onProgress, onError, options) {
+      key: "loadAsync",
+      value: function loadAsync(urdf) {
         var _this = this;
+        return new Promise(function (resolve, reject) {
+          _this.load(urdf, resolve, null, reject);
+        });
+      }
+
+      // urdf:    The path to the URDF within the package OR absolute
+      // onComplete:      Callback that is passed the model once loaded
+    }, {
+      key: "load",
+      value: function load(urdf, onComplete, onProgress, onError) {
+        var _this2 = this;
+        // Check if a full URI is specified before
+        // prepending the package info
         var manager = this.manager;
         var workingPath = THREE__namespace.LoaderUtils.extractUrlBase(urdf);
         var urdfPath = this.manager.resolveURL(urdf);
-        var errors = {};
-        var managerOnErrorDefault = function managerOnErrorDefault() {};
-        var managerOnProgressDefault = function managerOnProgressDefault() {};
-        var managerOnLoadDefault = function managerOnLoadDefault() {};
-        var model;
-        if (manager.onError) {
-          managerOnErrorDefault = manager.onProgress.bind(manager);
-        }
-        if (manager.onProgress) {
-          managerOnProgressDefault = manager.onProgress.bind(manager);
-        }
-        if (manager.onLoad) {
-          managerOnLoadDefault = manager.onLoad.bind(manager);
-        }
-        var that = this;
-        manager.onError = function (url) {
-          errors[url] = 'Error in loading resource';
-          if (onError) {
-            onError({
-              url: url,
-              retry: that.retryMap[url]
-            });
-          }
-          managerOnErrorDefault(url);
-        };
-        manager.onProgress = function (url, itemsLoaded, itemsTotal) {
-          if (onProgress) {
-            onProgress(url, itemsLoaded, itemsTotal);
-          }
-          managerOnProgressDefault(url, itemsLoaded, itemsTotal);
-        };
-        manager.onLoad = function () {
-          if (onComplete) {
-            var partialErrors = Object.keys(errors).length === 0 ? undefined : errors;
-            onComplete(model, partialErrors);
-          }
-          managerOnLoadDefault();
-        };
-        options = Object.assign({
-          workingPath: workingPath
-        }, options);
         manager.itemStart(urdfPath);
-        fetch(urdfPath, options.fetchOptions).then(function (res) {
-          return res.text();
+        fetch(urdfPath, this.fetchOptions).then(function (res) {
+          if (res.ok) {
+            if (onProgress) {
+              onProgress(null);
+            }
+            return res.text();
+          } else {
+            throw new Error("URDFLoader: Failed to load url '".concat(urdfPath, "' with error code ").concat(res.status, " : ").concat(res.statusText, "."));
+          }
         }).then(function (data) {
-          model = _this.parse(data, options);
-          window.model = model;
+          if (_this2.workingPath === '') {
+            _this2.workingPath = workingPath;
+          }
+          var model = _this2.parse(data);
+          onComplete(model);
           manager.itemEnd(urdfPath);
         })["catch"](function (e) {
-          console.error('URDFLoader: Error parsing file.', e);
+          if (onError) {
+            onError(e);
+          } else {
+            console.error('URDFLoader: Error loading file.', e);
+          }
           manager.itemError(urdfPath);
           manager.itemEnd(urdfPath);
         });
@@ -3201,32 +3314,40 @@
     }, {
       key: "parse",
       value: function parse(content) {
-        var _this2 = this;
-        var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-        var packages = options.packages || '';
-        var loadMeshCb = options.loadMeshCb || this.defaultMeshLoader.bind(this);
-        var workingPath = options.workingPath || '';
-        var parseVisual = 'parseVisual' in options ? options.parseVisual : true;
-        var parseCollision = options.parseCollision || false;
+        var packages = this.packages;
+        var loadMeshCb = this.loadMeshCb;
+        var parseVisual = this.parseVisual;
+        var parseCollision = this.parseCollision;
+        var workingPath = this.workingPath;
         var manager = this.manager;
         var linkMap = {};
         var jointMap = {};
         var materialMap = {};
+
+        // Resolves the path of mesh files
         function resolvePath(path) {
           if (!/^package:\/\//.test(path)) {
             return workingPath ? workingPath + path : path;
           }
+
+          // Remove "package://" keyword and split meshPath at the first slash
           var _path$replace$split = path.replace(/^package:\/\//, '').split(/\/(.+)/),
             _path$replace$split2 = _slicedToArray(_path$replace$split, 2),
             targetPkg = _path$replace$split2[0],
             relPath = _path$replace$split2[1];
           if (typeof packages === 'string') {
+            // "pkg" is one single package
             if (packages.endsWith(targetPkg)) {
+              // "pkg" is the target package
               return packages + '/' + relPath;
             } else {
+              // Assume "pkg" is the target package's parent directory
               return packages + '/' + targetPkg + '/' + relPath;
             }
+          } else if (packages instanceof Function) {
+            return packages(targetPkg) + '/' + relPath;
           } else if (_typeof(packages) === 'object') {
+            // "pkg" is a map of packages
             if (targetPkg in packages) {
               return packages[targetPkg] + '/' + relPath;
             } else {
@@ -3235,17 +3356,27 @@
             }
           }
         }
-        var processUrdf = function processUrdf(data) {
-          var parser = new DOMParser();
-          var urdf = parser.parseFromString(data, 'text/xml');
-          var children = _toConsumableArray(urdf.children);
+
+        // Process the URDF text format
+        function processUrdf(data) {
+          var children;
+          if (data instanceof Document) {
+            children = _toConsumableArray(data.children);
+          } else if (data instanceof Element) {
+            children = [data];
+          } else {
+            var parser = new DOMParser();
+            var urdf = parser.parseFromString(data, 'text/xml');
+            children = _toConsumableArray(urdf.children);
+          }
           var robotNode = children.filter(function (c) {
             return c.nodeName === 'robot';
           }).pop();
-          return processRobot.call(_this2, robotNode);
-        };
+          return processRobot(robotNode);
+        }
+
+        // Process the <robot> node
         function processRobot(robot) {
-          var _this3 = this;
           var robotNodes = _toConsumableArray(robot.children);
           var links = robotNodes.filter(function (c) {
             return c.nodeName.toLowerCase() === 'link';
@@ -3259,34 +3390,85 @@
           var obj = new URDFRobot();
           obj.robotName = robot.getAttribute('name');
           obj.urdfRobotNode = robot;
+
+          // Create the <material> map
           materials.forEach(function (m) {
             var name = m.getAttribute('name');
-            materialMap[name] = processMaterial.call(_this3, m);
+            materialMap[name] = processMaterial(m);
           });
+
+          // Create the <link> map
+          var visualMap = {};
+          var colliderMap = {};
           links.forEach(function (l) {
             var name = l.getAttribute('name');
             var isRoot = robot.querySelector("child[link=\"".concat(name, "\"]")) === null;
-            linkMap[name] = processLink.call(_this3, l, isRoot ? obj : null);
+            linkMap[name] = processLink(l, visualMap, colliderMap, isRoot ? obj : null);
           });
+
+          // Create the <joint> map
           joints.forEach(function (j) {
             var name = j.getAttribute('name');
-            jointMap[name] = processJoint.call(_this3, j);
+            jointMap[name] = processJoint(j);
           });
           obj.joints = jointMap;
           obj.links = linkMap;
+          obj.colliders = colliderMap;
+          obj.visual = visualMap;
+
+          // Link up mimic joints
+          var jointList = Object.values(jointMap);
+          jointList.forEach(function (j) {
+            if (j instanceof URDFMimicJoint) {
+              jointMap[j.mimicJoint].mimicJoints.push(j);
+            }
+          });
+
+          // Detect infinite loops of mimic joints
+          jointList.forEach(function (j) {
+            var uniqueJoints = new Set();
+            var iterFunction = function iterFunction(joint) {
+              if (uniqueJoints.has(joint)) {
+                throw new Error('URDFLoader: Detected an infinite loop of mimic joints.');
+              }
+              uniqueJoints.add(joint);
+              joint.mimicJoints.forEach(function (j) {
+                iterFunction(j);
+              });
+            };
+            iterFunction(j);
+          });
+          obj.frames = _objectSpread2(_objectSpread2(_objectSpread2(_objectSpread2({}, colliderMap), visualMap), linkMap), jointMap);
           return obj;
         }
+
+        // Process joint nodes and parent them
         function processJoint(joint) {
           var children = _toConsumableArray(joint.children);
           var jointType = joint.getAttribute('type');
-          var obj = new URDFJoint();
+          var obj;
+          var mimicTag = children.find(function (n) {
+            return n.nodeName.toLowerCase() === 'mimic';
+          });
+          if (mimicTag) {
+            obj = new URDFMimicJoint();
+            obj.mimicJoint = mimicTag.getAttribute('joint');
+            obj.multiplier = parseFloat(mimicTag.getAttribute('multiplier') || 1.0);
+            obj.offset = parseFloat(mimicTag.getAttribute('offset') || 0.0);
+            console.log('MIMIC: ', obj);
+          } else {
+            obj = new URDFJoint();
+          }
           obj.urdfNode = joint;
           obj.name = joint.getAttribute('name');
+          obj.urdfName = obj.name;
           obj.jointType = jointType;
           var parent = null;
           var child = null;
           var xyz = [0, 0, 0];
           var rpy = [0, 0, 0];
+
+          // Extract the attributes
           children.forEach(function (n) {
             var type = n.nodeName.toLowerCase();
             if (type === 'origin') {
@@ -3301,16 +3483,14 @@
               obj.limit.upper = parseFloat(n.getAttribute('upper') || obj.limit.upper);
             }
           });
-          if (parent && parent instanceof THREE__namespace.Object3D) {
-            parent.add(obj);
-          }
-          if (child && child instanceof THREE__namespace.Object3D) {
-            obj.add(child);
-          }
+
+          // Join the links
+          parent.add(obj);
+          obj.add(child);
           applyRotation(obj, rpy);
           obj.position.set(xyz[0], xyz[1], xyz[2]);
-          var jointAxesHelper = new THREE.AxesHelper(0.5);
-          obj.add(jointAxesHelper);
+
+          // Set up the rotate function
           var axisNode = children.filter(function (n) {
             return n.nodeName.toLowerCase() === 'axis';
           })[0];
@@ -3323,38 +3503,50 @@
           }
           return obj;
         }
-        function processLink(link) {
-          var _this4 = this;
-          var target = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+
+        // Process the <link> nodes
+        function processLink(link, visualMap, colliderMap) {
+          var target = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
           if (target === null) {
             target = new URDFLink();
           }
           var children = _toConsumableArray(link.children);
           target.name = link.getAttribute('name');
+          target.urdfName = target.name;
           target.urdfNode = link;
           if (parseVisual) {
             var visualNodes = children.filter(function (n) {
               return n.nodeName.toLowerCase() === 'visual';
             });
             visualNodes.forEach(function (vn) {
-              return processLinkElement.call(_this4, vn, target, materialMap);
+              var v = processLinkElement(vn, materialMap);
+              target.add(v);
+              if (vn.hasAttribute('name')) {
+                var name = vn.getAttribute('name');
+                v.name = name;
+                v.urdfName = name;
+                visualMap[name] = v;
+              }
             });
           }
           if (parseCollision) {
             var collisionNodes = children.filter(function (n) {
               return n.nodeName.toLowerCase() === 'collision';
             });
-            collisionNodes.forEach(function (vn) {
-              return processLinkElement.call(_this4, vn, target);
+            collisionNodes.forEach(function (cn) {
+              var c = processLinkElement(cn);
+              target.add(c);
+              if (cn.hasAttribute('name')) {
+                var name = cn.getAttribute('name');
+                c.name = name;
+                c.urdfName = name;
+                colliderMap[name] = c;
+              }
             });
           }
-          var linkAxesHelper = new THREE.AxesHelper(0.5);
-          target.add(linkAxesHelper);
-          this.addPhysicsToLink(target);
           return target;
         }
         function processMaterial(node) {
-          var _this5 = this;
           var matNodes = _toConsumableArray(node.children);
           var material = new THREE__namespace.MeshPhongMaterial();
           material.name = node.getAttribute('name') || '';
@@ -3367,38 +3559,30 @@
               material.color.setRGB(rgba[0], rgba[1], rgba[2]);
               material.opacity = rgba[3];
               material.transparent = rgba[3] < 1;
+              material.depthWrite = !material.transparent;
             } else if (type === 'texture') {
-              var _loader = new THREE__namespace.TextureLoader(manager);
+              // The URDF spec does not require that the <texture/> tag include
+              // a filename attribute so skip loading the texture if not provided.
               var filename = n.getAttribute('filename');
-              var filePath = resolvePath(filename);
-              var onError = function onError() {
-                _this5.retryMap[filePath] = function () {
-                  return _loader.load(filePath, function () {
-                    return null;
-                  }, function () {
-                    return null;
-                  }, onError);
-                };
-              };
-              material.map = _loader.load(filePath, function () {
-                return null;
-              }, function () {
-                return null;
-              }, onError);
+              if (filename) {
+                var loader = new THREE__namespace.TextureLoader(manager);
+                var filePath = resolvePath(filename);
+                material.map = loader.load(filePath);
+                material.map.colorSpace = THREE__namespace.SRGBColorSpace;
+              }
             }
           });
           return material;
         }
-        function processLinkElement(vn, linkObj) {
-          var _this6 = this;
-          var materialMap = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
+        // Process the visual and collision nodes into meshes
+        function processLinkElement(vn) {
+          var materialMap = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
           var isCollisionNode = vn.nodeName.toLowerCase() === 'collision';
-          var xyz = [0, 0, 0];
-          var rpy = [0, 0, 0];
-          var scale = [1, 1, 1];
           var children = _toConsumableArray(vn.children);
           var material = null;
-          var primitiveModel = null;
+
+          // get the material first
           var materialNode = children.filter(function (n) {
             return n.nodeName.toLowerCase() === 'material';
           })[0];
@@ -3407,11 +3591,13 @@
             if (name && name in materialMap) {
               material = materialMap[name];
             } else {
-              material = processMaterial.call(this, materialNode);
+              material = processMaterial(materialNode);
             }
           } else {
             material = new THREE__namespace.MeshPhongMaterial();
           }
+          var group = isCollisionNode ? new URDFCollider() : new URDFVisual();
+          group.urdfNode = vn;
           children.forEach(function (n) {
             var type = n.nodeName.toLowerCase();
             if (type === 'geometry') {
@@ -3419,268 +3605,96 @@
               if (geoType === 'mesh') {
                 var filename = n.children[0].getAttribute('filename');
                 var filePath = resolvePath(filename);
+
+                // file path is null if a package directory is not provided.
                 if (filePath !== null) {
                   var scaleAttr = n.children[0].getAttribute('scale');
-                  if (scaleAttr) scale = processTuple(scaleAttr);
-                  var cb = function cb(obj, err) {
+                  if (scaleAttr) {
+                    var scale = processTuple(scaleAttr);
+                    group.scale.set(scale[0], scale[1], scale[2]);
+                  }
+                  loadMeshCb(filePath, manager, function (obj, err) {
                     if (err) {
                       console.error('URDFLoader: Error loading mesh.', err);
-                      _this6.retryMap[filePath] = function () {
-                        return loadMeshCb(filePath, manager, cb);
-                      };
                     } else if (obj) {
                       if (obj instanceof THREE__namespace.Mesh) {
                         obj.material = material;
-                        if (_this6.allowMeshBVH) {
-                          obj.raycast = threeMeshBvh.acceleratedRaycast;
-                          obj.geometry.boundsTree = new threeMeshBvh.MeshBVH(obj.geometry);
-                        }
                       }
-                      linkObj.add(obj);
-                      obj.position.set(xyz[0], xyz[1], xyz[2]);
-                      obj.rotation.set(0, 0, 0);
-                      obj.scale.x *= scale[0];
-                      obj.scale.y *= scale[1];
-                      obj.scale.z *= scale[2];
-                      applyRotation(obj, rpy);
-                      if (isCollisionNode) {
-                        makeURDFCollider(obj);
-                      }
+
+                      // We don't expect non identity rotations or positions. In the case of
+                      // COLLADA files the model might come in with a custom scale for unit
+                      // conversion.
+                      obj.position.set(0, 0, 0);
+                      obj.quaternion._x = 0;
+                      obj.quaternion._y = 0;
+                      obj.quaternion._z = 0;
+                      obj.quaternion._w = 0;
+                      group.add(obj);
                     }
-                  };
-                  loadMeshCb(filePath, manager, cb);
+                  });
                 }
               } else if (geoType === 'box') {
-                primitiveModel = new THREE__namespace.Mesh();
-                primitiveModel.geometry = new THREE__namespace.BoxBufferGeometry(1, 1, 1);
+                var primitiveModel = new THREE__namespace.Mesh();
+                primitiveModel.geometry = new THREE__namespace.BoxGeometry(1, 1, 1);
                 primitiveModel.material = material;
-                if (_this6.allowMeshBVH) {
-                  primitiveModel.raycast = threeMeshBvh.acceleratedRaycast;
-                  primitiveModel.geometry.boundsTree = new threeMeshBvh.MeshBVH(primitiveModel.geometry);
-                }
                 var size = processTuple(n.children[0].getAttribute('size'));
-                linkObj.add(primitiveModel);
                 primitiveModel.scale.set(size[0], size[1], size[2]);
-                if (isCollisionNode) {
-                  makeURDFCollider(primitiveModel);
-                }
+                group.add(primitiveModel);
               } else if (geoType === 'sphere') {
-                primitiveModel = new THREE__namespace.Mesh();
-                primitiveModel.geometry = new THREE__namespace.SphereBufferGeometry(1, 30, 30);
-                primitiveModel.material = material;
-                if (_this6.allowMeshBVH) {
-                  primitiveModel.raycast = threeMeshBvh.acceleratedRaycast;
-                  primitiveModel.geometry.boundsTree = new threeMeshBvh.MeshBVH(primitiveModel.geometry);
-                }
+                var _primitiveModel = new THREE__namespace.Mesh();
+                _primitiveModel.geometry = new THREE__namespace.SphereGeometry(1, 30, 30);
+                _primitiveModel.material = material;
                 var radius = parseFloat(n.children[0].getAttribute('radius')) || 0;
-                primitiveModel.scale.set(radius, radius, radius);
-                linkObj.add(primitiveModel);
-                if (isCollisionNode) {
-                  makeURDFCollider(primitiveModel);
-                }
+                _primitiveModel.scale.set(radius, radius, radius);
+                group.add(_primitiveModel);
               } else if (geoType === 'cylinder') {
-                primitiveModel = new THREE__namespace.Mesh();
-                primitiveModel.geometry = new THREE__namespace.CylinderBufferGeometry(1, 1, 1, 30);
-                primitiveModel.material = material;
-                if (_this6.allowMeshBVH) {
-                  primitiveModel.raycast = threeMeshBvh.acceleratedRaycast;
-                  primitiveModel.geometry.boundsTree = new threeMeshBvh.MeshBVH(primitiveModel.geometry);
-                }
+                var _primitiveModel2 = new THREE__namespace.Mesh();
+                _primitiveModel2.geometry = new THREE__namespace.CylinderGeometry(1, 1, 1, 30);
+                _primitiveModel2.material = material;
                 var _radius = parseFloat(n.children[0].getAttribute('radius')) || 0;
                 var length = parseFloat(n.children[0].getAttribute('length')) || 0;
-                primitiveModel.scale.set(_radius, length, _radius);
-                primitiveModel.rotation.set(Math.PI / 2, 0, 0);
-                linkObj.add(primitiveModel);
-                if (isCollisionNode) {
-                  makeURDFCollider(primitiveModel);
-                }
+                _primitiveModel2.scale.set(_radius, length, _radius);
+                _primitiveModel2.rotation.set(Math.PI / 2, 0, 0);
+                group.add(_primitiveModel2);
               }
             } else if (type === 'origin') {
-              xyz = processTuple(n.getAttribute('xyz'));
-              rpy = processTuple(n.getAttribute('rpy'));
+              var xyz = processTuple(n.getAttribute('xyz'));
+              var rpy = processTuple(n.getAttribute('rpy'));
+              group.position.set(xyz[0], xyz[1], xyz[2]);
+              group.rotation.set(0, 0, 0);
+              applyRotation(group, rpy);
             }
           });
-          if (primitiveModel) {
-            applyRotation(primitiveModel, rpy, true);
-            primitiveModel.position.set(xyz[0], xyz[1], xyz[2]);
-          }
+          return group;
         }
         return processUrdf(content);
       }
+
+      // Default mesh loading function
     }, {
       key: "defaultMeshLoader",
       value: function defaultMeshLoader(path, manager, done) {
-        if (/\.stl(?:\?|$)/i.test(path)) {
-          var _loader2 = new STLLoader_js.STLLoader(manager);
-          _loader2.load(path, function (geom) {
+        if (/\.stl$/i.test(path)) {
+          var loader = new STLLoader_js.STLLoader(manager);
+          loader.load(path, function (geom) {
             var mesh = new THREE__namespace.Mesh(geom, new THREE__namespace.MeshPhongMaterial());
             done(mesh);
           });
-        } else if (/\.dae(?:\?|$)/i.test(path)) {
-          var _loader3 = new ColladaLoader_js.ColladaLoader(manager);
-          _loader3.load(path, function (dae) {
+        } else if (/\.dae$/i.test(path)) {
+          var _loader = new ColladaLoader_js.ColladaLoader(manager);
+          _loader.load(path, function (dae) {
             return done(dae.scene);
           });
         } else {
           console.warn("URDFLoader: Could not load model at ".concat(path, ".\nNo loader available"));
         }
       }
-    }, {
-      key: "addPhysicsToLink",
-      value: function addPhysicsToLink(link) {
-        if (!this.Ammo) return;
-        var shape = new this.Ammo.btBoxShape(new this.Ammo.btVector3(0.5, 0.5, 0.5));
-        var transform = new this.Ammo.btTransform();
-        transform.setIdentity();
-        transform.setOrigin(new this.Ammo.btVector3(link.position.x, link.position.y, link.position.z));
-        var mass = 1;
-        var localInertia = new this.Ammo.btVector3(0, 0, 0);
-        shape.calculateLocalInertia(mass, localInertia);
-        var motionState = new this.Ammo.btDefaultMotionState(transform);
-        var rbInfo = new this.Ammo.btRigidBodyConstructionInfo(mass, motionState, shape, localInertia);
-        var body = new this.Ammo.btRigidBody(rbInfo);
-        this.physicsWorld.addRigidBody(body);
-        this.physicsObjects.push({
-          threeObject: link,
-          body: body
-        });
-      }
-    }, {
-      key: "initPhysics",
-      value: function initPhysics() {
-        var _this7 = this;
-        Ammo__default["default"]().then(function (AmmoLib) {
-          _this7.Ammo = AmmoLib;
-          var collisionConfiguration = new AmmoLib.btDefaultCollisionConfiguration();
-          var dispatcher = new AmmoLib.btCollisionDispatcher(collisionConfiguration);
-          var overlappingPairCache = new AmmoLib.btDbvtBroadphase();
-          var solver = new AmmoLib.btSequentialImpulseConstraintSolver();
-          _this7.physicsWorld = new AmmoLib.btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
-          _this7.physicsWorld.setGravity(new AmmoLib.btVector3(0, -9.82, 0));
-          _this7.physicsObjects = [];
-          _this7.tempTransform = new AmmoLib.btTransform();
-          _this7.initGround();
-        });
-      }
-    }, {
-      key: "initGround",
-      value: function initGround() {
-        if (!this.Ammo) return;
-        var groundShape = new this.Ammo.btBoxShape(new this.Ammo.btVector3(50, 1, 50));
-        var groundTransform = new this.Ammo.btTransform();
-        groundTransform.setIdentity();
-        groundTransform.setOrigin(new this.Ammo.btVector3(0, -1, 0));
-        var mass = 0;
-        var localInertia = new this.Ammo.btVector3(0, 0, 0);
-        var myMotionState = new this.Ammo.btDefaultMotionState(groundTransform);
-        var rbInfo = new this.Ammo.btRigidBodyConstructionInfo(mass, myMotionState, groundShape, localInertia);
-        var body = new this.Ammo.btRigidBody(rbInfo);
-        this.physicsWorld.addRigidBody(body);
-      }
-    }, {
-      key: "updatePhysics",
-      value: function updatePhysics() {
-        var _this8 = this;
-        if (!this.physicsWorld) return;
-        var deltaTime = 1 / 60;
-        this.physicsWorld.stepSimulation(deltaTime, 10);
-        this.physicsObjects.forEach(function (obj) {
-          var threeObject = obj.threeObject,
-            body = obj.body;
-          var ms = body.getMotionState();
-          if (ms) {
-            ms.getWorldTransform(_this8.tempTransform);
-            var p = _this8.tempTransform.getOrigin();
-            var q = _this8.tempTransform.getRotation();
-            threeObject.position.set(p.x(), p.y(), p.z());
-            threeObject.quaternion.set(q.x(), q.y(), q.z(), q.w());
-          }
-        });
-      }
     }]);
   }();
-  URDFLoader.prototype.parseFromString = function (urdfString, options) {
-    try {
-      var parser = new DOMParser();
-      var urdfDom = parser.parseFromString(urdfString, "text/xml");
-      var model = this.parse(urdfDom, options);
-      if (options.onComplete) {
-        options.onComplete(model);
-      }
-    } catch (error) {
-      if (options.onError) {
-        options.onError(error);
-      }
-    }
-  };
-  URDFLoader.prototype.loadFromString = function (urdfString, onComplete) {
-    try {
-      var parser = new DOMParser();
-      var urdfDOM = parser.parseFromString(urdfString, "text/xml");
-      var model = this.parse(urdfDOM, {});
-      if (onComplete) {
-        onComplete(model);
-      }
-    } catch (error) {
-      console.error('Failed to parse URDF string:', error);
-    }
-  };
-  URDFLoader.prototype.applyUpdates = function () {
-    if (window.model) {
-      window.model.refreshScene();
-    }
-  };
-  function animate(loader, renderer, scene, camera) {
-    requestAnimationFrame(function () {
-      return animate(loader, renderer, scene, camera);
-    });
-    loader.updatePhysics();
-    renderer.render(scene, camera);
-  }
-  var loader = new URDFLoader();
-  loader.initPhysics();
-  var urdfPath = '/urdf/dropbear/urdf/dropbear.urdf'; // Update this with the actual path to your URDF file
-  loader.load(urdfPath, function (robot) {
-    if (!robot) {
-      console.error('Failed to load URDF model.');
-      return;
-    }
-    var scene = new THREE__namespace.Scene();
-    var camera = new THREE__namespace.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    var renderer = new THREE__namespace.WebGLRenderer();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
-    scene.add(robot);
-    robot.traverse(function (link) {
-      if (link.isURDFLink) {
-        loader.addPhysicsToLink(link);
-      }
-    });
-    camera.position.z = 5;
-    var ballGeometry = new THREE__namespace.SphereGeometry(0.5, 32, 32);
-    var ballMaterial = new THREE__namespace.MeshPhongMaterial({
-      color: 0xff0000
-    });
-    var ballMesh = new THREE__namespace.Mesh(ballGeometry, ballMaterial);
-    ballMesh.position.set(0, 5, 0);
-    scene.add(ballMesh);
-    var ballShape = new loader.Ammo.btSphereShape(0.5);
-    var ballTransform = new loader.Ammo.btTransform();
-    ballTransform.setIdentity();
-    ballTransform.setOrigin(new loader.Ammo.btVector3(ballMesh.position.x, ballMesh.position.y, ballMesh.position.z));
-    var ballMass = 1;
-    var ballLocalInertia = new loader.Ammo.btVector3(0, 0, 0);
-    ballShape.calculateLocalInertia(ballMass, ballLocalInertia);
-    var ballMotionState = new loader.Ammo.btDefaultMotionState(ballTransform);
-    var ballRbInfo = new loader.Ammo.btRigidBodyConstructionInfo(ballMass, ballMotionState, ballShape, ballLocalInertia);
-    var ballBody = new loader.Ammo.btRigidBody(ballRbInfo);
-    loader.physicsWorld.addRigidBody(ballBody);
-    loader.physicsObjects.push({
-      threeObject: ballMesh,
-      body: ballBody
-    });
-    animate(loader, renderer, scene, camera);
-  });
+  ;
+
+  var tempVec2 = new THREE__namespace.Vector2();
+  var emptyRaycast = function emptyRaycast() {};
 
   // urdf-viewer element
   // Loads and displays a 3D view of a URDF-formatted robot
@@ -3707,16 +3721,17 @@
       // Scene setup
       var scene = new THREE__namespace.Scene();
       var ambientLight = new THREE__namespace.HemisphereLight(_this.ambientColor, '#000');
-      ambientLight.groundColor.lerp(ambientLight.color, 0.5);
+      ambientLight.groundColor.lerp(ambientLight.color, 0.5 * Math.PI);
       ambientLight.intensity = 0.5;
       ambientLight.position.set(0, 1, 0);
       scene.add(ambientLight);
 
       // Light setup
-      var dirLight = new THREE__namespace.DirectionalLight(0xffffff);
+      var dirLight = new THREE__namespace.DirectionalLight(0xffffff, Math.PI);
       dirLight.position.set(4, 10, 1);
       dirLight.shadow.mapSize.width = 2048;
       dirLight.shadow.mapSize.height = 2048;
+      dirLight.shadow.normalBias = 0.001;
       dirLight.castShadow = true;
       scene.add(dirLight);
       scene.add(dirLight.target);
@@ -3730,19 +3745,19 @@
       renderer.setClearAlpha(0);
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE__namespace.PCFSoftShadowMap;
-      renderer.gammaOutput = true;
+      renderer.outputColorSpace = THREE__namespace.SRGBColorSpace;
 
       // Camera setup
-      var camera = new THREE__namespace.PerspectiveCamera(75, 1, 0.1, 2000);
+      var camera = new THREE__namespace.PerspectiveCamera(75, 1, 0.1, 1000);
       camera.position.z = -10;
 
       // World setup
       var world = new THREE__namespace.Object3D();
       scene.add(world);
-      var plane = new THREE__namespace.Mesh(new THREE__namespace.PlaneBufferGeometry(40, 40), new THREE__namespace.ShadowMaterial({
+      var plane = new THREE__namespace.Mesh(new THREE__namespace.PlaneGeometry(40, 40), new THREE__namespace.ShadowMaterial({
         side: THREE__namespace.DoubleSide,
         transparent: true,
-        opacity: 0.5
+        opacity: 0.25
       }));
       plane.rotation.x = -Math.PI / 2;
       plane.position.y = -0.5;
@@ -3751,13 +3766,13 @@
       scene.add(plane);
 
       // Controls setup
-      var controls = new OrbitControls.OrbitControls(camera, renderer.domElement);
+      var controls = new OrbitControls_js.OrbitControls(camera, renderer.domElement);
       controls.rotateSpeed = 2.0;
       controls.zoomSpeed = 5;
       controls.panSpeed = 2;
       controls.enableZoom = true;
       controls.enableDamping = false;
-      controls.maxDistance = 150;
+      controls.maxDistance = 50;
       controls.minDistance = 0.25;
       controls.addEventListener('change', function () {
         return _this.recenter();
@@ -3771,7 +3786,16 @@
       _this.directionalLight = dirLight;
       _this.ambientLight = ambientLight;
       _this._setUp(_this.up);
-      _this.initPhysics();
+      _this._collisionMaterial = new THREE.MeshPhongMaterial({
+        transparent: true,
+        opacity: 0.35,
+        shininess: 2.5,
+        premultipliedAlpha: true,
+        color: 0xffbe38,
+        polygonOffset: true,
+        polygonOffsetFactor: -1,
+        polygonOffsetUnits: -1
+      });
       var _renderLoop = function _renderLoop() {
         if (_this.parentNode) {
           _this.updateSize();
@@ -3786,7 +3810,6 @@
           // update controls after the environment in
           // case the controls are retargeted
           _this.controls.update();
-          _this.updatePhysics();
         }
         _this._renderLoopId = requestAnimationFrame(_renderLoop);
       };
@@ -3837,7 +3860,7 @@
     }, {
       key: "ambientColor",
       get: function get() {
-        return this.getAttribute('ambient-color') || '#263238';
+        return this.getAttribute('ambient-color') || '#8ea0a8';
       },
       set: function set(val) {
         val ? this.setAttribute('ambient-color', val) : this.removeAttribute('ambient-color');
@@ -3859,16 +3882,35 @@
         val ? this.setAttribute('no-auto-recenter', true) : this.removeAttribute('no-auto-recenter');
       }
     }, {
-      key: "angles",
+      key: "showCollision",
       get: function get() {
-        var angles = {};
-        if (this.robot) {
-          for (var name in this.robot.joints) angles[name] = this.robot.joints[name].angle;
-        }
-        return angles;
+        return this.hasAttribute('show-collision') || false;
       },
       set: function set(val) {
-        this._setAngles(val);
+        val ? this.setAttribute('show-collision', true) : this.removeAttribute('show-collision');
+      }
+    }, {
+      key: "jointValues",
+      get: function get() {
+        var values = {};
+        if (this.robot) {
+          for (var name in this.robot.joints) {
+            var joint = this.robot.joints[name];
+            values[name] = joint.jointValue.length === 1 ? joint.angle : _toConsumableArray(joint.jointValue);
+          }
+        }
+        return values;
+      },
+      set: function set(val) {
+        this.setJointValues(val);
+      }
+    }, {
+      key: "angles",
+      get: function get() {
+        return this.jointValues;
+      },
+      set: function set(v) {
+        this.jointValues = v;
       }
     }, {
       key: "connectedCallback",
@@ -3900,34 +3942,33 @@
     }, {
       key: "attributeChangedCallback",
       value: function attributeChangedCallback(attr, oldval, newval) {
-        this.recenter();
+        this._updateCollisionVisibility();
+        if (!this.noAutoRecenter) {
+          this.recenter();
+        }
         switch (attr) {
           case 'package':
           case 'urdf':
-            this._scheduleLoad();
-            break;
+            {
+              this._scheduleLoad();
+              break;
+            }
           case 'up':
-            this._setUp(this.up);
-            break;
+            {
+              this._setUp(this.up);
+              break;
+            }
           case 'ambient-color':
-            this.ambientLight.color.set(this.ambientColor);
-            this.ambientLight.groundColor.set('#000').lerp(this.ambientLight.color, 0.5);
-            break;
+            {
+              this.ambientLight.color.set(this.ambientColor);
+              this.ambientLight.groundColor.set('#000').lerp(this.ambientLight.color, 0.5);
+              break;
+            }
           case 'ignore-limits':
-            this._setIgnoreLimits(this.ignoreLimits, true);
-            break;
-          case 'physics':
-            this.togglePhysics(newval === 'true');
-            break;
-        }
-      }
-    }, {
-      key: "togglePhysics",
-      value: function togglePhysics(enabled) {
-        if (enabled && !this.physicsWorld) {
-          this.initPhysics(); // Initialize physics if not already done
-        } else if (!enabled && this.physicsWorld) {
-          this.stopPhysics(); // Define a method to stop physics if needed
+            {
+              this._setIgnoreLimits(this.ignoreLimits, true);
+              break;
+            }
         }
       }
 
@@ -3938,9 +3979,8 @@
         var r = this.renderer;
         var w = this.clientWidth;
         var h = this.clientHeight;
-        var currsize = new THREE__namespace.Vector2();
-        r.getSize(currsize);
-        if (currsize.width !== w || currsize.height !== h) {
+        var currSize = r.getSize(tempVec2);
+        if (currSize.width !== w || currSize.height !== h) {
           this.recenter();
         }
         r.setPixelRatio(window.devicePixelRatio);
@@ -3963,25 +4003,27 @@
       // Set the joint with jointName to
       // angle in degrees
     }, {
-      key: "setAngle",
-      value: function setAngle(jointName, angle) {
+      key: "setJointValue",
+      value: function setJointValue(jointName) {
+        var _this$robot$joints$jo;
         if (!this.robot) return;
         if (!this.robot.joints[jointName]) return;
-        var origAngle = this.robot.joints[jointName].angle;
-        var newAngle = this.robot.setAngle(jointName, angle);
-        if (origAngle !== newAngle) {
-          this.redraw();
+        for (var _len = arguments.length, values = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+          values[_key - 1] = arguments[_key];
         }
-        this.dispatchEvent(new CustomEvent('angle-change', {
-          bubbles: true,
-          cancelable: true,
-          detail: jointName
-        }));
+        if ((_this$robot$joints$jo = this.robot.joints[jointName]).setJointValue.apply(_this$robot$joints$jo, values)) {
+          this.redraw();
+          this.dispatchEvent(new CustomEvent('angle-change', {
+            bubbles: true,
+            cancelable: true,
+            detail: jointName
+          }));
+        }
       }
     }, {
-      key: "setAngles",
-      value: function setAngles(angles) {
-        for (var name in angles) this.setAngle(name, angles[name]);
+      key: "setJointValues",
+      value: function setJointValues(values) {
+        for (var name in values) this.setJointValue(name, values[name]);
       }
 
       /* Private Functions */
@@ -3991,19 +4033,14 @@
     }, {
       key: "_updateEnvironment",
       value: function _updateEnvironment() {
-        if (!this.robot) return;
+        var robot = this.robot;
+        if (!robot) return;
         this.world.updateMatrixWorld();
         var bbox = new THREE__namespace.Box3();
-        var temp = new THREE__namespace.Box3();
-        this.robot.traverse(function (c) {
-          var geometry = c.geometry;
-          if (geometry) {
-            if (geometry.boundingBox === null) {
-              geometry.computeBoundingBox();
-            }
-            temp.copy(geometry.boundingBox);
-            temp.applyMatrix4(c.matrixWorld);
-            bbox.union(temp);
+        bbox.makeEmpty();
+        robot.traverse(function (c) {
+          if (c.isURDFVisual) {
+            bbox.expandByObject(c);
           }
         });
         var center = bbox.getCenter(new THREE__namespace.Vector3());
@@ -4083,7 +4120,7 @@
                       m = new THREE__namespace.MeshPhongMaterial();
                     }
                     if (m.map) {
-                      m.map.encoding = THREE__namespace.GammaEncoding;
+                      m.map.colorSpace = THREE__namespace.SRGBColorSpace;
                     }
                     return m;
                   });
@@ -4124,6 +4161,7 @@
             _this4.world.add(robot);
             updateMaterials(robot);
             _this4._setIgnoreLimits(_this4.ignoreLimits);
+            _this4._updateCollisionVisibility();
             _this4.dispatchEvent(new CustomEvent('urdf-processed', {
               bubbles: true,
               cancelable: true,
@@ -4139,29 +4177,42 @@
           if (this.urlModifierFunc) {
             manager.setURLModifier(this.urlModifierFunc);
           }
-          new URDFLoader(manager).load(urdf,
-          // onComplete
-          function (model) {
-            robot = model;
-          },
-          // onProgress
-          function (url, loaded, total) {
-            console.log("".concat(url, "; ").concat(loaded, "/").concat(total));
-          },
-          // onError
-          function (error) {
-            console.log(error);
-          },
-          // options
-          {
-            packages: pkg,
-            loadMeshCb: this.loadMeshFunc,
-            fetchOptions: {
-              mode: 'cors',
-              credentials: 'same-origin'
-            }
+          var loader = new URDFLoader(manager);
+          loader.packages = pkg;
+          loader.loadMeshCb = this.loadMeshFunc;
+          loader.fetchOptions = {
+            mode: 'cors',
+            credentials: 'same-origin'
+          };
+          loader.parseCollision = true;
+          loader.load(urdf, function (model) {
+            return robot = model;
           });
         }
+      }
+    }, {
+      key: "_updateCollisionVisibility",
+      value: function _updateCollisionVisibility() {
+        var showCollision = this.showCollision;
+        var collisionMaterial = this._collisionMaterial;
+        var robot = this.robot;
+        if (robot === null) return;
+        var colliders = [];
+        robot.traverse(function (c) {
+          if (c.isURDFCollider) {
+            c.visible = showCollision;
+            colliders.push(c);
+          }
+        });
+        colliders.forEach(function (coll) {
+          coll.traverse(function (c) {
+            if (c.isMesh) {
+              c.raycast = emptyRaycast;
+              c.material = collisionMaterial;
+              c.castShadow = false;
+            }
+          });
+        });
       }
 
       // Watch the coordinate frame and update the
@@ -4189,7 +4240,7 @@
         if (this.robot) {
           Object.values(this.robot.joints).forEach(function (joint) {
             joint.ignoreLimits = ignore;
-            joint.setAngle(joint.angle);
+            joint.setJointValue.apply(joint, _toConsumableArray(joint.jointValue));
           });
         }
         if (dispatch) {
@@ -4200,118 +4251,10 @@
           }));
         }
       }
-
-      // Ammo.js setup and functions
-    }, {
-      key: "initPhysics",
-      value: function initPhysics() {
-        var _this5 = this;
-        Ammo__default["default"]().then(function (AmmoLib) {
-          _this5.Ammo = AmmoLib;
-          var collisionConfiguration = new AmmoLib.btDefaultCollisionConfiguration();
-          var dispatcher = new AmmoLib.btCollisionDispatcher(collisionConfiguration);
-          var overlappingPairCache = new AmmoLib.btDbvtBroadphase();
-          var solver = new AmmoLib.btSequentialImpulseConstraintSolver();
-          _this5.physicsWorld = new AmmoLib.btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
-          _this5.physicsWorld.setGravity(new AmmoLib.btVector3(0, -9.82, 0));
-          _this5.physicsObjects = [];
-          _this5.tempTransform = new AmmoLib.btTransform();
-          console.log('Ammo.js physics initialized with gravity:', _this5.physicsWorld.getGravity().y());
-          _this5.initGround();
-        })["catch"](function (error) {
-          console.error('Failed to load Ammo.js:', error);
-        });
-      }
-    }, {
-      key: "initGround",
-      value: function initGround() {
-        if (!this.Ammo) return; // Ensure Ammo is loaded
-
-        var groundShape = new this.Ammo.btBoxShape(new this.Ammo.btVector3(50, 1, 50));
-        var groundTransform = new this.Ammo.btTransform();
-        groundTransform.setIdentity();
-        groundTransform.setOrigin(new this.Ammo.btVector3(0, -1, 0));
-        var mass = 0;
-        var localInertia = new this.Ammo.btVector3(0, 0, 0);
-        var myMotionState = new this.Ammo.btDefaultMotionState(groundTransform);
-        var rbInfo = new this.Ammo.btRigidBodyConstructionInfo(mass, myMotionState, groundShape, localInertia);
-        var body = new this.Ammo.btRigidBody(rbInfo);
-        console.log('ground init');
-        this.physicsWorld.addRigidBody(body);
-      }
-    }, {
-      key: "createPhysicsObject",
-      value: function createPhysicsObject(threeObject, shapeType, mass) {
-        var shape;
-        switch (shapeType) {
-          case 'box':
-            var bbox = new THREE__namespace.Box3().setFromObject(threeObject);
-            var size = new THREE__namespace.Vector3();
-            bbox.getSize(size);
-            shape = new this.Ammo.btBoxShape(new this.Ammo.btVector3(size.x / 2, size.y / 2, size.z / 2));
-            break;
-          // Add more shape types as needed
-        }
-        var transform = new this.Ammo.btTransform();
-        transform.setIdentity();
-        transform.setOrigin(new this.Ammo.btVector3(threeObject.position.x, threeObject.position.y, threeObject.position.z));
-        var localInertia = new this.Ammo.btVector3(0, 0, 0);
-        shape.calculateLocalInertia(mass, localInertia);
-        var motionState = new this.Ammo.btDefaultMotionState(transform);
-        var rbInfo = new this.Ammo.btRigidBodyConstructionInfo(mass, motionState, shape, localInertia);
-        var body = new this.Ammo.btRigidBody(rbInfo);
-        console.log('physics objects created');
-        this.physicsWorld.addRigidBody(body);
-        this.physicsObjects.push({
-          threeObject: threeObject,
-          body: body
-        });
-      }
-    }, {
-      key: "updatePhysics",
-      value: function updatePhysics() {
-        var _this6 = this;
-        if (!this.physicsWorld) {
-          console.log('Physics world is not initialized.');
-          return;
-        }
-        var deltaTime = 1 / 60;
-        this.physicsWorld.stepSimulation(deltaTime, 10);
-        this.physicsObjects.forEach(function (obj) {
-          var threeObject = obj.threeObject,
-            body = obj.body;
-          var ms = body.getMotionState();
-          if (ms) {
-            ms.getWorldTransform(_this6.tempTransform);
-            var p = _this6.tempTransform.getOrigin();
-            var q = _this6.tempTransform.getRotation();
-            threeObject.position.set(p.x(), p.y(), p.z());
-            threeObject.quaternion.set(q.x(), q.y(), q.z(), q.w());
-            console.log("Updated position of ".concat(threeObject.name, ":"), p.x().toFixed(2), p.y().toFixed(2), p.z().toFixed(2));
-          }
-        });
-      }
-    }, {
-      key: "stopPhysics",
-      value: function stopPhysics() {
-        var _this7 = this;
-        if (!this.physicsWorld) {
-          console.log('No active physics world to stop.');
-          return;
-        }
-        // Loop through all physics objects and remove them from the physics world
-        this.physicsObjects.forEach(function (obj) {
-          _this7.physicsWorld.removeRigidBody(obj.body);
-          console.log("Removed physics body for ".concat(obj.threeObject.name));
-        });
-        // Clear the array of physics objects
-        this.physicsObjects = [];
-        console.log('Physics stopped and all bodies cleared.');
-      }
     }], [{
       key: "observedAttributes",
       get: function get() {
-        return ['package', 'urdf', 'up', 'display-shadow', 'ambient-color', 'ignore-limits', 'physics'];
+        return ['package', 'urdf', 'up', 'display-shadow', 'ambient-color', 'ignore-limits', 'show-collision'];
       }
     }]);
   }( /*#__PURE__*/_wrapNativeSuper(HTMLElement));

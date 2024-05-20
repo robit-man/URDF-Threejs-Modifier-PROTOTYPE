@@ -1,51 +1,23 @@
-import { Object3D, Quaternion } from 'three';
+import { Object3D, Vector3 } from 'three';
 
-function URDFColliderClone(...args) {
+const _tempAxis = new Vector3();
 
-    const proto = Object.getPrototypeOf(this);
-    const result = proto.clone.call(this, ...args);
-    result.isURDFCollider = true;
-    return result;
-
-};
-
-function makeURDFCollider(object) {
-
-    object.isURDFCollider = true;
-    object.clone = URDFColliderClone;
-
-}
-
-class URDFLink extends Object3D {
+class URDFBase extends Object3D {
 
     constructor(...args) {
 
         super(...args);
-        this.isURDFLink = true;
-        this.type = 'URDFLink';
         this.urdfNode = null;
+        this.urdfName = '';
 
-    }
-
-    show() {
-        this.visible = true;
-    }
-
-    hide() {
-        this.visible = false;
-    }
-
-    delete() {
-        this.parent.remove(this);
-        this.children.map(child => {
-            this.remove(child);
-        });
     }
 
     copy(source, recursive) {
 
         super.copy(source, recursive);
+
         this.urdfNode = source.urdfNode;
+        this.urdfName = source.urdfName;
 
         return this;
 
@@ -53,25 +25,65 @@ class URDFLink extends Object3D {
 
 }
 
-class URDFJoint extends Object3D {
+class URDFCollider extends URDFBase {
+
+    constructor(...args) {
+
+        super(...args);
+        this.isURDFCollider = true;
+        this.type = 'URDFCollider';
+
+    }
+
+}
+
+class URDFVisual extends URDFBase {
+
+    constructor(...args) {
+
+        super(...args);
+        this.isURDFVisual = true;
+        this.type = 'URDFVisual';
+
+    }
+
+}
+
+class URDFLink extends URDFBase {
+
+    constructor(...args) {
+
+        super(...args);
+        this.isURDFLink = true;
+        this.type = 'URDFLink';
+
+    }
+
+}
+
+class URDFJoint extends URDFBase {
 
     get jointType() {
 
         return this._jointType;
 
     }
+
     set jointType(v) {
 
         if (this.jointType === v) return;
         this._jointType = v;
-
+        this.matrixWorldNeedsUpdate = true;
         switch (v) {
 
             case 'fixed':
+                this.jointValue = [];
+                break;
+
             case 'continuous':
             case 'revolute':
             case 'prismatic':
-                this.jointValue = 0;
+                this.jointValue = new Array(1).fill(0);
                 break;
 
             case 'planar':
@@ -88,25 +100,28 @@ class URDFJoint extends Object3D {
 
     get angle() {
 
-        return this.jointValue;
+        return this.jointValue[0];
 
     }
 
     constructor(...args) {
+
         super(...args);
 
         this.isURDFJoint = true;
         this.type = 'URDFJoint';
 
-        this.urdfNode = null;
         this.jointValue = null;
         this.jointType = 'fixed';
-        this.axis = null;
+        this.axis = new Vector3(1, 0, 0);
         this.limit = { lower: 0, upper: 0 };
         this.ignoreLimits = false;
 
         this.origPosition = null;
         this.origQuaternion = null;
+
+        this.mimicJoints = [];
+
     }
 
     /* Overrides */
@@ -114,29 +129,32 @@ class URDFJoint extends Object3D {
 
         super.copy(source, recursive);
 
-        this.urdfNode = source.urdfNode;
         this.jointType = source.jointType;
-        this.axis = source.axis ? source.axis.clone() : null;
+        this.axis = source.axis.clone();
         this.limit.lower = source.limit.lower;
         this.limit.upper = source.limit.upper;
         this.ignoreLimits = false;
 
-        this.jointValue = Array.isArray(source.jointValue) ? [...source.jointValue] : source.jointValue;
+        this.jointValue = [...source.jointValue];
 
         this.origPosition = source.origPosition ? source.origPosition.clone() : null;
         this.origQuaternion = source.origQuaternion ? source.origQuaternion.clone() : null;
 
+        this.mimicJoints = [...source.mimicJoints];
+
         return this;
+
     }
 
     /* Public Functions */
-    setAngle(...values) {
-        return this.setOffset(...values);
-    }
+    /**
+     * @param {...number|null} values The joint value components to set, optionally null for no-op
+     * @returns {boolean} Whether the invocation of this function resulted in an actual change to the joint value
+     */
+    setJointValue(...values) {
 
-    setOffset(...values) {
-
-        values = values.map(v => parseFloat(v));
+        // Parse all incoming values into numbers except null, which we treat as a no-op for that value component.
+        values = values.map(v => v === null ? null : parseFloat(v));
 
         if (!this.origPosition || !this.origQuaternion) {
 
@@ -145,17 +163,27 @@ class URDFJoint extends Object3D {
 
         }
 
+        let didUpdate = false;
+
+        this.mimicJoints.forEach(joint => {
+
+            didUpdate = joint.updateFromMimickedJoint(...values) || didUpdate;
+
+        });
+
         switch (this.jointType) {
 
             case 'fixed': {
-                break;
+
+                return didUpdate;
+
             }
             case 'continuous':
             case 'revolute': {
 
                 let angle = values[0];
-                if (angle == null) break;
-                if (angle === this.jointValue) break;
+                if (angle == null) return didUpdate;
+                if (angle === this.jointValue[0]) return didUpdate;
 
                 if (!this.ignoreLimits && this.jointType === 'revolute') {
 
@@ -164,36 +192,52 @@ class URDFJoint extends Object3D {
 
                 }
 
-                // FromAxisAngle seems to rotate the opposite of the
-                // expected angle for URDF, so negate it here
-                const delta = new Quaternion().setFromAxisAngle(this.axis, angle);
-                this.quaternion.multiplyQuaternions(this.origQuaternion, delta);
+                this.quaternion
+                    .setFromAxisAngle(this.axis, angle)
+                    .premultiply(this.origQuaternion);
 
-                this.jointValue = angle;
-                this.matrixWorldNeedsUpdate = true;
+                if (this.jointValue[0] !== angle) {
 
-                break;
+                    this.jointValue[0] = angle;
+                    this.matrixWorldNeedsUpdate = true;
+                    return true;
+
+                } else {
+
+                    return didUpdate;
+
+                }
+
             }
 
             case 'prismatic': {
 
-                let angle = values[0];
-                if (angle == null) break;
-                if (angle === this.jointValue) break;
+                let pos = values[0];
+                if (pos == null) return didUpdate;
+                if (pos === this.jointValue[0]) return didUpdate;
 
                 if (!this.ignoreLimits) {
 
-                    angle = Math.min(this.limit.upper, angle);
-                    angle = Math.max(this.limit.lower, angle);
+                    pos = Math.min(this.limit.upper, pos);
+                    pos = Math.max(this.limit.lower, pos);
 
                 }
 
                 this.position.copy(this.origPosition);
-                this.position.addScaledVector(this.axis, angle);
+                _tempAxis.copy(this.axis).applyEuler(this.rotation);
+                this.position.addScaledVector(_tempAxis, pos);
 
-                this.jointValue = angle;
-                this.worldMatrixNeedsUpdate = true;
-                break;
+                if (this.jointValue[0] !== pos) {
+
+                    this.jointValue[0] = pos;
+                    this.matrixWorldNeedsUpdate = true;
+                    return true;
+
+                } else {
+
+                    return didUpdate;
+
+                }
 
             }
 
@@ -204,7 +248,41 @@ class URDFJoint extends Object3D {
 
         }
 
-        return this.jointValue;
+        return didUpdate;
+
+    }
+
+}
+
+class URDFMimicJoint extends URDFJoint {
+
+    constructor(...args) {
+
+        super(...args);
+        this.type = 'URDFMimicJoint';
+        this.mimicJoint = null;
+        this.offset = 0;
+        this.multiplier = 1;
+
+    }
+
+    updateFromMimickedJoint(...values) {
+
+        const modifiedValues = values.map(x => x * this.multiplier + this.offset);
+        return super.setJointValue(...modifiedValues);
+
+    }
+
+    /* Overrides */
+    copy(source, recursive) {
+
+        super.copy(source, recursive);
+
+        this.mimicJoint = source.mimicJoint;
+        this.offset = source.offset;
+        this.multiplier = source.multiplier;
+
+        return this;
 
     }
 
@@ -223,6 +301,9 @@ class URDFRobot extends URDFLink {
 
         this.links = null;
         this.joints = null;
+        this.colliders = null;
+        this.visual = null;
+        this.frames = null;
 
     }
 
@@ -235,46 +316,93 @@ class URDFRobot extends URDFLink {
 
         this.links = {};
         this.joints = {};
+        this.colliders = {};
+        this.visual = {};
 
         this.traverse(c => {
 
-            if (c.isURDFJoint && c.name in source.joints) {
+            if (c.isURDFJoint && c.urdfName in source.joints) {
 
-                this.joints[c.name] = c;
+                this.joints[c.urdfName] = c;
 
             }
 
-            if (c.isURDFLink && c.name in source.links) {
+            if (c.isURDFLink && c.urdfName in source.links) {
 
-                this.links[c.name] = c;
+                this.links[c.urdfName] = c;
+
+            }
+
+            if (c.isURDFCollider && c.urdfName in source.colliders) {
+
+                this.colliders[c.urdfName] = c;
+
+            }
+
+            if (c.isURDFVisual && c.urdfName in source.visual) {
+
+                this.visual[c.urdfName] = c;
 
             }
 
         });
 
+        // Repair mimic joint references once we've re-accumulated all our joint data
+        for (const joint in this.joints) {
+            this.joints[joint].mimicJoints = this.joints[joint].mimicJoints.map((mimicJoint) => this.joints[mimicJoint.name]);
+        }
+
+        this.frames = {
+            ...this.colliders,
+            ...this.visual,
+            ...this.links,
+            ...this.joints,
+        };
+
         return this;
 
     }
 
-    setAngle(jointName, ...angle) {
+    getFrame(name) {
+
+        return this.frames[name];
+
+    }
+
+    setJointValue(jointName, ...angle) {
 
         const joint = this.joints[jointName];
         if (joint) {
 
-            return joint.setAngle(...angle);
+            return joint.setJointValue(...angle);
 
         }
 
-        return null;
+        return false;
     }
 
-    setAngles(angles) {
+    setJointValues(values) {
 
-        // TODO: How to handle other, multi-dimensional joint types?
-        for (const name in angles) this.setAngle(name, angles[name]);
+        let didChange = false;
+        for (const name in values) {
+
+            const value = values[name];
+            if (Array.isArray(value)) {
+
+                didChange = this.setJointValue(name, ...value) || didChange;
+
+            } else {
+
+                didChange = this.setJointValue(name, value) || didChange;
+
+            }
+
+        }
+
+        return didChange;
 
     }
 
 }
 
-export { URDFRobot, URDFLink, URDFJoint, makeURDFCollider };
+export { URDFRobot, URDFLink, URDFJoint, URDFMimicJoint, URDFVisual, URDFCollider };

@@ -1,7 +1,10 @@
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/js/controls/OrbitControls';
+import { MeshPhongMaterial } from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import URDFLoader from './URDFLoader.js';
-import Ammo from 'ammojs3';
+
+const tempVec2 = new THREE.Vector2();
+const emptyRaycast = () => {};
 
 // urdf-viewer element
 // Loads and displays a 3D view of a URDF-formatted robot
@@ -13,11 +16,11 @@ import Ammo from 'ammojs3';
 // ignore-limits-change: Fires when the 'ignore-limits' attribute changes
 // angle-change: Fires when an angle changes
 export default
-    class URDFViewer extends HTMLElement {
+class URDFViewer extends HTMLElement {
 
     static get observedAttributes() {
 
-        return ['package', 'urdf', 'up', 'display-shadow', 'ambient-color', 'ignore-limits', 'physics'];
+        return ['package', 'urdf', 'up', 'display-shadow', 'ambient-color', 'ignore-limits', 'show-collision'];
 
     }
 
@@ -36,7 +39,7 @@ export default
     get displayShadow() { return this.hasAttribute('display-shadow') || false; }
     set displayShadow(val) { val ? this.setAttribute('display-shadow', '') : this.removeAttribute('display-shadow'); }
 
-    get ambientColor() { return this.getAttribute('ambient-color') || '#263238'; }
+    get ambientColor() { return this.getAttribute('ambient-color') || '#8ea0a8'; }
     set ambientColor(val) { val ? this.setAttribute('ambient-color', val) : this.removeAttribute('ambient-color'); }
 
     get autoRedraw() { return this.hasAttribute('auto-redraw') || false; }
@@ -45,19 +48,38 @@ export default
     get noAutoRecenter() { return this.hasAttribute('no-auto-recenter') || false; }
     set noAutoRecenter(val) { val ? this.setAttribute('no-auto-recenter', true) : this.removeAttribute('no-auto-recenter'); }
 
-    get angles() {
+    get showCollision() { return this.hasAttribute('show-collision') || false; }
+    set showCollision(val) { val ? this.setAttribute('show-collision', true) : this.removeAttribute('show-collision'); }
 
-        const angles = {};
+    get jointValues() {
+
+        const values = {};
         if (this.robot) {
 
-            for (const name in this.robot.joints) angles[name] = this.robot.joints[name].angle;
+            for (const name in this.robot.joints) {
+
+                const joint = this.robot.joints[name];
+                values[name] = joint.jointValue.length === 1 ? joint.angle : [...joint.jointValue];
+
+            }
 
         }
 
-        return angles;
+        return values;
 
     }
-    set angles(val) { this._setAngles(val); }
+    set jointValues(val) { this.setJointValues(val); }
+
+    get angles() {
+
+        return this.jointValues;
+
+    }
+    set angles(v) {
+
+        this.jointValues = v;
+
+    }
 
     /* Lifecycle Functions */
     constructor() {
@@ -75,16 +97,17 @@ export default
         const scene = new THREE.Scene();
 
         const ambientLight = new THREE.HemisphereLight(this.ambientColor, '#000');
-        ambientLight.groundColor.lerp(ambientLight.color, 0.5);
+        ambientLight.groundColor.lerp(ambientLight.color, 0.5 * Math.PI);
         ambientLight.intensity = 0.5;
         ambientLight.position.set(0, 1, 0);
         scene.add(ambientLight);
 
         // Light setup
-        const dirLight = new THREE.DirectionalLight(0xffffff);
+        const dirLight = new THREE.DirectionalLight(0xffffff, Math.PI);
         dirLight.position.set(4, 10, 1);
         dirLight.shadow.mapSize.width = 2048;
         dirLight.shadow.mapSize.height = 2048;
+        dirLight.shadow.normalBias = 0.001;
         dirLight.castShadow = true;
         scene.add(dirLight);
         scene.add(dirLight.target);
@@ -95,10 +118,10 @@ export default
         renderer.setClearAlpha(0);
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        renderer.gammaOutput = true;
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
 
         // Camera setup
-        const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 2000);
+        const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
         camera.position.z = -10;
 
         // World setup
@@ -106,8 +129,8 @@ export default
         scene.add(world);
 
         const plane = new THREE.Mesh(
-            new THREE.PlaneBufferGeometry(40, 40),
-            new THREE.ShadowMaterial({ side: THREE.DoubleSide, transparent: true, opacity: 0.5 })
+            new THREE.PlaneGeometry(40, 40),
+            new THREE.ShadowMaterial({ side: THREE.DoubleSide, transparent: true, opacity: 0.25 }),
         );
         plane.rotation.x = -Math.PI / 2;
         plane.position.y = -0.5;
@@ -122,7 +145,7 @@ export default
         controls.panSpeed = 2;
         controls.enableZoom = true;
         controls.enableDamping = false;
-        controls.maxDistance = 150;
+        controls.maxDistance = 50;
         controls.minDistance = 0.25;
         controls.addEventListener('change', () => this.recenter());
 
@@ -136,7 +159,17 @@ export default
         this.ambientLight = ambientLight;
 
         this._setUp(this.up);
-        this.initPhysics();
+
+        this._collisionMaterial = new MeshPhongMaterial({
+            transparent: true,
+            opacity: 0.35,
+            shininess: 2.5,
+            premultipliedAlpha: true,
+            color: 0xffbe38,
+            polygonOffset: true,
+            polygonOffsetFactor: -1,
+            polygonOffsetUnits: -1,
+        });
 
         const _renderLoop = () => {
 
@@ -159,7 +192,7 @@ export default
                 // update controls after the environment in
                 // case the controls are retargeted
                 this.controls.update();
-                this.updatePhysics();
+
             }
             this._renderLoopId = requestAnimationFrame(_renderLoop);
 
@@ -176,9 +209,9 @@ export default
 
             const styletag = document.createElement('style');
             styletag.innerHTML =
-                `
-                ${this.tagName} { display: block; }
-                ${this.tagName} canvas {
+            `
+                ${ this.tagName } { display: block; }
+                ${ this.tagName } canvas {
                     width: 100%;
                     height: 100%;
                 }
@@ -207,37 +240,47 @@ export default
     }
 
     attributeChangedCallback(attr, oldval, newval) {
-        this.recenter();
+
+        this._updateCollisionVisibility();
+        if (!this.noAutoRecenter) {
+            this.recenter();
+        }
 
         switch (attr) {
+
             case 'package':
-            case 'urdf':
+            case 'urdf': {
+
                 this._scheduleLoad();
                 break;
-            case 'up':
+
+            }
+
+            case 'up': {
+
                 this._setUp(this.up);
                 break;
-            case 'ambient-color':
+
+            }
+
+            case 'ambient-color': {
+
                 this.ambientLight.color.set(this.ambientColor);
                 this.ambientLight.groundColor.set('#000').lerp(this.ambientLight.color, 0.5);
                 break;
-            case 'ignore-limits':
+
+            }
+
+            case 'ignore-limits': {
+
                 this._setIgnoreLimits(this.ignoreLimits, true);
                 break;
-            case 'physics':
-                this.togglePhysics(newval === 'true');
-                break;
-        }
-    }
 
-    togglePhysics(enabled) {
-        if (enabled && !this.physicsWorld) {
-            this.initPhysics();  // Initialize physics if not already done
-        } else if (!enabled && this.physicsWorld) {
-            this.stopPhysics();  // Define a method to stop physics if needed
-        }
-    }
+            }
 
+        }
+
+    }
 
     /* Public API */
     updateSize() {
@@ -245,10 +288,9 @@ export default
         const r = this.renderer;
         const w = this.clientWidth;
         const h = this.clientHeight;
-        const currsize = new THREE.Vector2();
-        r.getSize(currsize);
+        const currSize = r.getSize(tempVec2);
 
-        if (currsize.width !== w || currsize.height !== h) {
+        if (currSize.width !== w || currSize.height !== h) {
 
             this.recenter();
 
@@ -276,24 +318,23 @@ export default
 
     // Set the joint with jointName to
     // angle in degrees
-    setAngle(jointName, angle) {
+    setJointValue(jointName, ...values) {
 
         if (!this.robot) return;
         if (!this.robot.joints[jointName]) return;
 
-        const origAngle = this.robot.joints[jointName].angle;
-        const newAngle = this.robot.setAngle(jointName, angle);
-        if (origAngle !== newAngle) {
-            this.redraw();
-        }
+        if (this.robot.joints[jointName].setJointValue(...values)) {
 
-        this.dispatchEvent(new CustomEvent('angle-change', { bubbles: true, cancelable: true, detail: jointName }));
+            this.redraw();
+            this.dispatchEvent(new CustomEvent('angle-change', { bubbles: true, cancelable: true, detail: jointName }));
+
+        }
 
     }
 
-    setAngles(angles) {
+    setJointValues(values) {
 
-        for (const name in angles) this.setAngle(name, angles[name]);
+        for (const name in values) this.setJointValue(name, values[name]);
 
     }
 
@@ -303,31 +344,17 @@ export default
     // camera on the center of the scene
     _updateEnvironment() {
 
-        if (!this.robot) return;
+        const robot = this.robot;
+        if (!robot) return;
 
         this.world.updateMatrixWorld();
 
         const bbox = new THREE.Box3();
-        const temp = new THREE.Box3();
-
-        this.robot.traverse(c => {
-
-            const geometry = c.geometry;
-            if (geometry) {
-
-                if (geometry.boundingBox === null) {
-
-                    geometry.computeBoundingBox();
-
-                }
-
-                temp.copy(geometry.boundingBox);
-                temp.applyMatrix4(c.matrixWorld);
-
-                bbox.union(temp);
-
+        bbox.makeEmpty();
+        robot.traverse(c => {
+            if (c.isURDFVisual) {
+                bbox.expandByObject(c);
             }
-
         });
 
         const center = bbox.getCenter(new THREE.Vector3());
@@ -364,8 +391,8 @@ export default
 
         // if our current model is already what's being requested
         // or has been loaded then early out
-        if (this._prevload === `${this.package}|${this.urdf}`) return;
-        this._prevload = `${this.package}|${this.urdf}`;
+        if (this._prevload === `${ this.package }|${ this.urdf }`) return;
+        this._prevload = `${ this.package }|${ this.urdf }`;
 
         // if we're already waiting on a load then early out
         if (this._loadScheduled) return;
@@ -426,7 +453,7 @@ export default
 
                                         if (m.map) {
 
-                                            m.map.encoding = THREE.GammaEncoding;
+                                            m.map.colorSpace = THREE.SRGBColorSpace;
 
                                         }
 
@@ -480,6 +507,7 @@ export default
                 updateMaterials(robot);
 
                 this._setIgnoreLimits(this.ignoreLimits);
+                this._updateCollisionVisibility();
 
                 this.dispatchEvent(new CustomEvent('urdf-processed', { bubbles: true, cancelable: true, composed: true }));
                 this.dispatchEvent(new CustomEvent('geometry-loaded', { bubbles: true, cancelable: true, composed: true }));
@@ -494,34 +522,52 @@ export default
 
             }
 
-            new URDFLoader(manager).load(
-                urdf,
-
-                // onComplete
-                (model) => {
-                    robot = model;
-                },
-
-                // onProgress
-                (url, loaded, total) => {
-                    console.log(`${url}; ${loaded}/${total}`);
-                },
-
-                // onError
-                (error) => {
-                    console.log(error);
-                },
-
-                // options
-                {
-
-                    packages: pkg,
-                    loadMeshCb: this.loadMeshFunc,
-                    fetchOptions: { mode: 'cors', credentials: 'same-origin' },
-
-                });
+            const loader = new URDFLoader(manager);
+            loader.packages = pkg;
+            loader.loadMeshCb = this.loadMeshFunc;
+            loader.fetchOptions = { mode: 'cors', credentials: 'same-origin' };
+            loader.parseCollision = true;
+            loader.load(urdf, model => robot = model);
 
         }
+
+    }
+
+    _updateCollisionVisibility() {
+
+        const showCollision = this.showCollision;
+        const collisionMaterial = this._collisionMaterial;
+        const robot = this.robot;
+
+        if (robot === null) return;
+
+        const colliders = [];
+        robot.traverse(c => {
+
+            if (c.isURDFCollider) {
+
+                c.visible = showCollision;
+                colliders.push(c);
+
+            }
+
+        });
+
+        colliders.forEach(coll => {
+
+            coll.traverse(c => {
+
+                if (c.isMesh) {
+
+                    c.raycast = emptyRaycast;
+                    c.material = collisionMaterial;
+                    c.castShadow = false;
+
+                }
+
+            });
+
+        });
 
     }
 
@@ -553,7 +599,7 @@ export default
                 .forEach(joint => {
 
                     joint.ignoreLimits = ignore;
-                    joint.setAngle(joint.angle);
+                    joint.setJointValue(...joint.jointValue);
 
                 });
 
@@ -567,114 +613,4 @@ export default
 
     }
 
-
-    // Ammo.js setup and functions
-    initPhysics() {
-        Ammo().then((AmmoLib) => {
-            this.Ammo = AmmoLib;
-    
-            const collisionConfiguration = new AmmoLib.btDefaultCollisionConfiguration();
-            const dispatcher = new AmmoLib.btCollisionDispatcher(collisionConfiguration);
-            const overlappingPairCache = new AmmoLib.btDbvtBroadphase();
-            const solver = new AmmoLib.btSequentialImpulseConstraintSolver();
-            this.physicsWorld = new AmmoLib.btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
-            this.physicsWorld.setGravity(new AmmoLib.btVector3(0, -9.82, 0));
-    
-            this.physicsObjects = [];
-            this.tempTransform = new AmmoLib.btTransform();
-    
-            console.log('Ammo.js physics initialized with gravity:', this.physicsWorld.getGravity().y());
-            this.initGround();
-        }).catch(error => {
-            console.error('Failed to load Ammo.js:', error);
-        });
-    }
-    
-
-    initGround() {
-        if (!this.Ammo) return; // Ensure Ammo is loaded
-
-        const groundShape = new this.Ammo.btBoxShape(new this.Ammo.btVector3(50, 1, 50));
-        const groundTransform = new this.Ammo.btTransform();
-        groundTransform.setIdentity();
-        groundTransform.setOrigin(new this.Ammo.btVector3(0, -1, 0));
-
-        const mass = 0;
-        const localInertia = new this.Ammo.btVector3(0, 0, 0);
-        const myMotionState = new this.Ammo.btDefaultMotionState(groundTransform);
-        const rbInfo = new this.Ammo.btRigidBodyConstructionInfo(mass, myMotionState, groundShape, localInertia);
-        const body = new this.Ammo.btRigidBody(rbInfo);
-
-        console.log('ground init');
-
-        this.physicsWorld.addRigidBody(body);
-    }
-
-    createPhysicsObject(threeObject, shapeType, mass) {
-        let shape;
-        switch (shapeType) {
-            case 'box':
-                const bbox = new THREE.Box3().setFromObject(threeObject);
-                const size = new THREE.Vector3();
-                bbox.getSize(size);
-                shape = new this.Ammo.btBoxShape(new this.Ammo.btVector3(size.x / 2, size.y / 2, size.z / 2));
-                break;
-            // Add more shape types as needed
-        }
-
-        const transform = new this.Ammo.btTransform();
-        transform.setIdentity();
-        transform.setOrigin(new this.Ammo.btVector3(threeObject.position.x, threeObject.position.y, threeObject.position.z));
-
-        const localInertia = new this.Ammo.btVector3(0, 0, 0);
-        shape.calculateLocalInertia(mass, localInertia);
-
-        const motionState = new this.Ammo.btDefaultMotionState(transform);
-        const rbInfo = new this.Ammo.btRigidBodyConstructionInfo(mass, motionState, shape, localInertia);
-        const body = new this.Ammo.btRigidBody(rbInfo);
-
-        console.log('physics objects created');
-
-        this.physicsWorld.addRigidBody(body);
-        this.physicsObjects.push({ threeObject, body });
-    }
-
-    updatePhysics() {
-        if (!this.physicsWorld) {
-            console.log('Physics world is not initialized.');
-            return;
-        }
-    
-        const deltaTime = 1 / 60;
-        this.physicsWorld.stepSimulation(deltaTime, 10);
-    
-        this.physicsObjects.forEach(obj => {
-            const { threeObject, body } = obj;
-            const ms = body.getMotionState();
-            if (ms) {
-                ms.getWorldTransform(this.tempTransform);
-                const p = this.tempTransform.getOrigin();
-                const q = this.tempTransform.getRotation();
-                threeObject.position.set(p.x(), p.y(), p.z());
-                threeObject.quaternion.set(q.x(), q.y(), q.z(), q.w());
-                console.log(`Updated position of ${threeObject.name}:`, p.x().toFixed(2), p.y().toFixed(2), p.z().toFixed(2));
-            }
-        });
-    }
-
-    stopPhysics() {
-        if (!this.physicsWorld) {
-            console.log('No active physics world to stop.');
-            return;
-        }
-        // Loop through all physics objects and remove them from the physics world
-        this.physicsObjects.forEach(obj => {
-            this.physicsWorld.removeRigidBody(obj.body);
-            console.log(`Removed physics body for ${obj.threeObject.name}`);
-        });
-        // Clear the array of physics objects
-        this.physicsObjects = [];
-        console.log('Physics stopped and all bodies cleared.');
-    }
-    
 };

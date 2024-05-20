@@ -1,4 +1,5 @@
-<?xml version="1.0"?><robot name="biped_robot">
+<?xml version="1.0"?>
+<robot name="biped_robot">
 
     <!-- Torso Link -->
     <link name="torso">
@@ -105,12 +106,13 @@
             </geometry>
         </visual>
     </link>
-    <joint name="rightHipPitchKneeMotors_to_rightHipPitchKneeRearBracket" type="revolute">
+    <joint name="rightHipPitchKneeMotors_to_rightHipPitchKneeRearBracket" type="mimic">
         <parent link="rightHipPitchKneeMotors"/>
         <child link="rightHipPitchKneeRearBracket"/>
         <origin xyz="-4 -5 3" rpy="0 0 0"/>
         <axis xyz="0 0 1.0"/>
         <limit lower="-6.283185307179586" upper="6.283185307179586" effort="0" velocity="0"/>
+        <mimic joint="rightHipPitchKneeMotors_to_rightHipPitchKneeFrontBracket" multiplier="0.9" offset="0"/>
     </joint>
 
     <!-- Right Knee Primary Hanger -->
