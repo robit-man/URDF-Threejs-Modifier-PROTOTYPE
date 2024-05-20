@@ -4,7 +4,7 @@
 # URDF-ThreeJS Modifier
 Fork of [gkjohnson/urdf-loaders](https://github.com/gkjohnson/urdf-loaders) with only the JS component, and (soon) incorporating deeper sim2real control of systems connected over serial / websockets.
 
-![image](https://github.com/robit-man/URDF-Threejs-Modifier/assets/36677806/f26ac20a-fab6-4d0f-8840-089bfbd0b067)
+![2024-05-20-10-34-37](https://github.com/robit-man/URDF-Threejs-Modifier/assets/36677806/969cd7b6-95dc-4ecb-a1fb-85f700afcbde)
 
 # Project Overview
 
