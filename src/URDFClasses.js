@@ -144,26 +144,26 @@ class URDFJoint extends URDFBase {
             const mimicValues = values.map(value => value * mimicJoint.multiplier + mimicJoint.offset);
 
             const angle = mimicValues[0]; // the angle in radians
-        
+
             // Determine which axis is dominant for the rotation
             const axis = mimicJoint.axis;
             let axisVector = new THREE.Vector3();
             if (axis.x !== 0) axisVector.set(1, 0, 0);
             else if (axis.y !== 0) axisVector.set(0, 1, 0);
             else if (axis.z !== 0) axisVector.set(0, 0, 1);
-        
+
             // Convert the angle to a quaternion based on the dominant axis
             const quaternion = new THREE.Quaternion().setFromAxisAngle(axisVector, angle);
-        
+
             // Assign the computed quaternion to the mimic joint
             mimicJoint.quaternion.copy(quaternion);
-        
+
             console.log('Updated Quaternion:', mimicJoint.quaternion);
-        
+
             // Assuming setJointValue should now simply accept the quaternion for direct manipulation
             didUpdate = mimicJoint.setJointValue(mimicJoint.quaternion) || didUpdate;
         });
-        
+
 
         switch (this.jointType) {
             case 'fixed':
