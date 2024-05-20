@@ -112,7 +112,7 @@
         <origin xyz="-4 -5 3" rpy="0 0 0"/>
         <axis xyz="0 0 1.0"/>
         <limit lower="-6.283185307179586" upper="6.283185307179586" effort="0" velocity="0"/>
-        <mimic joint="rightHipPitchKneeMotors_to_rightHipPitchKneeFrontBracket" multiplier="0.5" offset="0"/>
+        <mimic joint="rightHipPitchKneeMotors_to_rightHipPitchKneeFrontBracket" multiplier="1.2" offset="0"/>
     </joint>
 
     <!-- Right Knee Primary Hanger -->
@@ -124,12 +124,14 @@
             </geometry>
         </visual>
     </link>
-    <joint name="rightHipPitchKneeFrontBracket_to_rightKneePrimaryHangar" type="revolute">
+    <joint name="rightHipPitchKneeFrontBracket_to_rightKneePrimaryHangar" type="mimic">
         <parent link="rightHipPitchKneeFrontBracket"/>
         <child link="rightKneePrimaryHangar"/>
         <origin xyz="-0.1 -16 -0.75" rpy="0 0 0"/>
         <axis xyz="0 0 1.0"/>
         <limit lower="-6.283185307179586" upper="6.283185307179586" effort="0" velocity="0"/>
+        <mimic joint="rightHipPitchKneeMotors_to_rightHipPitchKneeFrontBracket" multiplier="-1.5" offset="0"/>
+
     </joint>
 
     <!-- Right Knee Secondary Hanger -->
@@ -141,12 +143,13 @@
             </geometry>
         </visual>
     </link>
-    <joint name="rightHipPitchKneeFrontBracket_to_rightKneeSecondaryHangar" type="revolute">
+    <joint name="rightHipPitchKneeFrontBracket_to_rightKneeSecondaryHangar" type="mimic">
         <parent link="rightHipPitchKneeFrontBracket"/>
         <child link="rightKneeSecondaryHangar"/>
         <origin xyz="-3.2 -16.7 -0.8" rpy="0 0 0.17453292519943295"/>
         <axis xyz="0 0 1.0"/>
         <limit lower="-6.283185307179586" upper="6.283185307179586" effort="0" velocity="0"/>
+        <mimic joint="rightHipPitchKneeMotors_to_rightHipPitchKneeFrontBracket" multiplier="-2.5" offset="0"/>
     </joint>
 
     <!-- Right Calf -->
@@ -158,12 +161,14 @@
             </geometry>
         </visual>
     </link>
-    <joint name="rightKneePrimaryHangar_to_rightCalf" type="revolute">
+    <joint name="rightKneePrimaryHangar_to_rightCalf" type="mimic">
         <parent link="rightKneePrimaryHangar"/>
         <child link="rightCalf"/>
         <origin xyz="-3.65 -5 1.5" rpy="0 0 0"/>
         <axis xyz="0 0 1.0"/>
         <limit lower="-6.283185307179586" upper="6.283185307179586" effort="0" velocity="0"/>
+
+        <mimic joint="rightHipPitchKneeMotors_to_rightHipPitchKneeFrontBracket" multiplier="-1" offset="0"/>
     </joint>
 
     <!-- Right Ankle -->
