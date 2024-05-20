@@ -2,7 +2,7 @@
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('three'), require('three/examples/jsm/controls/OrbitControls.js'), require('three/examples/jsm/loaders/STLLoader.js'), require('three/examples/jsm/loaders/ColladaLoader.js')) :
   typeof define === 'function' && define.amd ? define(['three', 'three/examples/jsm/controls/OrbitControls.js', 'three/examples/jsm/loaders/STLLoader.js', 'three/examples/jsm/loaders/ColladaLoader.js'], factory) :
   (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.URDFManipulator = factory(global.THREE, global.THREE, global.THREE, global.THREE));
-})(this, (function (THREE, OrbitControls_js, STLLoader_js, ColladaLoader_js) { 'use strict';
+})(this, (function (THREE$1, OrbitControls_js, STLLoader_js, ColladaLoader_js) { 'use strict';
 
   function _interopNamespace(e) {
     if (e && e.__esModule) return e;
@@ -22,7 +22,7 @@
     return Object.freeze(n);
   }
 
-  var THREE__namespace = /*#__PURE__*/_interopNamespace(THREE);
+  var THREE__namespace = /*#__PURE__*/_interopNamespace(THREE$1);
 
   function _AsyncGenerator(e) {
     var r, t;
@@ -2855,7 +2855,7 @@
     throw new TypeError("Cannot set property of null or undefined.");
   }
 
-  var _tempAxis = new THREE.Vector3();
+  var _tempAxis = new THREE$1.Vector3();
   var URDFBase = /*#__PURE__*/function (_Object3D) {
     function URDFBase() {
       var _this;
@@ -2878,7 +2878,7 @@
         return this;
       }
     }]);
-  }(THREE.Object3D);
+  }(THREE$1.Object3D);
   var URDFCollider = /*#__PURE__*/function (_URDFBase) {
     function URDFCollider() {
       var _this2;
@@ -2936,7 +2936,7 @@
       _this5.type = 'URDFJoint';
       _this5.jointValue = null;
       _this5.jointType = 'fixed';
-      _this5.axis = new THREE.Vector3(1, 0, 0);
+      _this5.axis = new THREE$1.Vector3(1, 0, 0);
       _this5.limit = {
         lower: 0,
         upper: 0
@@ -3017,13 +3017,29 @@
           this.origPosition = this.position.clone();
           this.origQuaternion = this.quaternion.clone();
         }
+
+        //console.log(this.dependentMimicJoints[0]);
         var didUpdate = false;
         this.dependentMimicJoints.forEach(function (mimicJoint) {
           var mimicValues = values.map(function (value) {
             return value * mimicJoint.multiplier + mimicJoint.offset;
           });
-          console.log('Updating mimic joint', mimicJoint, 'with values', mimicValues);
-          didUpdate = mimicJoint.setJointValue.apply(mimicJoint, _toConsumableArray(mimicValues)) || didUpdate;
+          var angle = mimicValues[0]; // the angle in radians
+
+          // Determine which axis is dominant for the rotation
+          var axis = mimicJoint.axis;
+          var axisVector = new THREE.Vector3();
+          if (axis.x !== 0) axisVector.set(1, 0, 0);else if (axis.y !== 0) axisVector.set(0, 1, 0);else if (axis.z !== 0) axisVector.set(0, 0, 1);
+
+          // Convert the angle to a quaternion based on the dominant axis
+          var quaternion = new THREE.Quaternion().setFromAxisAngle(axisVector, angle);
+
+          // Assign the computed quaternion to the mimic joint
+          mimicJoint.quaternion.copy(quaternion);
+          console.log('Updated Quaternion:', mimicJoint.quaternion);
+
+          // Assuming setJointValue should now simply accept the quaternion for direct manipulation
+          didUpdate = mimicJoint.setJointValue(mimicJoint.quaternion) || didUpdate;
         });
         switch (this.jointType) {
           case 'fixed':
@@ -3068,6 +3084,8 @@
             console.warn("'".concat(this.jointType, "' joint not yet supported"));
         }
         console.log('Did update:', didUpdate);
+        console.log(this.urdfName);
+        console.log(this.rotation);
         return didUpdate;
       }
     }, {
@@ -3447,9 +3465,7 @@
           });
           obj.frames = _objectSpread2(_objectSpread2(_objectSpread2(_objectSpread2({}, colliderMap), visualMap), linkMap), jointMap);
           return obj;
-        }
-
-        // Process joint nodes and parent them
+        } // Process joint nodes and parent them
         function processJoint(joint) {
           var children = _toConsumableArray(joint.children);
           var jointType = joint.getAttribute('type');
@@ -3507,6 +3523,15 @@
             });
             obj.axis = new THREE__namespace.Vector3(axisXYZ[0], axisXYZ[1], axisXYZ[2]);
             obj.axis.normalize();
+          }
+
+          // If it's a mimic joint, find its master joint and link them
+          if (mimicTag) {
+            var masterJointName = mimicTag.getAttribute('joint');
+            var masterJoint = jointMap[masterJointName]; // Assuming jointMap is a map from names to joint objects
+            if (masterJoint) {
+              masterJoint.addDependentMimicJoint(obj);
+            }
           }
           return obj;
         }
@@ -3793,7 +3818,7 @@
       _this.directionalLight = dirLight;
       _this.ambientLight = ambientLight;
       _this._setUp(_this.up);
-      _this._collisionMaterial = new THREE.MeshPhongMaterial({
+      _this._collisionMaterial = new THREE$1.MeshPhongMaterial({
         transparent: true,
         opacity: 0.35,
         shininess: 2.5,
@@ -4283,21 +4308,21 @@
     return curr;
   }
   ;
-  var prevHitPoint = new THREE.Vector3();
-  var newHitPoint = new THREE.Vector3();
-  var pivotPoint = new THREE.Vector3();
-  var tempVector = new THREE.Vector3();
-  var tempVector2 = new THREE.Vector3();
-  var projectedStartPoint = new THREE.Vector3();
-  var projectedEndPoint = new THREE.Vector3();
-  var plane = new THREE.Plane();
+  var prevHitPoint = new THREE$1.Vector3();
+  var newHitPoint = new THREE$1.Vector3();
+  var pivotPoint = new THREE$1.Vector3();
+  var tempVector = new THREE$1.Vector3();
+  var tempVector2 = new THREE$1.Vector3();
+  var projectedStartPoint = new THREE$1.Vector3();
+  var projectedEndPoint = new THREE$1.Vector3();
+  var plane = new THREE$1.Plane();
   var URDFDragControls = /*#__PURE__*/function () {
     function URDFDragControls(scene) {
       _classCallCheck(this, URDFDragControls);
       this.enabled = true;
       this.scene = scene;
-      this.raycaster = new THREE.Raycaster();
-      this.initialGrabPoint = new THREE.Vector3();
+      this.raycaster = new THREE$1.Raycaster();
+      this.initialGrabPoint = new THREE$1.Vector3();
       this.hitDistance = -1;
       this.hovered = null;
       this.manipulating = null;
@@ -4425,8 +4450,8 @@
       _this = _callSuper(this, PointerURDFDragControls, [scene]);
       _this.camera = camera;
       _this.domElement = domElement;
-      var raycaster = new THREE.Raycaster();
-      var mouse = new THREE.Vector2();
+      var raycaster = new THREE$1.Raycaster();
+      var mouse = new THREE$1.Vector2();
       function updateMouse(e) {
         mouse.x = (e.pageX - domElement.offsetLeft) / domElement.offsetWidth * 2 - 1;
         mouse.y = -((e.pageY - domElement.offsetTop) / domElement.offsetHeight) * 2 + 1;
