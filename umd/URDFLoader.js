@@ -1,7 +1,7 @@
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? factory(require('three'), require('three/examples/jsm/loaders/STLLoader.js'), require('three/examples/jsm/loaders/ColladaLoader.js'), require('three-mesh-bvh'), require('ammojs3')) :
+  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('three'), require('three/examples/jsm/loaders/STLLoader.js'), require('three/examples/jsm/loaders/ColladaLoader.js'), require('three-mesh-bvh'), require('ammojs3')) :
   typeof define === 'function' && define.amd ? define(['three', 'three/examples/jsm/loaders/STLLoader.js', 'three/examples/jsm/loaders/ColladaLoader.js', 'three-mesh-bvh', 'ammojs3'], factory) :
-  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.THREE, global.THREE, global.THREE, global.THREE, global.Ammo));
+  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.URDFLoader = factory(global.THREE, global.THREE, global.THREE, global.THREE, global.Ammo));
 })(this, (function (THREE, STLLoader_js, ColladaLoader_js, threeMeshBvh, Ammo) { 'use strict';
 
   function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
@@ -3681,6 +3681,8 @@
     });
     animate(loader, renderer, scene, camera);
   });
+
+  return URDFLoader;
 
 }));
 //# sourceMappingURL=URDFLoader.js.map

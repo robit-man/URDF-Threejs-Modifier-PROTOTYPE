@@ -4,7 +4,7 @@ import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
 import { ColladaLoader } from 'three/examples/jsm/loaders/ColladaLoader.js';
 import { URDFRobot, URDFJoint, URDFLink, makeURDFCollider } from './URDFClasses.js';
 import { MeshBVH, acceleratedRaycast } from 'three-mesh-bvh';
-import Ammo from './ammo.js';
+import Ammo from 'ammojs3';
 
 const tempQuaternion = new THREE.Quaternion();
 const tempEuler = new THREE.Euler();
@@ -23,6 +23,7 @@ function applyRotation(obj, rpy, additive = false) {
     obj.quaternion.copy(tempQuaternion);
 }
 
+export default
 class URDFLoader {
     constructor(manager, allowMeshBVH = false) {
         this.manager = manager || THREE.DefaultLoadingManager;
