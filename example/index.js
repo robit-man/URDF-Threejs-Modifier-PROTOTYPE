@@ -168,12 +168,12 @@ viewer.addEventListener('urdf-processed', () => {
         };
 
         slider.addEventListener('input', () => {
-            viewer.setAngle(joint.name, parseFloat(slider.value) * DEG2RAD);
+            viewer.setJointValue(joint.name, parseFloat(slider.value) * DEG2RAD);
             li.update();
         });
 
         input.addEventListener('change', () => {
-            viewer.setAngle(joint.name, parseFloat(input.value) * DEG2RAD);
+            viewer.setJointValue(joint.name, parseFloat(input.value) * DEG2RAD);
             li.update();
         });
 
@@ -194,3 +194,5 @@ document.addEventListener('WebComponentsReady', () => {
         viewer.package = '../../../urdf';
     }
 });
+
+

@@ -2925,17 +2925,18 @@
       _this5.origPosition = null;
       _this5.origQuaternion = null;
       _this5.mimicJoints = [];
+      _this5.dependentMimicJoints = [];
       return _this5;
     }
-
-    /* Overrides */
     _inherits(URDFJoint, _URDFBase4);
     return _createClass(URDFJoint, [{
       key: "jointType",
       get: function get() {
+        console.log('Accessing jointType:', this._jointType);
         return this._jointType;
       },
       set: function set(v) {
+        console.log('Setting jointType from', this.jointType, 'to', v);
         if (this.jointType === v) return;
         this._jointType = v;
         this.matrixWorldNeedsUpdate = true;
@@ -2959,97 +2960,103 @@
     }, {
       key: "angle",
       get: function get() {
+        console.log('Getting angle:', this.jointValue[0]);
         return this.jointValue[0];
       }
     }, {
       key: "copy",
       value: function copy(source, recursive) {
         _get(_getPrototypeOf(URDFJoint.prototype), "copy", this).call(this, source, recursive);
+        console.log('Copying properties from source', source);
         this.jointType = source.jointType;
         this.axis = source.axis.clone();
         this.limit.lower = source.limit.lower;
         this.limit.upper = source.limit.upper;
-        this.ignoreLimits = false;
+        this.ignoreLimits = source.ignoreLimits;
         this.jointValue = _toConsumableArray(source.jointValue);
         this.origPosition = source.origPosition ? source.origPosition.clone() : null;
         this.origQuaternion = source.origQuaternion ? source.origQuaternion.clone() : null;
         this.mimicJoints = _toConsumableArray(source.mimicJoints);
-        return this;
+        this.dependentMimicJoints = source.dependentMimicJoints.map(function (joint) {
+          return joint.clone();
+        });
       }
-
-      /* Public Functions */
-      /**
-       * @param {...number|null} values The joint value components to set, optionally null for no-op
-       * @returns {boolean} Whether the invocation of this function resulted in an actual change to the joint value
-       */
     }, {
       key: "setJointValue",
       value: function setJointValue() {
         for (var _len6 = arguments.length, values = new Array(_len6), _key6 = 0; _key6 < _len6; _key6++) {
           values[_key6] = arguments[_key6];
         }
-        // Parse all incoming values into numbers except null, which we treat as a no-op for that value component.
+        console.log('Initial values received:', values);
         values = values.map(function (v) {
           return v === null ? null : parseFloat(v);
         });
+        console.log('Parsed values:', values);
         if (!this.origPosition || !this.origQuaternion) {
+          console.log('Initializing original position and quaternion');
           this.origPosition = this.position.clone();
           this.origQuaternion = this.quaternion.clone();
         }
         var didUpdate = false;
-        this.mimicJoints.forEach(function (joint) {
-          didUpdate = joint.updateFromMimickedJoint.apply(joint, _toConsumableArray(values)) || didUpdate;
+        this.dependentMimicJoints.forEach(function (mimicJoint) {
+          var mimicValues = values.map(function (value) {
+            return value * mimicJoint.multiplier + mimicJoint.offset;
+          });
+          console.log('Updating mimic joint', mimicJoint, 'with values', mimicValues);
+          didUpdate = mimicJoint.setJointValue.apply(mimicJoint, _toConsumableArray(mimicValues)) || didUpdate;
         });
         switch (this.jointType) {
           case 'fixed':
-            {
-              return didUpdate;
-            }
+            break;
           case 'continuous':
           case 'revolute':
-            {
-              var angle = values[0];
-              if (angle == null) return didUpdate;
-              if (angle === this.jointValue[0]) return didUpdate;
-              if (!this.ignoreLimits && this.jointType === 'revolute') {
-                angle = Math.min(this.limit.upper, angle);
-                angle = Math.max(this.limit.lower, angle);
-              }
-              this.quaternion.setFromAxisAngle(this.axis, angle).premultiply(this.origQuaternion);
-              if (this.jointValue[0] !== angle) {
-                this.jointValue[0] = angle;
-                this.matrixWorldNeedsUpdate = true;
-                return true;
-              } else {
-                return didUpdate;
-              }
+            var angle = values[0];
+            console.log('Current angle:', angle);
+            if (!this.ignoreLimits && this.jointType === 'revolute') {
+              angle = Math.min(this.limit.upper, angle);
+              angle = Math.max(this.limit.lower, angle);
+              console.log('Angle adjusted within limits:', angle);
             }
+            this.quaternion.setFromAxisAngle(this.axis, angle).premultiply(this.origQuaternion);
+            if (this.jointValue[0] !== angle) {
+              this.jointValue[0] = angle;
+              this.matrixWorldNeedsUpdate = true;
+              didUpdate = true;
+              console.log('Angle updated to:', angle);
+            }
+            break;
           case 'prismatic':
-            {
-              var pos = values[0];
-              if (pos == null) return didUpdate;
-              if (pos === this.jointValue[0]) return didUpdate;
-              if (!this.ignoreLimits) {
-                pos = Math.min(this.limit.upper, pos);
-                pos = Math.max(this.limit.lower, pos);
-              }
-              this.position.copy(this.origPosition);
-              _tempAxis.copy(this.axis).applyEuler(this.rotation);
-              this.position.addScaledVector(_tempAxis, pos);
-              if (this.jointValue[0] !== pos) {
-                this.jointValue[0] = pos;
-                this.matrixWorldNeedsUpdate = true;
-                return true;
-              } else {
-                return didUpdate;
-              }
+            var pos = values[0];
+            console.log('Current position:', pos);
+            if (!this.ignoreLimits) {
+              pos = Math.min(this.limit.upper, pos);
+              pos = Math.max(this.limit.lower, pos);
+              console.log('Position adjusted within limits:', pos);
             }
+            this.position.copy(this.origPosition);
+            _tempAxis.copy(this.axis).applyEuler(this.rotation);
+            this.position.addScaledVector(_tempAxis, pos);
+            if (this.jointValue[0] !== pos) {
+              this.jointValue[0] = pos;
+              this.matrixWorldNeedsUpdate = true;
+              didUpdate = true;
+              console.log('Position updated to:', pos);
+            }
+            break;
           case 'floating':
           case 'planar':
-            // TODO: Support these joint types
             console.warn("'".concat(this.jointType, "' joint not yet supported"));
         }
+        console.log('Did update:', didUpdate);
         return didUpdate;
+      }
+    }, {
+      key: "addDependentMimicJoint",
+      value: function addDependentMimicJoint(mimicJoint) {
+        console.log('Adding dependent mimic joint:', mimicJoint);
+        if (!this.dependentMimicJoints.includes(mimicJoint)) {
+          this.dependentMimicJoints.push(mimicJoint);
+        }
       }
     }]);
   }(URDFBase);
