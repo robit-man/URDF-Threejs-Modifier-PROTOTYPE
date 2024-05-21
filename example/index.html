@@ -52,6 +52,8 @@
             padding: 4px;
             background-color: #020526;
 
+            filter: saturate(0) brightness(1);
+
         }
 
         .active2::placeholder {
@@ -73,8 +75,8 @@
 
         .inputwrap {
             overflow: hidden;
-            margin-top: 4px;
-            margin-bottom: 4px;
+            margin-top: 0px;
+            margin-bottom: 0px;
             height: 0px;
             display: flex;
             flex-flow: column;
@@ -134,7 +136,7 @@
         #joint-controls {
             display: flex;
             flex-flow: column;
-            gap: 4px;
+            gap: 8px;
             margin-top: unset !important;
         }
 
@@ -267,7 +269,7 @@
         #buttoncol {
             display: flex;
             flex-flow: column;
-            gap: 14px;
+            gap: 16px;
             margin: unset !important;
         }
 
@@ -306,7 +308,10 @@
             font-size: 2rem;
             text-transform: uppercase;
 
+        }
 
+        #toggle-debug:hover {
+            background-color: #ea0;
         }
 
         #toggle-controls::before {
@@ -541,7 +546,7 @@
         .urdf-editor {
             border-radius: 0.25rem;
             margin: unset;
-            margin-top: 4px !important;
+            margin-top: 8px !important;
             overflow: hidden;
             min-height: 200px;
             position: relative;
@@ -1203,9 +1208,9 @@
             const linkName = document.getElementById('link-selection-save').value;
 
             const link = viewer.robot.links[linkName];
-            const meshIndex = link.children.findIndex(child => child instanceof THREE.Mesh);
-            const linkValues = link.children[meshIndex];
-            console.log(meshIndex);
+            const visualIndex = link.children.findIndex(child => child.name === 'URDFVisual');
+            const linkValues = link.children[visualIndex];
+            console.log(visualIndex);
             const visualOriginXYZ = document.getElementById('visual-origin-xyz').value.split(' ').map(Number);
 
             const visualOriginRPYElement = document.getElementById('visual-origin-rpy');
@@ -1218,8 +1223,8 @@
 
             console.log('Converted L : ', visualConvertedRPY)
 
-            if (viewer && viewer.robot && viewer.robot.links[linkName].children[meshIndex]) {
-                const linkWrite = viewer.robot.links[linkName].children[meshIndex];
+            if (viewer && viewer.robot && viewer.robot.links[linkName].children[visualIndex]) {
+                const linkWrite = viewer.robot.links[linkName].children[visualIndex];
                 console.log('Link Pre Write : ', linkWrite)
 
                 const linkQuaternion = new THREE.Quaternion();
@@ -1278,7 +1283,8 @@
             const linkSelector = document.getElementById('link-selector');
             const linkName = linkSelector.value;
             const link = viewer.robot.links[linkName];
-            const meshIndex = link.children.findIndex(child => child instanceof THREE.Mesh);
+            console.log(link.children);
+            const visualIndex = link.children.findIndex(child => child.name === 'URDFVisual');
             const linkValues = link.children[0];
 
             if (viewer && viewer.robot && viewer.robot.links[linkName]) {
@@ -1312,15 +1318,18 @@
                 const joint = viewer.robot.joints[jointName];
 
                 if (joint.origQuaternion) {
-                    if (joint.origQuaternion.isQuaternion === true) {
+                    console.log(joint.origQuaternion);
+
+                    if (joint.origQuaternion) {
+
                         const euler = new THREE.Euler().setFromQuaternion(joint.origQuaternion, 'XYZ');
-                        //console.log(joint.origQuaternion);
+                        console.log(joint.origQuaternion);
 
                         const rpy = [euler.x, euler.y, euler.z].map(r => {
                             let degrees = r * 180 / Math.PI;
                             return degrees.toFixed(dynamicPrecision(degrees));
                         });
-                        //console.log(rpy);
+                        console.log(rpy);
 
                         document.getElementById('joint-selection-save').value = jointName;
                         document.getElementById('joint-origin-xyz').value = joint.origPosition.toArray().join(' ');
