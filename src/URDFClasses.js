@@ -1,4 +1,5 @@
-import { Object3D, Vector3 } from 'three';
+
+import { Object3D, Vector3, Quaternion } from 'three';
 
 const _tempAxis = new Vector3();
 
@@ -66,12 +67,12 @@ class URDFJoint extends URDFBase {
 
 
     get jointType() {
-        console.log('Accessing jointType:', this._jointType);
+        //console.log('Accessing jointType:', this._jointType);
         return this._jointType;
     }
 
     set jointType(v) {
-        console.log('Setting jointType from', this.jointType, 'to', v);
+        //console.log('Setting jointType from', this.jointType, 'to', v);
         if (this.jointType === v) return;
         this._jointType = v;
         this.matrixWorldNeedsUpdate = true;
@@ -94,7 +95,7 @@ class URDFJoint extends URDFBase {
     }
 
     get angle() {
-        console.log('Getting angle:', this.jointValue[0]);
+        //console.log('Getting angle:', this.jointValue[0]);
         return this.jointValue[0];
     }
 
@@ -111,11 +112,20 @@ class URDFJoint extends URDFBase {
         this.origQuaternion = null;
         this.mimicJoints = [];
         this.dependentMimicJoints = [];
+        const gpu = new GPU.GPU();
+        this.calculateQuaternions = gpu.createKernel(function(angle, x, y, z) {
+            const cosHalfAngle = Math.cos(angle / 2);
+            const sinHalfAngle = Math.sin(angle / 2);
+            return [cosHalfAngle, sinHalfAngle * x, sinHalfAngle * y, sinHalfAngle * z];
+        }, {
+            output: [4],
+            returnType: 'Array(4)'
+        });
     }
-
+    
     copy(source, recursive) {
         super.copy(source, recursive);
-        console.log('Copying properties from source', source);
+        //console.log('Copying properties from source', source);
         this.jointType = source.jointType;
         this.axis = source.axis.clone();
         this.limit.lower = source.limit.lower;
@@ -129,41 +139,34 @@ class URDFJoint extends URDFBase {
     }
 
     setJointValue(...values) {
-        console.log('Initial values received:', values);
+        //console.log('Initial values received:', values);
         values = values.map(v => v === null ? null : parseFloat(v));
-        console.log('Parsed values:', values);
+        //console.log('Parsed values:', values);
         if (!this.origPosition || !this.origQuaternion) {
-            console.log('Initializing original position and quaternion');
+            //console.log('Initializing original position and quaternion');
             this.origPosition = this.position.clone();
             this.origQuaternion = this.quaternion.clone();
         }
-
         //console.log(this.dependentMimicJoints[0]);
         let didUpdate = false;
         this.dependentMimicJoints.forEach(mimicJoint => {
             const mimicValues = values.map(value => value * mimicJoint.multiplier + mimicJoint.offset);
-
             const angle = mimicValues[0]; // the angle in radians
-
             // Determine which axis is dominant for the rotation
             const axis = mimicJoint.axis;
             let axisVector = new THREE.Vector3();
             if (axis.x !== 0) axisVector.set(1, 0, 0);
             else if (axis.y !== 0) axisVector.set(0, 1, 0);
             else if (axis.z !== 0) axisVector.set(0, 0, 1);
-
             // Convert the angle to a quaternion based on the dominant axis
             const quaternion = new THREE.Quaternion().setFromAxisAngle(axisVector, angle);
-
             // Assign the computed quaternion to the mimic joint
             mimicJoint.quaternion.copy(quaternion);
-
-            console.log('Updated Quaternion:', mimicJoint.quaternion);
-
+            //console.log('Updated Quaternion:', mimicJoint.quaternion);
             // Assuming setJointValue should now simply accept the quaternion for direct manipulation
             didUpdate = mimicJoint.setJointValue(mimicJoint.quaternion) || didUpdate;
-        });
 
+        });
 
         switch (this.jointType) {
             case 'fixed':
@@ -171,27 +174,27 @@ class URDFJoint extends URDFBase {
             case 'continuous':
             case 'revolute':
                 let angle = values[0];
-                console.log('Current angle:', angle);
+                //console.log('Current angle:', angle);
                 if (!this.ignoreLimits && this.jointType === 'revolute') {
                     angle = Math.min(this.limit.upper, angle);
                     angle = Math.max(this.limit.lower, angle);
-                    console.log('Angle adjusted within limits:', angle);
+                    //console.log('Angle adjusted within limits:', angle);
                 }
                 this.quaternion.setFromAxisAngle(this.axis, angle).premultiply(this.origQuaternion);
                 if (this.jointValue[0] !== angle) {
                     this.jointValue[0] = angle;
                     this.matrixWorldNeedsUpdate = true;
                     didUpdate = true;
-                    console.log('Angle updated to:', angle);
+                    //console.log('Angle updated to:', angle);
                 }
                 break;
             case 'prismatic':
                 let pos = values[0];
-                console.log('Current position:', pos);
+                //console.log('Current position:', pos);
                 if (!this.ignoreLimits) {
                     pos = Math.min(this.limit.upper, pos);
                     pos = Math.max(this.limit.lower, pos);
-                    console.log('Position adjusted within limits:', pos);
+                    //console.log('Position adjusted within limits:', pos);
                 }
                 this.position.copy(this.origPosition);
                 _tempAxis.copy(this.axis).applyEuler(this.rotation);
@@ -200,24 +203,24 @@ class URDFJoint extends URDFBase {
                     this.jointValue[0] = pos;
                     this.matrixWorldNeedsUpdate = true;
                     didUpdate = true;
-                    console.log('Position updated to:', pos);
+                    //console.log('Position updated to:', pos);
                 }
                 break;
             case 'floating':
             case 'planar':
-                console.warn(`'${this.jointType}' joint not yet supported`);
+                //console.warn(`'${this.jointType}' joint not yet supported`);
         }
 
-        console.log('Did update:', didUpdate);
+        //console.log('Did update:', didUpdate);
 
-        console.log(this.urdfName);
-        console.log(this.rotation);
+        //console.log(this.urdfName);
+        //console.log(this.rotation);
 
         return didUpdate;
     }
 
     addDependentMimicJoint(mimicJoint) {
-        console.log('Adding dependent mimic joint:', mimicJoint);
+        //console.log('Adding dependent mimic joint:', mimicJoint);
         if (!this.dependentMimicJoints.includes(mimicJoint)) {
             this.dependentMimicJoints.push(mimicJoint);
         }

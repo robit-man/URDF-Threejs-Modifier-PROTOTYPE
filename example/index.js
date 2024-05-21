@@ -14,6 +14,8 @@ var DEG2RAD = Math.PI / 180;
 const RAD2DEG = 1 / DEG2RAD;
 let sliders = {};
 
+
+
 // Global Functions
 window.setColor = color => {
     document.body.style.backgroundColor = color;

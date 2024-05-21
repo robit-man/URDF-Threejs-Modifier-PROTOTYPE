@@ -16,7 +16,6 @@ body {
 }
 
 canvas {
-    height: 100vh !important;
 }
 
 select {

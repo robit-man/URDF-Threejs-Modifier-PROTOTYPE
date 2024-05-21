@@ -46,9 +46,9 @@
     "@babel/plugin-transform-runtime": "^7.6.2",
     "@babel/preset-env": "^7.6.3",
     "@webcomponents/webcomponentsjs": "^2.0.0",
+    "ammojs3": "^0.0.11",
     "concurrently": "^4.0.1",
     "eslint": "^5.14.1",
-    "file-loader": "^6.2.0",
     "html-loader": "^0.5.5",
     "jest": "^24.1.0",
     "jest-cli": "^24.1.0",
@@ -63,19 +63,20 @@
     "script-loader": "^0.7.0",
     "static-server": "^3.0.0",
     "svg-inline-loader": "^0.8.2",
-    "three": "^0.109.0",
+    "three": "^0.92.0",
     "threejs-model-loader": "0.0.1",
     "wc-loader": "^1.1.12",
-    "webpack": "^3.5.3",
-    "ammojs3": "^0.0.11"
-
+    "webpack": "^3.5.3"
   },
   "dependencies": {
     "ammojs3": "^0.0.11",
     "codemirror": "^6.0.1",
+    "latest": "^0.2.0",
+    "n": "^9.2.3",
     "npm": "^10.8.0",
     "run": "^1.5.0",
     "start": "^5.1.0",
+    "stats.js": "^0.17.0",
     "three-mesh-bvh": "^0.1.4",
     "xacro-parser": "^0.3.9"
   }
